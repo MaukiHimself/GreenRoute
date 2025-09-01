@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Login Form</h1>
+    <h1>Edit a Product</h1>
     <div>
         @if($errors->any())
         <ul>
@@ -17,9 +17,9 @@
         </ul>
         @endif
     </div>
-    <form method="post" action="{{route('product.store')}}">
+    <form method="post" action="{{route('product.update',$product) }}">
      @csrf
-     @method('POST')
+     @method('put')
     <div class="container">
         <!-- Login Form -->
         <div id="login-page">
@@ -34,21 +34,21 @@
             <div class="tabs">
                 <div class="tab active">Login</div>
             </div>
-            
+        
             <div class="form-container">
                 <form id="login-form">
                     <div class="form-group">
                         <label for="login-username">Username</label>
-                        <input type="text" name="username" id="login-username" placeholder="Enter username" required>
+                        <input type="text" name="username" id="login-username" placeholder="Enter username" value="{{ $product->username }}"/>
                     </div>
                     
                     <div class="form-group">
                         <label for="login-password">Password</label>
-                        <input type="password" name="password" id="login-password" placeholder='Enter password' required>
+                        <input type="password" name="password" id="login-password" placeholder="Enter password" value="{{ $product->password }}"/>
                     </div>
                     
                     <div class="form-group">
-                        <button type="submit">Login</button>
+                        <button type="submit">Update</button>
                     </div>
                     
                     <div class="form-footer">
@@ -59,9 +59,7 @@
                         <a href="#" id="forgot-password">Forgot password?</a>
                     </div>
                 </form>
+                
                 <div id="notification" class="notification hidden"></div>
             </div>
-            </div>
-
-</body>
-</html>
+</div>
