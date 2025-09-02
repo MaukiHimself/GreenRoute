@@ -17,7 +17,7 @@
         </ul>
         @endif
     </div>
-    <form method="post" action="">
+    <form method="post" action="{{ route('register') }}">
      @csrf
      @method('POST')
     <div class="container">
@@ -78,7 +78,7 @@
                 <button id="btn-continue" class="btn-continue" disabled>Continue to Registration</button>
                 
                 <div class="form-footer">
-                    Already have an account? <a href="#" id="back-to-login">Login here</a>
+                    Already have an account? <a href="{{ route('create') }}" id="back-to-login">Login here</a>
                 </div>
             </div>
         </div>

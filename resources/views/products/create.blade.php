@@ -16,7 +16,9 @@
             @endforeach
         </ul>
         @endif
+        
     </div>
+
     <form method="post" action="{{route('product.store')}}">
      @csrf
      @method('POST')
@@ -36,6 +38,7 @@
             </div>
             
             <div class="form-container">
+                
                 <form id="login-form">
                     <div class="form-group">
                         <label for="login-username">Username</label>
@@ -52,16 +55,17 @@
                     </div>
                     
                     <div class="form-footer">
-                        <a href="#" id="create-account">Don't have an account? Register</a>
+                        <a href="/`register" id="create-account">Don't have an account? Register</a>
                     </div>
                     
                     <div class="form-footer">
                         <a href="#" id="forgot-password">Forgot password?</a>
                     </div>
                 </form>
+                
                 <div id="notification" class="notification hidden"></div>
             </div>
-            </div>
+    </div>
 
 </body>
 </html>

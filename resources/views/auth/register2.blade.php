@@ -17,7 +17,7 @@
         </ul>
         @endif
     </div>
-    <form method="post" action="">
+    <form method="post" action="{{ route('register2') }}">
      @csrf
      @method('POST')
     <div class="container">

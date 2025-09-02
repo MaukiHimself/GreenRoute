@@ -42,4 +42,8 @@ $products=Product::all();
         $product->delete();
         return redirect()->route('product.index')->with('success','Product deleted Successfully');
     }
+   /* public function choice(){
+        return view('products.index');*/
+
+    
 }
