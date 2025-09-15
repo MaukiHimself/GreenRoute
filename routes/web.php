@@ -3,11 +3,31 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Auth\UserTypeController;
+use App\Http\Controllers\ClientPortalController;
+use App\Http\Controllers\ContractorFeedbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('landing');
+});
+
+// Test route for dashboard component
+Route::get('/test-dashboard', function () {
+    // Create a mock user for testing
+    $user = new \App\Models\User();
+    $user->id = 1;
+    $user->name = 'Test User';
+    $user->email = 'test@example.com';
+    $user->user_type = 'contractor';
+    
+    // Mock authentication
+    auth()->login($user);
+    
+    return view('test-dashboard');
 });
 
 // Main dashboard route that redirects to the appropriate dashboard based on user type
@@ -20,6 +40,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/client', [DashboardController::class, 'clientDashboard'])->name('dashboard.client');
     Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
     Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('dashboard.admin');
+
+    // Client portal (client views)
+    Route::prefix('dashboard/client')->group(function () {
+        Route::get('schedules', [ClientPortalController::class, 'schedules'])->name('client.schedules');
+        Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
+        Route::view('support', 'client_portal.support')->name('client.support');
+        Route::post('support', [ClientPortalController::class, 'storeFeedback'])->name('client.support.submit');
+    });
+    
+    // Contractor routes
+    Route::prefix('dashboard/contractor')->group(function () {
+        Route::resource('clients', ClientController::class);
+        Route::get('feedback', [ContractorFeedbackController::class, 'index'])->name('contractor.feedback.index');
+    });
+    
+    // Schedule management for contractors
+    Route::resource('schedules', ScheduleController::class);
+    
+    // Invoice management for contractors
+    Route::resource('invoices', InvoiceController::class);
+    Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
 });
 
 /*Route::middleware('auth')->group(function () {*/
@@ -30,7 +72,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/product/{product}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/{product}', [ProductController::class, 'destroy'])->name('product.destroy');
     /* Route::get('/product/{product}/choice', [ProductController::class, 'choice'])->name('product.choice');*/
-
 
     
     

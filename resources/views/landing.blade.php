@@ -3,143 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AFIA IT Orbit Department</title>
+    <title>EcoPickup - Waste Management System</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f7f9fc;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
+        
         .header {
             text-align: center;
-            padding: 2rem 0;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
+        
         .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2c3e50;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            letter-spacing: -0.02em;
         }
+        
         .subtitle {
-            font-size: 1.2rem;
-            color: #7f8c8d;
+            font-size: 1.25rem;
+            color: #6b7280;
             margin-bottom: 2rem;
+            font-weight: 400;
         }
+        
         .card-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
         }
+        
         .card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            width: 300px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+        
         .card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
         }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
         .card-title {
             font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #1f2937;
             margin-bottom: 1rem;
         }
+        
         .card-description {
-            color: #7f8c8d;
+            color: #6b7280;
             margin-bottom: 2rem;
-            min-height: 80px;
+            line-height: 1.6;
+            font-size: 0.95rem;
         }
+        
         .btn {
             display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
+            padding: 0.875rem 1.75rem;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
             margin: 0.5rem;
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-align: center;
+            min-width: 120px;
         }
-        .btn:hover {
-            background-color: #2980b9;
-        }
+        
         .btn-register {
-            background-color: #2ecc71;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
+        
         .btn-register:hover {
-            background-color: #27ae60;
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         }
+        
         .btn-login {
-            background-color: #3498db;
+            background: white;
+            color: #059669;
+            border: 2px solid #10b981;
         }
+        
         .btn-login:hover {
-            background-color: #2980b9;
+            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
         }
+        
         .footer {
             text-align: center;
             margin-top: 4rem;
             padding: 2rem 0;
-            color: #7f8c8d;
+            color: #6b7280;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .features {
+            margin: 3rem 0;
+            text-align: center;
+        }
+        
+        .features h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .features p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .card-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .card {
+                padding: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">AFIA IT Orbit Department</div>
-            <div class="subtitle">Welcome to our platform. Please select your user type to continue.</div>
+            <div class="logo">🌱 EcoPickup</div>
+            <div class="subtitle">Sustainable Waste Management Solutions for a Greener Future</div>
+        </div>
+        
+        <div class="features">
+            <h3>Choose Your Role</h3>
+            <p>Join our platform and contribute to a cleaner, more sustainable environment</p>
         </div>
         
         <div class="card-container">
             <div class="card">
+                <div class="card-icon">👤</div>
                 <div class="card-title">Client</div>
                 <div class="card-description">
-                    Access your client dashboard to manage your waste collection services, view schedules, and track your account.
+                    Schedule waste pickups, track your collection history, and manage your account with our easy-to-use client portal.
                 </div>
                 <div>
-                    <a href="{{ route('register.client') }}" class="btn btn-register">Register</a>
-                    <a href="{{ route('login.client') }}" class="btn btn-login">Login</a>
+                    <a href="{{ route('register.client') }}" class="btn btn-register">Get Started</a>
+                    <a href="{{ route('login.client') }}" class="btn btn-login">Sign In</a>
                 </div>
             </div>
             
             <div class="card">
+                <div class="card-icon">🚛</div>
                 <div class="card-title">Contractor</div>
                 <div class="card-description">
-                    Access your contractor dashboard to manage your waste collection operations, client assignments, and business metrics.
+                    Manage your waste collection operations, track client assignments, generate invoices, and grow your business.
                 </div>
                 <div>
-                    <a href="{{ route('register.contractor') }}" class="btn btn-register">Register</a>
-                    <a href="{{ route('login.contractor') }}" class="btn btn-login">Login</a>
+                    <a href="{{ route('register.contractor') }}" class="btn btn-register">Join Us</a>
+                    <a href="{{ route('login.contractor') }}" class="btn btn-login">Sign In</a>
                 </div>
             </div>
             
             <div class="card">
+                <div class="card-icon">⚙️</div>
                 <div class="card-title">Administrator</div>
                 <div class="card-description">
-                    Access the admin dashboard to manage the entire system, users, contractors, and platform settings.
+                    Oversee the entire platform, manage users, monitor system performance, and ensure smooth operations.
                 </div>
                 <div>
-                    <a href="{{ route('register.admin') }}" class="btn btn-register">Register</a>
-                    <a href="{{ route('login.admin') }}" class="btn btn-login">Login</a>
+                    <a href="{{ route('register.admin') }}" class="btn btn-register">Access Panel</a>
+                    <a href="{{ route('login.admin') }}" class="btn btn-login">Sign In</a>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            &copy; {{ date('Y') }} AFIA IT Orbit Department. All rights reserved.
+            <p>&copy; {{ date('Y') }} AFIA IT Orbit Department. All rights reserved.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Building a sustainable future, one pickup at a time.</p>
         </div>
     </div>
 </body>

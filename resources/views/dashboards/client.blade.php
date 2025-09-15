@@ -1,157 +1,367 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-dashboard-layout title="Client Dashboard">
+    <x-slot name="sidebar">
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('dashboard.client') }}">
+                    <i class="bi bi-house me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('profile.edit') }}">
+                    <i class="bi bi-person me-2"></i>Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.schedules') }}">
+                    <i class="bi bi-calendar3 me-2"></i>Schedules
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.invoices') }}">
+                    <i class="bi bi-receipt me-2"></i>Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.support') }}">
+                    <i class="bi bi-headset me-2"></i>Support/Help
+                </a>
+            </li>
+        </ul>
+    </x-slot>
 
-    <title>{{ config('app.name', 'Laravel') }} - Client Dashboard</title>
+    <x-slot name="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Client</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+    </x-slot>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <x-slot name="notificationCount">1</x-slot>
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
-        <!-- Sidebar Navigation -->
-        <div class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-            <!-- Logo -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 text-dark">Welcome, {{ Auth::user()->name }}!</h1>
+                            <p class="text-muted mb-0">Manage your waste collection services and stay updated with your account.</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex justify-content-end">
+                                <div class="text-center me-4">
+                                    <div class="h4 mb-0 text-primary">{{ date('d') }}</div>
+                                    <small class="text-muted">{{ date('M Y') }}</small>
+                                </div>
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-success">{{ date('l') }}</div>
+                                    <small class="text-muted">{{ date('H:i A') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Menu -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center">
-                    <span class="text-gray-800 dark:text-gray-200 font-medium">Menu</span>
-                </div>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="mt-2">
-                <a href="{{ route('dashboard.client') }}" class="flex items-center px-4 py-3 text-gray-800 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
-                    <span>Client Dashboard</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Profile</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Scheduler</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Invoices</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Support/Help</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-            </nav>
+        </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1">
-            <!-- Top Navigation -->
-            <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-                <div class="flex justify-between items-center">
-                    <div class="text-gray-800 dark:text-gray-200">
-                        Home / Client / Dashboard / {{ Auth::user()->name }}
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="text-gray-600 dark:text-gray-400 focus:outline-none">
-                                <span class="sr-only">Notifications</span>
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                                </svg>
-                            </button>
+    <!-- Service Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-trash text-primary fs-4"></i>
+                            </div>
                         </div>
-                        <div>
-                            <button class="flex items-center text-gray-600 dark:text-gray-400 focus:outline-none">
-                                <span class="sr-only">User Profile</span>
-                                <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                            </button>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">Monthly</div>
+                            <div class="text-muted small">Collection Frequency</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-calendar-check text-success fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">{{ date('M d', strtotime('+15 days')) }}</div>
+                            <div class="text-muted small">Next Collection</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-clock text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">8:00 AM</div>
+                            <div class="text-muted small">Collection Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-currency-dollar text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">$250</div>
+                            <div class="text-muted small">Monthly Cost</div>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard Content -->
-            <div class="p-6">
-                <!-- Welcome Section -->
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">WELCOME, {{ Auth::user()->name }}</h2>
-                </div>
-
-                <!-- Schedule Section -->
-                <div class="mb-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">My Schedule</h3>
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Waste collection: Monthly, Date: 15</div>
-                            </div>
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Dashboard Tabs (now links) -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-dark">
+                            <i class="bi bi-house me-2 text-primary"></i>My Services
+                        </h5>
+                        <div class="btn-group" role="group" aria-label="Client dashboard tabs">
+                            <a href="{{ route('client.schedules') }}" class="btn btn-primary">
+                                <i class="bi bi-calendar3 me-1"></i>Schedules
+                            </a>
+                            <a href="{{ route('client.invoices') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-receipt me-1"></i>Invoices
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="bi bi-clock-history me-1"></i>History
+                            </a>
                         </div>
                     </div>
                 </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Use the buttons above to view your detailed schedules and invoices.</p>
+                </div>
+            </div>
+        </div>
 
-                <!-- Invoices Section -->
-                <div class="mb-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">My Invoices</h3>
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm font-medium">Invoice #1001</div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-400">Amount: $250.00</div>
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-dark">
+                            <i class="bi bi-lightning me-2 text-warning"></i>Quick Actions
+                        </h5>
+                        <span class="badge bg-warning text-dark">4 Actions</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <a href="{{ route('client.schedules') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-white bg-opacity-20 rounded-circle p-1 me-2">
+                                        <i class="bi bi-calendar-plus text-white"></i>
                                     </div>
-                                    <div class="flex space-x-2">
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Paid</span>
-                                    </div>
+                                    <span>View Schedules</span>
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm font-medium">Invoice #1002</div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-400">Amount: $250.00</div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <a href="{{ route('client.invoices') }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-receipt text-primary"></i>
                                     </div>
-                                    <div class="flex space-x-2">
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
-                                    </div>
+                                    <span>View Invoices</span>
                                 </div>
-                            </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-outline-success w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-credit-card text-success"></i>
+                                    </div>
+                                    <span>Make Payment</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-headset text-info"></i>
+                                    </div>
+                                    <span>Contact Support</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Status -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3 text-muted">Service Status</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <small class="text-muted">Active Service</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <small class="text-muted">Monthly Collection</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <small class="text-muted">Next: {{ date('M d', strtotime('+15 days')) }}</small>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+                            </div>
+
+    <!-- Invoices Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-dark">
+                            <i class="bi bi-receipt me-2 text-success"></i>My Invoices
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('client.invoices') }}" class="btn btn-outline-success btn-sm active">Open Invoices</a>
+                            <a href="{{ route('client.invoices') }}" class="btn btn-outline-warning btn-sm">All</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">See your full invoices list on the Invoices page.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
                 <!-- Feedback Form -->
-                <div class="mb-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">Feedback Form</h3>
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-chat-dots me-2 text-info"></i>Feedback Form
+                    </h5>
+                </div>
+                <div class="card-body">
                             <form>
-                                <div class="mb-4">
-                                    <textarea class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" rows="4" placeholder="Enter your feedback here..."></textarea>
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Your Feedback</label>
+                                <textarea class="form-control" rows="4" placeholder="Please share your experience with our waste collection service..."></textarea>
                                 </div>
-                                <div class="flex justify-end">
-                                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">Submit</button>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Rating</label>
+                                <div class="d-flex gap-1 mb-3">
+                                    <button type="button" class="btn btn-outline-warning btn-sm p-2">
+                                        <i class="bi bi-star-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm p-2">
+                                        <i class="bi bi-star-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm p-2">
+                                        <i class="bi bi-star-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm p-2">
+                                        <i class="bi bi-star-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm p-2">
+                                        <i class="bi bi-star"></i>
+                                    </button>
                                 </div>
-                            </form>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-send me-1"></i>Submit Feedback
+                                </button>
+                                </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+                                    </div>
+                                </div>
+
+    <!-- Help Center -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-question-circle me-2 text-secondary"></i>Help Center
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Quick Help</h6>
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-calendar-plus text-primary me-2"></i>How to schedule a pickup?
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-credit-card text-primary me-2"></i>Payment methods
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-geo-alt text-primary me-2"></i>Service areas
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-headset text-primary me-2"></i>Contact support
+                                </a>
+                                    </div>
+                                </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Policy</h6>
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-file-text text-primary me-2"></i>Terms of Service
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-shield-check text-primary me-2"></i>Privacy Policy
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-x-circle text-primary me-2"></i>Cancellation Policy
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-arrow-clockwise text-primary me-2"></i>Refund Policy
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+</x-dashboard-layout>

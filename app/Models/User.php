@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -78,5 +79,21 @@ class User extends Authenticatable
         return $this->user_type === 'contractor';
     }
     
+    /**
+     * Get the clients for the contractor.
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class, 'contractor_id');
+    }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'contractor_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'contractor_id');
+    }
 }

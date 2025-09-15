@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
+
+class Invoice extends Model
+{
+    protected $fillable = [
+        'invoice_number',
+        'contractor_id',
+        'client_id',
+        'schedule_id',
+        'invoice_date',
+        'due_date',
+        'status',
+        'subtotal',
+        'tax_rate',
+        'tax_amount',
+        'total_amount',
+        'service_type',
+        'description',
+        'notes',
+        'amount_paid',
+        'paid_at',
+        'payment_method'
+    ];
+
+    protected $casts = [
+        'invoice_date' => 'date',
+        'due_date' => 'date',
+        'paid_at' => 'datetime',
+        'subtotal' => 'decimal:2',
+        'tax_rate' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2'
+    ];
+
+    // Relationships
+    public function contractor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'contractor_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(Schedule::class);
+    }
+
+    // Accessors
+    public function getBalanceDueAttribute()
+    {
+        return $this->total_amount - $this->amount_paid;
+    }
+
+    public function getIsOverdueAttribute()
+    {
+        return $this->status !== 'paid' && $this->due_date->isPast();
+    }
+
+    public function getIsPaidAttribute()
+    {
+        return $this->status === 'paid' || $this->amount_paid >= $this->total_amount;
+    }
+
+    // Scopes
+    public function scopeForContractor($query, $contractorId)
+    {
+        return $query->where('contractor_id', $contractorId);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('status', '!=', 'paid')
+                    ->where('due_date', '<', now());
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->where('status', '!=', 'paid')
+                    ->where('total_amount', '>', 'amount_paid');
+    }
+
+    // Methods
+    public function generateInvoiceNumber()
+    {
+        $year = now()->year;
+        $month = now()->format('m');
+        $lastInvoice = static::where('invoice_number', 'like', "INV-{$year}{$month}-%")
+                           ->orderBy('invoice_number', 'desc')
+                           ->first();
+        
+        if ($lastInvoice) {
+            $lastNumber = (int) substr($lastInvoice->invoice_number, -4);
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '0001';
+        }
+        
+        return "INV-{$year}{$month}-{$newNumber}";
+    }
+
+    public function markAsPaid($paymentMethod = null)
+    {
+        $this->update([
+            'status' => 'paid',
+            'amount_paid' => $this->total_amount,
+            'paid_at' => now(),
+            'payment_method' => $paymentMethod
+        ]);
+    }
+
+    public function calculateTotals()
+    {
+        $this->tax_amount = $this->subtotal * ($this->tax_rate / 100);
+        $this->total_amount = $this->subtotal + $this->tax_amount;
+        $this->save();
+    }
+}

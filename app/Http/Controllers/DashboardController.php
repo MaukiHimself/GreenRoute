@@ -25,11 +25,11 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        if (Auth::user()->isClient()) {
+        if (Auth::user()->user_type === 'client') {
             return redirect()->route('dashboard.client');
-        } elseif (Auth::user()->isContractor()) {
+        } elseif (Auth::user()->user_type === 'contractor') {
             return redirect()->route('dashboard.contractor');
-        } elseif (Auth::user()->isAdmin()) {
+        } elseif (Auth::user()->user_type === 'admin') {
             return redirect()->route('dashboard.admin');
         } else {
             // Default dashboard if user type is not recognized
@@ -44,7 +44,7 @@ class DashboardController extends Controller
      */
     public function clientDashboard()
     {
-        if (!Auth::user()->isClient()) {
+        if (Auth::user()->user_type !== 'client') {
             return redirect()->route('dashboard');
         }
         
@@ -58,7 +58,7 @@ class DashboardController extends Controller
      */
     public function contractorDashboard()
     {
-        if (!Auth::user()->isContractor()) {
+        if (Auth::user()->user_type !== 'contractor') {
             return redirect()->route('dashboard');
         }
         
@@ -72,7 +72,7 @@ class DashboardController extends Controller
      */
     public function adminDashboard()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (Auth::user()->user_type !== 'admin') {
             return redirect()->route('dashboard');
         }
         

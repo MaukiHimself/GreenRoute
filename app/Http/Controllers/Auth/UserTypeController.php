@@ -172,7 +172,7 @@ class UserTypeController extends Controller
             $request->session()->regenerate();
 
             // Check if user is a client
-            if (Auth::user()->isClient()) {
+            if (Auth::user()->user_type === 'client') {
                 return redirect()->intended(route('dashboard.client'));
             } else {
                 Auth::logout();
@@ -201,7 +201,7 @@ class UserTypeController extends Controller
             $request->session()->regenerate();
 
             // Check if user is a contractor
-            if (Auth::user()->isContractor()) {
+            if (Auth::user()->user_type === 'contractor') {
                 return redirect()->intended(route('dashboard.contractor'));
             } else {
                 Auth::logout();
@@ -230,7 +230,7 @@ class UserTypeController extends Controller
             $request->session()->regenerate();
 
             // Check if user is an admin
-            if (Auth::user()->isAdmin()) {
+            if (Auth::user()->user_type === 'admin') {
                 return redirect()->intended(route('dashboard.admin'));
             } else {
                 Auth::logout();

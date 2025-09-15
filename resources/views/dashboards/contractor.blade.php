@@ -1,189 +1,518 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-dashboard-layout title="Contractor Dashboard">
+    <x-slot name="sidebar">
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('dashboard.contractor') }}">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('clients.index') }}">
+                    <i class="bi bi-people me-2"></i>Client Database
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('schedules.index') }}">
+                    <i class="bi bi-calendar3 me-2"></i>Schedule Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('invoices.index') }}">
+                    <i class="bi bi-receipt me-2"></i>Invoice Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-credit-card me-2"></i>Billing & Payments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-chat-dots me-2"></i>SMS Manager
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-geo-alt me-2"></i>Route Optimization
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gps me-2"></i>GPS Tracker
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-graph-up me-2"></i>Reports & Analytics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('contractor.feedback.index') }}">
+                    <i class="bi bi-chat-dots me-2"></i>Client Feedback
+                </a>
+            </li>
+        </ul>
+    </x-slot>
 
-    <title>{{ config('app.name', 'Laravel') }} - Contractor Dashboard</title>
+    <x-slot name="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Waste Contractor</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+    </x-slot>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <x-slot name="notificationCount">2</x-slot>
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
-        <!-- Sidebar Navigation -->
-        <div class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-            <!-- Logo -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 text-dark">Welcome back, {{ Auth::user()->name }}!</h1>
+                            <p class="text-muted mb-0">Here's what's happening with your waste management business today.</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex justify-content-end">
+                                <div class="text-center me-4">
+                                    <div class="h4 mb-0 text-primary">{{ date('d') }}</div>
+                                    <small class="text-muted">{{ date('M Y') }}</small>
+                                </div>
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-success">{{ date('l') }}</div>
+                                    <small class="text-muted">{{ date('H:i A') }}</small>
+                                </div>
+                            </div>
+        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Menu -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center">
-                    <span class="text-gray-800 dark:text-gray-200 font-medium">Menu</span>
-                </div>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="mt-2">
-                <a href="{{ route('dashboard.contractor') }}" class="flex items-center px-4 py-3 text-gray-800 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Client Database</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Billing & Payments</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Collection Schedules</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Disposal Schedules</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>SMS Manager</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Route Optimization</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>GPS Tracker</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-                <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span>Reports & Analytics</span>
-                    <span class="ml-auto">&gt;</span>
-                </a>
-            </nav>
+        </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1">
-            <!-- Top Navigation -->
-            <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-                <div class="flex justify-between items-center">
-                    <div class="text-gray-800 dark:text-gray-200">
-                        Home / Waste Contractor / Dashboard / {{ Auth::user()->name }}
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="text-gray-600 dark:text-gray-400 focus:outline-none">
-                                <span class="sr-only">Notifications</span>
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                                </svg>
-                            </button>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-people-fill text-primary fs-4"></i>
+                            </div>
                         </div>
-                        <div>
-                            <button class="flex items-center text-gray-600 dark:text-gray-400 focus:outline-none">
-                                <span class="sr-only">User Profile</span>
-                                <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                            </button>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">24</div>
+                            <div class="text-muted small">Active Clients</div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Dashboard Content -->
-            <div class="p-6">
-                <!-- System Performance Section -->
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">System Performance</h2>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <div class="grid grid-cols-3 gap-4">
-                            <div>
-                                <span class="text-gray-600 dark:text-gray-400">Active Clients:</span>
-                                <span class="ml-2 font-medium">24</span>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-truck text-success fs-4"></i>
                             </div>
-                            <div>
-                                <span class="text-gray-600 dark:text-gray-400">Total Routes:</span>
-                                <span class="ml-2 font-medium">12</span>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">12</div>
+                            <div class="text-muted small">Total Routes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-check-circle text-warning fs-4"></i>
                             </div>
-                            <div>
-                                <span class="text-gray-600 dark:text-gray-400">Completed Jobs:</span>
-                                <span class="ml-2 font-medium">36</span>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">36</div>
+                            <div class="text-muted small">Completed Jobs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-currency-dollar text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0 text-dark">$2,450</div>
+                            <div class="text-muted small">Monthly Revenue</div>
+                        </div>
+                    </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Active Routes Section -->
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Active Routes</h2>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Route</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Clients</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Dashboard Tabs -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-dark">
+                            <i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard Overview
+                        </h5>
+                        <div class="btn-group" role="group" aria-label="Dashboard tabs">
+                            <button type="button" class="btn btn-primary active" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" role="tab">
+                                <i class="bi bi-route me-1"></i>Routes
+                            </button>
+                            <a href="{{ route('clients.index') }}" class="btn btn-outline-primary" id="clients-tab-link" role="tab">
+                                <i class="bi bi-people me-1"></i>Clients
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules" role="tab">
+                                <i class="bi bi-calendar3 me-1"></i>Schedules
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="dashboardTabContent">
+                        <!-- Routes Tab -->
+                        <div class="tab-pane fade show active" id="routes" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-muted">Active Routes</h6>
+                                <a href="{{ route('schedules.index') }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Route
+                                </a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Route</th>
+                                            <th>Clients</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr>
-                                        <td class="px-4 py-3 whitespace-nowrap">Route A</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">15</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
-                                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <i class="bi bi-geo-alt text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Route A</div>
+                                                        <small class="text-muted">Downtown Area</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="badge bg-primary">15 Clients</span></td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                            <td>
+                                                <div class="progress" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                                                </div>
+                                                <small class="text-muted">75% Complete</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-primary" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-success" title="Edit Route">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-3 whitespace-nowrap">Route B</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">9</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
-                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <i class="bi bi-geo-alt text-warning"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Route B</div>
+                                                        <small class="text-muted">Suburban Area</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="badge bg-warning">9 Clients</span></td>
+                                            <td><span class="badge bg-warning">Pending</span></td>
+                                            <td>
+                                                <div class="progress" style="height: 6px;">
+                                                    <div class="progress-bar bg-warning" style="width: 30%"></div>
+                                                </div>
+                                                <small class="text-muted">30% Complete</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-warning" title="Start Route">
+                                                        <i class="bi bi-play-circle"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-primary" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
+                        </div>
+
+                        <!-- Clients Tab -->
+                        <!-- Removed: Clients content now lives at /dashboard/contractor/clients -->
+                        
+                        <!-- Schedules Tab -->
+                        <div class="tab-pane fade" id="schedules" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-muted">Upcoming Schedules</h6>
+                                <a href="{{ route('schedules.create') }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-calendar-plus me-1"></i>New Schedule
+                                </a>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="bi bi-calendar-check text-success"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Route A - Downtown</h6>
+                                            <small class="text-muted">Tomorrow, 8:00 AM - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-success">Start</button>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="bi bi-calendar text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Route B - Suburban</h6>
+                                            <small class="text-muted">Friday, 2:00 PM - 6:00 PM</small>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-warning">Prepare</button>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Performance -->
+        <div class="col-lg-4 mb-4">
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-dark">
+                            <i class="bi bi-lightning me-2 text-warning"></i>Quick Actions
+                        </h5>
+                        <span class="badge bg-warning text-dark">4 Actions</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <a href="{{ route('clients.create') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-white bg-opacity-20 rounded-circle p-1 me-2">
+                                        <i class="bi bi-person-plus text-white"></i>
+                                    </div>
+                                    <span>Add New Client</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <a href="{{ route('schedules.create') }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-calendar-plus text-primary"></i>
+                                    </div>
+                                    <span>Schedule Pickup</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <a href="{{ route('invoices.create') }}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-receipt text-success"></i>
+                                    </div>
+                                    <span>Create Invoice</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <a href="#" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info bg-opacity-10 rounded-circle p-1 me-2">
+                                        <i class="bi bi-graph-up text-info"></i>
+                                    </div>
+                                    <span>View Reports</span>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3 text-muted">Today's Summary</h6>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="bg-primary bg-opacity-10 rounded p-2">
+                                    <div class="h5 mb-0 text-primary">8</div>
+                                    <small class="text-muted">Completed</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-warning bg-opacity-10 rounded p-2">
+                                    <div class="h5 mb-0 text-warning">3</div>
+                                    <small class="text-muted">Pending</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-bar-chart me-2 text-info"></i>Weekly Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-end justify-content-between" style="height: 200px;">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 60px;"></div>
+                            <small class="text-muted mt-2">Mon</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 80px;"></div>
+                            <small class="text-muted mt-2">Tue</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 120px;"></div>
+                            <small class="text-muted mt-2">Wed</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 90px;"></div>
+                            <small class="text-muted mt-2">Thu</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 140px;"></div>
+                            <small class="text-muted mt-2">Fri</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 100px;"></div>
+                            <small class="text-muted mt-2">Sat</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="bg-primary rounded-top" style="width: 20px; height: 70px;"></div>
+                            <small class="text-muted mt-2">Sun</small>
+                        </div>
+                    </div>
+                </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Performance Graph Section -->
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Performance</h2>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                        <div class="h-64 flex items-end justify-between space-x-2">
-                            <div class="w-1/7 bg-blue-500 h-1/4 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-2/4 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-3/4 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-1/2 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-3/5 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-4/5 rounded-t"></div>
-                            <div class="w-1/7 bg-blue-500 h-2/3 rounded-t"></div>
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-clock-history me-2 text-secondary"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Pickup Completed</div>
+                                    <small class="text-muted">Route A - 15 clients served</small>
+                                </div>
+                                <div class="ms-auto">
+                                    <small class="text-muted">2 hours ago</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-person-plus text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">New Client Added</div>
+                                    <small class="text-muted">John Smith - Downtown Area</small>
+                                </div>
+                                <div class="ms-auto">
+                                    <small class="text-muted">4 hours ago</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex justify-between mt-2 text-xs text-gray-600 dark:text-gray-400">
-                            <div>Mon</div>
-                            <div>Tue</div>
-                            <div>Wed</div>
-                            <div>Thu</div>
-                            <div>Fri</div>
-                            <div>Sat</div>
-                            <div>Sun</div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-receipt text-warning"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Invoice Generated</div>
+                                    <small class="text-muted">INV-001 - $250.00</small>
+                                </div>
+                                <div class="ms-auto">
+                                    <small class="text-muted">6 hours ago</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-calendar text-info"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Schedule Updated</div>
+                                    <small class="text-muted">Route B - 3 new pickups</small>
+                                </div>
+                                <div class="ms-auto">
+                                    <small class="text-muted">1 day ago</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+</x-dashboard-layout>
