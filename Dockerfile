@@ -49,6 +49,9 @@ RUN rm -f package-lock.json && \
 # Create SQLite database file
 RUN touch /var/www/html/database/database.sqlite
 
+# Generate Laravel application key if not set
+RUN php artisan key:generate --force
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
