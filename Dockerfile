@@ -49,6 +49,9 @@ RUN rm -f package-lock.json && \
 # Create SQLite database file
 RUN touch /var/www/html/database/database.sqlite
 
+# Create .env file for Laravel commands if it doesn't exist
+RUN cp .env.production .env || cp .env.example .env || echo "APP_KEY=" > .env
+
 # Generate Laravel application key if not set
 RUN php artisan key:generate --force
 
