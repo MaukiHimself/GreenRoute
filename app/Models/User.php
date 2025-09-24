@@ -24,6 +24,14 @@ class User extends Authenticatable
         'name',
         'email',
         'user_type',
+        'subscription_completed',
+        'business_license',
+        'certificate_incorporation',
+        'contract_document',
+        'initial_payment',
+        'subscription_status',
+        'subscription_date',
+        'remember_login',
     ];
 
     /**
@@ -110,5 +118,15 @@ class User extends Authenticatable
     public function latestLocation()
     {
         return $this->contractorLocations()->latest()->first();
+    }
+
+    public function needsSubscription(): bool
+    {
+        return !$this->subscription_completed && in_array($this->user_type, ['contractor', 'client']);
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription_status === 'active';
     }
 }

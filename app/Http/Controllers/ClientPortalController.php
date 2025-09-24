@@ -71,6 +71,27 @@ class ClientPortalController extends Controller
             'status' => 'open',
         ]);
 
-        return back()->with('success', 'Your message has been sent to your contractor.');
+        return response()->json(['success' => true, 'message' => 'Feedback submitted successfully']);
+    }
+
+    public function dashboard()
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        $upcomingSchedules = Schedule::with('contractor')
+            ->where('client_id', $client->id)
+            ->where('pickup_date', '>=', now())
+            ->orderBy('pickup_date')
+            ->limit(5)
+            ->get();
+
+        $recentInvoices = Invoice::with('contractor')
+            ->where('client_id', $client->id)
+            ->orderByDesc('invoice_date')
+            ->limit(5)
+            ->get();
+
+        return view('client.dashboard', compact('client', 'upcomingSchedules', 'recentInvoices'));
     }
 }

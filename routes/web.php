@@ -9,6 +9,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Auth\UserTypeController;
 use App\Http\Controllers\ClientPortalController;
 use App\Http\Controllers\ContractorFeedbackController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +31,17 @@ Route::get('/test-dashboard', function () {
     return view('test-dashboard');
 });
 
+// Test route for subscription system
+Route::get('/test-subscription', function () {
+    return view('test-subscription');
+});
+
+// Subscription routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/subscription/profile', [SubscriptionController::class, 'profile'])->name('subscription.profile');
+    Route::post('/subscription/store', [SubscriptionController::class, 'store'])->name('subscription.store');
+});
+
 // Main dashboard route that redirects to the appropriate dashboard based on user type
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -43,10 +55,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Client portal (client views)
     Route::prefix('dashboard/client')->group(function () {
+        Route::get('/', [ClientPortalController::class, 'dashboard'])->name('client.dashboard');
         Route::get('schedules', [ClientPortalController::class, 'schedules'])->name('client.schedules');
         Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
         Route::view('support', 'client_portal.support')->name('client.support');
-        Route::post('support', [ClientPortalController::class, 'storeFeedback'])->name('client.support.submit');
+        Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
     });
     
     // Contractor routes
@@ -114,6 +127,7 @@ Route::post('/register/admin', [UserTypeController::class, 'storeAdmin'])->name(
 
 // Public location validation for registration
 Route::post('/location/validate-public', [App\Http\Controllers\LocationController::class, 'validateLocationAccuracy'])->name('location.validate.public');
+Route::post('/location/reverse-geocode', [App\Http\Controllers\LocationController::class, 'reverseGeocode'])->name('location.reverse.geocode');
 
 // Location and mapping routes
 Route::middleware(['auth'])->group(function () {

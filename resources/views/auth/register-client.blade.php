@@ -62,8 +62,11 @@
             
             <div class="col-md-6">
                 <label for="address" class="form-label fw-medium">Physical Address</label>
-                <input id="address" type="text" name="address" value="{{ old('address') }}" required
-                       class="form-control form-control-lg" placeholder="Enter your full address">
+                <div class="position-relative">
+                    <input id="address" type="text" name="address" value="{{ old('address') }}" required
+                           class="form-control form-control-lg" placeholder="Will be auto-filled from GPS location">
+                    <small class="text-muted">📍 Address will be automatically filled when you get your location</small>
+                </div>
                 <input type="hidden" id="latitude" name="latitude">
                 <input type="hidden" id="longitude" name="longitude">
             </div>
@@ -129,14 +132,19 @@
         let map, marker, geocoder;
         
         function initMap() {
-            // Initialize map centered on Tanzania
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 13,
-                center: { lat: -3.3731, lng: 36.8822 } // Moshi, Tanzania coordinates
-            });
-            
-            geocoder = new google.maps.Geocoder();
-            marker = new google.maps.Marker({ map: map });
+            if (typeof google !== 'undefined' && google.maps) {
+                // Initialize map centered on Tanzania
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 13,
+                    center: { lat: -3.3731, lng: 36.8822 } // Moshi, Tanzania coordinates
+                });
+                
+                geocoder = new google.maps.Geocoder();
+                marker = new google.maps.Marker({ map: map });
+            } else {
+                // Fallback when Google Maps is not available
+                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light rounded"><div class="text-center"><i class="bi bi-geo-alt text-muted" style="font-size: 3rem;"></i><p class="text-muted mt-2">Map preview unavailable<br><small>GPS location capture still works</small></p></div></div>';
+            }
             
 
             document.getElementById('watchLocation').addEventListener('click', watchPreciseLocation);
@@ -270,14 +278,19 @@
         function updateLocation(lat, lng, accuracy, source) {
             const location = { lat: lat, lng: lng };
             
-            // Update map view
-            map.setCenter(location);
-            map.setZoom(18);
-            marker.setPosition(location);
+            // Update map view if available
+            if (map && marker) {
+                map.setCenter(location);
+                map.setZoom(18);
+                marker.setPosition(location);
+            }
             
             // Store coordinates with high precision
             document.getElementById('latitude').value = lat.toFixed(8);
             document.getElementById('longitude').value = lng.toFixed(8);
+            
+            // Auto-fill address using reverse geocoding
+            reverseGeocodeAddress(lat, lng);
             
             console.log(`GPS Update: ${lat.toFixed(8)}, ${lng.toFixed(8)} (±${Math.round(accuracy)}m) - ${source}`);
             
@@ -286,6 +299,49 @@
                 accuracy: `±${Math.round(accuracy)}m`,
                 source: source,
                 timestamp: new Date().toLocaleString()
+            });
+        }
+        
+        function reverseGeocodeAddress(lat, lng) {
+            const addressInput = document.getElementById('address');
+            const statusEl = document.getElementById('locationStatus');
+            
+            // Show loading state
+            addressInput.placeholder = 'Looking up address...';
+            addressInput.style.backgroundColor = '#fff3cd';
+            
+            fetch('/location/reverse-geocode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.address) {
+                    addressInput.value = data.address;
+                    addressInput.style.backgroundColor = '#d1e7dd';
+                    addressInput.placeholder = 'Address auto-filled from GPS';
+                    
+                    // Show success message
+                    statusEl.innerHTML += ' 📍 Address auto-filled successfully!';
+                    
+                    console.log('Address auto-filled:', data.address);
+                } else {
+                    addressInput.style.backgroundColor = '#f8d7da';
+                    addressInput.placeholder = 'Please enter address manually';
+                    console.warn('Address lookup failed:', data.message);
+                }
+            })
+            .catch(error => {
+                addressInput.style.backgroundColor = '#f8d7da';
+                addressInput.placeholder = 'Please enter address manually';
+                console.error('Address lookup error:', error);
             });
         }
         
@@ -342,5 +398,14 @@
         }
     </script>
     
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap&libraries=geometry"></script>
+    @if(config('services.google_maps.api_key'))
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap&libraries=geometry"></script>
+    @else
+        <script>
+            function initMap() {
+                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light rounded"><div class="text-center"><i class="bi bi-geo-alt text-muted" style="font-size: 3rem;"></i><p class="text-muted mt-2">Map preview unavailable<br><small>GPS location capture still works</small></p></div></div>';
+            }
+            initMap();
+        </script>
+    @endif
 </x-guest-layout>

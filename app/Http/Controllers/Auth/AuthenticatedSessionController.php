@@ -28,6 +28,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Handle remember me functionality
+        if ($request->filled('remember')) {
+            Auth::user()->update(['remember_login' => true]);
+        }
+
+        // Check if user needs to complete subscription
+        if (Auth::user()->needsSubscription()) {
+            return redirect()->route('subscription.profile');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
