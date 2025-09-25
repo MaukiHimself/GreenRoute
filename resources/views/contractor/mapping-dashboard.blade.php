@@ -290,10 +290,7 @@
                 </div>
 
                 <div id="routes-tab" class="tab-content" style="display: none;">
-                    <div class="card">
-                        <div class="card-header"><h5 class="text-success mb-0">Route Optimization</h5></div>
-                        <div class="card-body"><p>Advanced route optimization tools coming soon...</p></div>
-                    </div>
+                    <iframe src="/routes" width="100%" height="600" frameborder="0"></iframe>
                 </div>
 
                 <div id="gps-tab" class="tab-content" style="display: none;">

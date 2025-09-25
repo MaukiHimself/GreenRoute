@@ -185,6 +185,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/send', [App\Http\Controllers\SmsController::class, 'send'])->name('sms.send');
         Route::get('/template', [App\Http\Controllers\SmsController::class, 'getTemplate'])->name('sms.template');
     });
+    
+    // Route Optimization routes
+    Route::middleware(['auth'])->prefix('routes')->group(function () {
+        Route::get('/', [App\Http\Controllers\RouteOptimizationController::class, 'index'])->name('routes.index');
+        Route::post('/optimize', [App\Http\Controllers\RouteOptimizationController::class, 'optimize'])->name('routes.optimize');
+    });
 });
 
 require __DIR__.'/auth.php';
