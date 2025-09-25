@@ -146,6 +146,9 @@ Route::middleware(['auth'])->group(function () {
     // Contractor routes
     Route::middleware(['auth'])->prefix('contractor')->group(function () {
         Route::get('/clients/locations', [App\Http\Controllers\ContractorController::class, 'getAssignedClients'])->name('contractor.clients.locations');
+        Route::get('/dashboard-stats', [App\Http\Controllers\ContractorController::class, 'getDashboardStats']);
+        Route::get('/recent-invoices', [App\Http\Controllers\ContractorController::class, 'getRecentInvoices']);
+        Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules']);
         Route::get('/clients/{client}', [ClientController::class, 'show']);
         Route::get('/clients/{client}/edit', [ClientController::class, 'edit']);
     });

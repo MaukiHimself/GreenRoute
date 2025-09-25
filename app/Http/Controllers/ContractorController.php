@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Invoice;
+use App\Models\Schedule;
+use Illuminate\Support\Facades\Auth;
 
 class ContractorController extends Controller
 {
@@ -38,5 +41,63 @@ class ContractorController extends Controller
             ->get();
 
         return response()->json($clients);
+    }
+    
+    public function getDashboardStats()
+    {
+        $contractorId = Auth::id();
+        
+        $stats = [
+            'total_clients' => Client::where('contractor_id', $contractorId)->count(),
+            'total_invoices' => Invoice::where('contractor_id', $contractorId)->count(),
+            'pending_payments' => Invoice::where('contractor_id', $contractorId)
+                ->where('status', '!=', 'paid')
+                ->sum('total_amount'),
+            'active_routes' => Schedule::where('contractor_id', $contractorId)
+                ->distinct('pickup_location')
+                ->count()
+        ];
+        
+        return response()->json($stats);
+    }
+    
+    public function getRecentInvoices()
+    {
+        $invoices = Invoice::where('contractor_id', Auth::id())
+            ->with('client')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'client_name' => $invoice->client->name,
+                    'total_amount' => number_format($invoice->total_amount, 2),
+                    'status' => $invoice->status
+                ];
+            });
+            
+        return response()->json($invoices);
+    }
+    
+    public function getUpcomingSchedules()
+    {
+        $schedules = Schedule::where('contractor_id', Auth::id())
+            ->with('client')
+            ->where('pickup_date', '>=', now()->toDateString())
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('pickup_date')
+            ->limit(5)
+            ->get()
+            ->map(function($schedule) {
+                return [
+                    'pickup_location' => $schedule->pickup_location,
+                    'client_name' => $schedule->client->name,
+                    'pickup_date' => $schedule->pickup_date->format('M d, Y'),
+                    'pickup_time' => $schedule->pickup_time
+                ];
+            });
+            
+        return response()->json($schedules);
     }
 }

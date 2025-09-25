@@ -81,15 +81,7 @@
                 <div id="dashboard-tab" class="tab-content">
                     <!-- Stats -->
                     <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card stat-card h-100">
-                                <div class="card-body text-center">
-                                    <h3 class="text-success">98%</h3>
-                                    <p class="text-muted mb-0">System Performance</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card stat-card h-100">
                                 <div class="card-body text-center">
                                     <h3 class="text-success" id="totalClients">0</h3>
@@ -97,24 +89,65 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card stat-card h-100">
                                 <div class="card-body text-center">
-                                    <h3 class="text-success">5</h3>
+                                    <h3 class="text-primary" id="totalInvoices">0</h3>
+                                    <p class="text-muted mb-0">Total Invoices</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="text-warning" id="pendingPayments">$0</h3>
+                                    <p class="text-muted mb-0">Pending Payments</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="text-info" id="activeRoutes">0</h3>
                                     <p class="text-muted mb-0">Active Routes</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Chart -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="text-success mb-0">Annual Performance</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="performanceChart"></canvas>
+
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="text-success mb-0">Quick Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/dashboard/contractor/clients/create" class="btn btn-outline-success w-100">
+                                                <i class="bi bi-person-plus me-2"></i>Add New Client
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/billing/create" class="btn btn-outline-primary w-100">
+                                                <i class="bi bi-receipt me-2"></i>Create Invoice
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/schedules/create" class="btn btn-outline-info w-100">
+                                                <i class="bi bi-calendar-plus me-2"></i>Schedule Collection
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/reports" class="btn btn-outline-warning w-100">
+                                                <i class="bi bi-graph-up me-2"></i>View Reports
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,78 +156,33 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card h-100">
-                                <div class="card-header">
-                                    <h5 class="text-success mb-0">Pending Invoices</h5>
+                                <div class="card-header d-flex justify-content-between">
+                                    <h5 class="text-success mb-0">Recent Invoices</h5>
+                                    <a href="/billing" class="btn btn-sm btn-outline-success">View All</a>
                                 </div>
                                 <div class="card-body">
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item d-flex justify-content-between">
-                                            <span>Invoice #001</span>
-                                            <span class="text-danger fw-bold">$150.00</span>
-                                        </div>
-                                        <div class="list-group-item d-flex justify-content-between">
-                                            <span>Invoice #002</span>
-                                            <span class="text-danger fw-bold">$200.00</span>
-                                        </div>
+                                    <div id="recentInvoices">
+                                        <p class="text-muted">Loading recent invoices...</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="card h-100">
-                                <div class="card-header">
-                                    <h5 class="text-success mb-0">Upcoming Schedules</h5>
+                                <div class="card-header d-flex justify-content-between">
+                                    <h5 class="text-success mb-0">Upcoming Collections</h5>
+                                    <a href="/schedules" class="btn btn-sm btn-outline-success">View All</a>
                                 </div>
                                 <div class="card-body">
-                                    <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
-                                        <strong>Route A - Downtown</strong>
-                                        <small class="d-block text-muted">Monday, 9:00 AM</small>
-                                    </div>
-                                    <div class="border-start border-warning border-4 ps-3 bg-light p-2 rounded">
-                                        <strong>Route B - Suburbs</strong>
-                                        <small class="d-block text-muted">Tuesday, 10:00 AM</small>
+                                    <div id="upcomingSchedules">
+                                        <p class="text-muted">Loading upcoming schedules...</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Route Controls -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="text-success mb-0">Route Planning</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option>Route A</option>
-                                        <option>Route B</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option>January</option>
-                                        <option>February</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="date" class="form-control">
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button id="updateLocation" class="btn btn-success">
-                                    <i class="bi bi-geo-alt me-1"></i>Update Location
-                                </button>
-                                <button id="optimizeRoute" class="btn btn-primary">
-                                    <i class="bi bi-arrow-repeat me-1"></i>Optimize Route
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Map -->
                     <div class="card">
@@ -401,6 +389,79 @@
                 });
         }
         
+        function loadDashboardData() {
+            // Load dashboard statistics
+            fetch('/contractor/dashboard-stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalClients').textContent = data.total_clients || 0;
+                    document.getElementById('totalInvoices').textContent = data.total_invoices || 0;
+                    document.getElementById('pendingPayments').textContent = '$' + (data.pending_payments || 0);
+                    document.getElementById('activeRoutes').textContent = data.active_routes || 0;
+                })
+                .catch(() => {
+                    console.log('Dashboard stats not available');
+                });
+                
+            // Load recent invoices
+            fetch('/contractor/recent-invoices')
+                .then(response => response.json())
+                .then(invoices => {
+                    const container = document.getElementById('recentInvoices');
+                    if (invoices.length === 0) {
+                        container.innerHTML = '<p class="text-muted">No recent invoices</p>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    invoices.forEach(invoice => {
+                        container.innerHTML += `
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-start border-3 border-primary">
+                                <div>
+                                    <strong>Invoice #${invoice.id}</strong><br>
+                                    <small class="text-muted">${invoice.client_name}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold text-${invoice.status === 'paid' ? 'success' : 'warning'}">$${invoice.total_amount}</span><br>
+                                    <small class="badge bg-${invoice.status === 'paid' ? 'success' : 'warning'}">${invoice.status}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(() => {
+                    document.getElementById('recentInvoices').innerHTML = '<p class="text-muted">Unable to load invoices</p>';
+                });
+                
+            // Load upcoming schedules
+            fetch('/contractor/upcoming-schedules')
+                .then(response => response.json())
+                .then(schedules => {
+                    const container = document.getElementById('upcomingSchedules');
+                    if (schedules.length === 0) {
+                        container.innerHTML = '<p class="text-muted">No upcoming schedules</p>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    schedules.forEach(schedule => {
+                        container.innerHTML += `
+                            <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
+                                <strong>${schedule.pickup_location}</strong><br>
+                                <small class="text-muted">${schedule.client_name}</small><br>
+                                <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(() => {
+                    document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
+                });
+        }
+        
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+        
         function getCurrentLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
@@ -500,27 +561,7 @@
             loadClientsTable();
         }
 
-        // Chart
-        const canvas = document.getElementById('performanceChart');
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth;
-        canvas.height = 200;
-        
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-        const data = [65, 75, 85, 70, 90, 80, 95];
-        
-        ctx.fillStyle = '#198754';
-        months.forEach((month, i) => {
-            const height = data[i] * 1.5;
-            const barWidth = canvas.width / months.length - 20;
-            const x = i * (canvas.width / months.length) + 10;
-            
-            ctx.fillRect(x, 180 - height, barWidth, height);
-            ctx.fillStyle = '#000';
-            ctx.font = '12px Arial';
-            ctx.fillText(month, x + barWidth/4, 195);
-            ctx.fillStyle = '#198754';
-        });
+
     </script>
     
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcwt701YioUFnzbJp9Bktla31qjKwM304&callback=initMap"></script>
