@@ -21,7 +21,11 @@ class Schedule extends Model
         'service_type',
         'status',
         'notes',
-        'estimated_duration'
+        'estimated_duration',
+        'total_volume',
+        'disposal_site',
+        'disposal_type',
+        'disposal_notes'
     ];
 
     protected $casts = [

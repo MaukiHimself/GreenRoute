@@ -170,6 +170,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{schedule}/print', [ScheduleController::class, 'print'])->name('schedules.print');
         Route::post('/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.status');
     });
+    
+    // Disposal routes
+    Route::middleware(['auth'])->prefix('disposal')->group(function () {
+        Route::get('/', [App\Http\Controllers\DisposalController::class, 'index'])->name('disposal.index');
+        Route::get('/{schedule}', [App\Http\Controllers\DisposalController::class, 'show'])->name('disposal.show');
+        Route::get('/{schedule}/edit', [App\Http\Controllers\DisposalController::class, 'edit'])->name('disposal.edit');
+        Route::put('/{schedule}', [App\Http\Controllers\DisposalController::class, 'update'])->name('disposal.update');
+    });
+    
+    // SMS routes
+    Route::middleware(['auth'])->prefix('sms')->group(function () {
+        Route::get('/', [App\Http\Controllers\SmsController::class, 'index'])->name('sms.index');
+        Route::post('/send', [App\Http\Controllers\SmsController::class, 'send'])->name('sms.send');
+        Route::get('/template', [App\Http\Controllers\SmsController::class, 'getTemplate'])->name('sms.template');
+    });
 });
 
 require __DIR__.'/auth.php';

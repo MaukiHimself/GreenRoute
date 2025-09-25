@@ -282,17 +282,11 @@
                 </div>
 
                 <div id="disposal-tab" class="tab-content" style="display: none;">
-                    <div class="card">
-                        <div class="card-header"><h5 class="text-success mb-0">Disposal Schedules</h5></div>
-                        <div class="card-body"><p>Disposal schedule management interface coming soon...</p></div>
-                    </div>
+                    <iframe src="/disposal" width="100%" height="600" frameborder="0"></iframe>
                 </div>
 
                 <div id="sms-tab" class="tab-content" style="display: none;">
-                    <div class="card">
-                        <div class="card-header"><h5 class="text-success mb-0">SMS Manager</h5></div>
-                        <div class="card-body"><p>SMS management interface coming soon...</p></div>
-                    </div>
+                    <iframe src="/sms" width="100%" height="600" frameborder="0"></iframe>
                 </div>
 
                 <div id="routes-tab" class="tab-content" style="display: none;">
