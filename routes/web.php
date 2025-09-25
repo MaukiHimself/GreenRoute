@@ -48,8 +48,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 // Type-specific dashboard routes
+Route::get('/dashboard/client', [DashboardController::class, 'clientDashboard'])->name('dashboard.client');
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard/client', [DashboardController::class, 'clientDashboard'])->name('dashboard.client');
     Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
     Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('dashboard.admin');
 

@@ -151,7 +151,7 @@ class UserTypeController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard.client')
+        return redirect()->route('client.dashboard')
             ->with('success', 'Registration successful! Your precise location has been recorded.');
     }
 
@@ -236,7 +236,7 @@ class UserTypeController extends Controller
 
             // Check if user is a client
             if (Auth::user()->user_type === 'client') {
-                return redirect()->intended(route('dashboard.client'));
+                return redirect()->intended(route('client.dashboard'));
             } else {
                 Auth::logout();
                 return back()->withErrors([
