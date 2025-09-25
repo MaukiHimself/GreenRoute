@@ -6,136 +6,111 @@ use App\Models\Schedule;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $schedules = Schedule::where('contractor_id', Auth::id())
+        $schedules = Schedule::forContractor(Auth::id())
             ->with('client')
-            ->orderBy('pickup_date', 'asc')
-            ->orderBy('pickup_time', 'asc')
+            ->orderBy('pickup_date', 'desc')
             ->paginate(15);
-            
+
         return view('schedules.index', compact('schedules'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $clients = Client::where('contractor_id', Auth::id())
-            ->where('status', 'active')
-            ->get();
-        return view('schedules.create', compact('clients'));
+        $locations = Client::where('contractor_id', Auth::id())
+            ->select('address')
+            ->distinct()
+            ->pluck('address');
+
+        return view('schedules.create', compact('locations'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'pickup_date' => 'required|date|after_or_equal:today',
+            'route_name' => 'required|string|max:255',
+            'site_location' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'pickup_time' => 'required|date_format:H:i',
-            'pickup_location' => 'required|string|max:255',
-            'pickup_address' => 'required|string',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:10',
-            'service_type' => 'required|in:collection,disposal,both',
-            'estimated_duration' => 'nullable|numeric|min:0.25|max:24',
-            'notes' => 'nullable|string'
+            'comments' => 'nullable|string'
         ]);
 
-        // Verify client belongs to contractor
-        $client = Client::where('contractor_id', Auth::id())
-            ->where('id', $validated['client_id'])
-            ->firstOrFail();
-        
-        $validated['contractor_id'] = Auth::id();
-        
-        Schedule::create($validated);
+        // Get clients at this location
+        $clients = Client::where('contractor_id', Auth::id())
+            ->where('address', 'like', '%' . $validated['site_location'] . '%')
+            ->get();
 
-        return redirect()->route('schedules.index')
-            ->with('success', 'Schedule created successfully.');
+        // Create schedule for each client
+        foreach ($clients as $client) {
+            Schedule::create([
+                'contractor_id' => Auth::id(),
+                'client_id' => $client->id,
+                'pickup_date' => $validated['start_date'],
+                'pickup_time' => $validated['pickup_time'],
+                'pickup_location' => $validated['route_name'],
+                'pickup_address' => $client->address,
+                'city' => $client->city,
+                'state' => $client->state,
+                'zip_code' => $client->zip_code,
+                'service_type' => 'collection',
+                'status' => 'scheduled',
+                'notes' => $validated['comments']
+            ]);
+        }
+
+        return redirect()->route('schedules.index')->with('success', 'Collection schedule created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Schedule $schedule)
     {
-        $this->authorize('view', $schedule);
-        return view('schedules.show', compact('schedule'));
-    }
+        if ($schedule->contractor_id !== Auth::id()) {
+            abort(404);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Schedule $schedule)
-    {
-        $this->authorize('update', $schedule);
-        $clients = Client::where('contractor_id', Auth::id())
-            ->where('status', 'active')
+        // Get all schedules for the same location and date range
+        $locationSchedules = Schedule::forContractor(Auth::id())
+            ->where('pickup_location', $schedule->pickup_location)
+            ->where('pickup_date', '>=', $schedule->pickup_date)
+            ->with('client')
+            ->orderBy('pickup_address')
             ->get();
-        return view('schedules.edit', compact('schedule', 'clients'));
+
+        return view('schedules.show', compact('schedule', 'locationSchedules'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Schedule $schedule)
+    public function updateStatus(Request $request, Schedule $schedule)
     {
-        $this->authorize('update', $schedule);
-        
+        if ($schedule->contractor_id !== Auth::id()) {
+            abort(404);
+        }
+
         $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'pickup_date' => 'required|date',
-            'pickup_time' => 'required|date_format:H:i',
-            'pickup_location' => 'required|string|max:255',
-            'pickup_address' => 'required|string',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:10',
-            'service_type' => 'required|in:collection,disposal,both',
-            'status' => 'required|in:scheduled,in_progress,completed,cancelled',
-            'estimated_duration' => 'nullable|numeric|min:0.25|max:24',
-            'notes' => 'nullable|string'
+            'status' => 'required|in:scheduled,in_progress,completed,cancelled'
         ]);
 
-        // Verify client belongs to contractor
-        $client = Client::where('contractor_id', Auth::id())
-            ->where('id', $validated['client_id'])
-            ->firstOrFail();
-        
-        $schedule->update($validated);
+        $schedule->update(['status' => $validated['status']]);
 
-        return redirect()->route('schedules.index')
-            ->with('success', 'Schedule updated successfully.');
+        return response()->json(['success' => true]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Schedule $schedule)
+    public function print(Schedule $schedule)
     {
-        $this->authorize('delete', $schedule);
-        
-        $schedule->delete();
+        if ($schedule->contractor_id !== Auth::id()) {
+            abort(404);
+        }
 
-        return redirect()->route('schedules.index')
-            ->with('success', 'Schedule deleted successfully.');
+        $locationSchedules = Schedule::forContractor(Auth::id())
+            ->where('pickup_location', $schedule->pickup_location)
+            ->where('pickup_date', '>=', $schedule->pickup_date)
+            ->with('client')
+            ->orderBy('pickup_address')
+            ->get();
+
+        return view('schedules.print', compact('schedule', 'locationSchedules'));
     }
 }

@@ -160,6 +160,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{invoice}/send', [App\Http\Controllers\BillingController::class, 'sendInvoice'])->name('billing.send');
         Route::post('/{invoice}/remind', [App\Http\Controllers\BillingController::class, 'sendReminder'])->name('billing.remind');
     });
+    
+    // Schedule routes
+    Route::middleware(['auth'])->prefix('schedules')->group(function () {
+        Route::get('/', [ScheduleController::class, 'index'])->name('schedules.index');
+        Route::get('/create', [ScheduleController::class, 'create'])->name('schedules.create');
+        Route::post('/', [ScheduleController::class, 'store'])->name('schedules.store');
+        Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('schedules.show');
+        Route::get('/{schedule}/print', [ScheduleController::class, 'print'])->name('schedules.print');
+        Route::post('/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.status');
+    });
 });
 
 require __DIR__.'/auth.php';

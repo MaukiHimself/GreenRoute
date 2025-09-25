@@ -1,114 +1,79 @@
-<x-dashboard-layout title="Schedule Management">
-    <x-slot name="sidebar">
-        <ul class="nav nav-pills flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('dashboard.contractor') }}">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('clients.index') }}">
-                    <i class="bi bi-people me-2"></i>Clients
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="{{ route('schedules.index') }}">
-                    <i class="bi bi-calendar3 me-2"></i>Schedules
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('invoices.index') }}">
-                    <i class="bi bi-receipt me-2"></i>Invoices
-                </a>
-            </li>
-        </ul>
-    </x-slot>
-
-    <x-slot name="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('dashboard.contractor') }}">Waste Contractor</a></li>
-        <li class="breadcrumb-item active">Schedules</li>
-    </x-slot>
-
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h4 class="mb-0">Schedule Management</h4>
-                <small class="text-muted">Create and manage upcoming pickups</small>
-            </div>
-            <a href="{{ route('schedules.create') }}" class="btn btn-primary">
-                <i class="bi bi-calendar-plus me-1"></i> New Schedule
+<x-guest-layout>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-success">Collection Schedules</h4>
+            <a href="{{ route('schedules.create') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Schedule
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Scheduled Collections</h6>
             </div>
-        @endif
-
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-striped align-middle mb-0">
-                        <thead class="table-light">
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <th>Date & Time</th>
+                                <th>Route Name</th>
                                 <th>Client</th>
                                 <th>Location</th>
-                                <th>Service</th>
+                                <th>Pickup Date</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($schedules as $schedule)
-                                <tr>
-                                    <td>
-                                        <div class="fw-semibold">{{ $schedule->pickup_date->format('M d, Y') }}</div>
-                                        <small class="text-muted">{{ $schedule->pickup_time->format('g:i A') }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold">{{ $schedule->client->name }}</div>
-                                        <small class="text-muted">{{ $schedule->client->email }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="text-muted">{{ $schedule->pickup_location }}</div>
-                                        <small class="text-muted">{{ $schedule->full_address }}</small>
-                                    </td>
-                                    <td>
-                                        @php $svc=$schedule->service_type; @endphp
-                                        <span class="badge {{ $svc==='collection' ? 'bg-primary' : ($svc==='disposal' ? 'bg-danger' : 'bg-info') }}">{{ ucfirst($svc) }}</span>
-                                    </td>
-                                    <td>
-                                        @php $st=$schedule->status; @endphp
-                                        <span class="badge {{ $st==='scheduled' ? 'bg-warning' : ($st==='in_progress' ? 'bg-primary' : ($st==='completed' ? 'bg-success' : 'bg-danger')) }}">{{ ucfirst(str_replace('_',' ',$st)) }}</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('schedules.show', $schedule) }}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
-                                            <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
-                                            <form action="{{ route('schedules.destroy', $schedule) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this schedule?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>{{ $schedule->pickup_location }}</td>
+                                <td>{{ $schedule->client->name }}</td>
+                                <td>{{ $schedule->pickup_address }}</td>
+                                <td>{{ $schedule->pickup_date->format('M d, Y') }}</td>
+                                <td>
+                                    <select class="form-select form-select-sm" onchange="updateStatus({{ $schedule->id }}, this.value)">
+                                        <option value="scheduled" {{ $schedule->status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                        <option value="in_progress" {{ $schedule->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                        <option value="completed" {{ $schedule->status === 'completed' ? 'selected' : '' }}>Completed</option>
+                                        <option value="cancelled" {{ $schedule->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ route('schedules.show', $schedule) }}" class="btn btn-outline-primary">View</a>
+                                        <a href="{{ route('schedules.print', $schedule) }}" class="btn btn-outline-secondary" target="_blank">Print</a>
+                                    </div>
+                                </td>
+                            </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted p-4">No schedules found. <a href="{{ route('schedules.create') }}">Create your first schedule</a></td>
-                                </tr>
+                            <tr>
+                                <td colspan="6" class="text-center">No schedules found</td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+                {{ $schedules->links() }}
             </div>
-            @if($schedules->hasPages())
-                <div class="card-footer bg-white d-flex justify-content-end">{{ $schedules->links() }}</div>
-            @endif
         </div>
     </div>
-</x-dashboard-layout>
+
+    <script>
+        function updateStatus(scheduleId, status) {
+            fetch(`/schedules/${scheduleId}/status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: status })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</x-guest-layout>
