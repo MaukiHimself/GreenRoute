@@ -294,19 +294,11 @@
                 </div>
 
                 <div id="gps-tab" class="tab-content" style="display: none;">
-                    <div class="card">
-                        <div class="card-header"><h5 class="text-success mb-0">GPS Tracker</h5></div>
-                        <div class="card-body">
-                            <div id="gpsMap" style="height: 500px; border-radius: 8px;"></div>
-                        </div>
-                    </div>
+                    <iframe src="/trucks" width="100%" height="600" frameborder="0"></iframe>
                 </div>
 
                 <div id="reports-tab" class="tab-content" style="display: none;">
-                    <div class="card">
-                        <div class="card-header"><h5 class="text-success mb-0">Reports & Analytics</h5></div>
-                        <div class="card-body"><p>Reports and analytics interface coming soon...</p></div>
-                    </div>
+                    <iframe src="/reports" width="100%" height="600" frameborder="0"></iframe>
                 </div>
             </div>
         </div>

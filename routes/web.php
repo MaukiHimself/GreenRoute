@@ -191,6 +191,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [App\Http\Controllers\RouteOptimizationController::class, 'index'])->name('routes.index');
         Route::post('/optimize', [App\Http\Controllers\RouteOptimizationController::class, 'optimize'])->name('routes.optimize');
     });
+    
+    // Reports routes
+    Route::middleware(['auth'])->prefix('reports')->group(function () {
+        Route::get('/', [App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');
+        Route::get('/export', [App\Http\Controllers\ReportsController::class, 'export'])->name('reports.export');
+    });
+    
+    // GPS Tracker routes
+    Route::middleware(['auth'])->prefix('trucks')->group(function () {
+        Route::get('/', [App\Http\Controllers\TruckController::class, 'index'])->name('trucks.index');
+        Route::post('/', [App\Http\Controllers\TruckController::class, 'store'])->name('trucks.store');
+        Route::post('/{truck}/location', [App\Http\Controllers\TruckController::class, 'updateLocation'])->name('trucks.location');
+        Route::get('/locations', [App\Http\Controllers\TruckController::class, 'getLocations'])->name('trucks.locations');
+    });
 });
 
 require __DIR__.'/auth.php';

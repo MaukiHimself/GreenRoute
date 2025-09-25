@@ -21,30 +21,25 @@ class RouteOptimizationController extends Controller
     public function optimize(Request $request)
     {
         $validated = $request->validate([
-            'site_location' => 'required|string',
-            'start_latitude' => 'required|numeric',
-            'start_longitude' => 'required|numeric'
+            'site_location' => 'required|string'
         ]);
 
         $clients = Client::where('contractor_id', Auth::id())
             ->where('address', 'like', '%' . $validated['site_location'] . '%')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
             ->get();
 
-        $optimizedRoute = $this->calculateOptimalRoute(
-            $clients,
-            $validated['start_latitude'],
-            $validated['start_longitude']
-        );
+        $optimizedRoute = $this->calculateOptimalRoute($clients);
 
         return response()->json([
             'success' => true,
             'route' => $optimizedRoute,
-            'total_distance' => $this->calculateTotalDistance($optimizedRoute),
-            'estimated_time' => $this->estimateTime($optimizedRoute)
+            'total_distance' => $this->calculateTotalDistance($optimizedRoute)
         ]);
     }
 
-    private function calculateOptimalRoute($clients, $startLat, $startLng)
+    private function calculateOptimalRoute($clients)
     {
         if ($clients->isEmpty()) {
             return [];
@@ -52,21 +47,33 @@ class RouteOptimizationController extends Controller
 
         $route = [];
         $unvisited = $clients->toArray();
-        $currentLat = $startLat;
-        $currentLng = $startLng;
+        
+        // Start from the first client's GPS coordinates
+        $firstClient = array_shift($unvisited);
+        $route[] = [
+            'id' => $firstClient['id'],
+            'name' => $firstClient['name'],
+            'address' => $firstClient['address'],
+            'latitude' => floatval($firstClient['latitude']),
+            'longitude' => floatval($firstClient['longitude']),
+            'phone' => $firstClient['phone']
+        ];
+        
+        $currentLat = floatval($firstClient['latitude']);
+        $currentLng = floatval($firstClient['longitude']);
 
-        // Simple nearest neighbor algorithm
+        // Find nearest neighbor for remaining clients
         while (!empty($unvisited)) {
             $nearestIndex = 0;
             $minDistance = $this->calculateDistance(
                 $currentLat, $currentLng,
-                $unvisited[0]['latitude'], $unvisited[0]['longitude']
+                floatval($unvisited[0]['latitude']), floatval($unvisited[0]['longitude'])
             );
 
             for ($i = 1; $i < count($unvisited); $i++) {
                 $distance = $this->calculateDistance(
                     $currentLat, $currentLng,
-                    $unvisited[$i]['latitude'], $unvisited[$i]['longitude']
+                    floatval($unvisited[$i]['latitude']), floatval($unvisited[$i]['longitude'])
                 );
 
                 if ($distance < $minDistance) {
@@ -80,14 +87,13 @@ class RouteOptimizationController extends Controller
                 'id' => $nearest['id'],
                 'name' => $nearest['name'],
                 'address' => $nearest['address'],
-                'latitude' => $nearest['latitude'],
-                'longitude' => $nearest['longitude'],
-                'category' => $nearest['category'],
+                'latitude' => floatval($nearest['latitude']),
+                'longitude' => floatval($nearest['longitude']),
                 'phone' => $nearest['phone']
             ];
 
-            $currentLat = $nearest['latitude'];
-            $currentLng = $nearest['longitude'];
+            $currentLat = floatval($nearest['latitude']);
+            $currentLng = floatval($nearest['longitude']);
             array_splice($unvisited, $nearestIndex, 1);
         }
 
@@ -96,7 +102,7 @@ class RouteOptimizationController extends Controller
 
     private function calculateDistance($lat1, $lng1, $lat2, $lng2)
     {
-        $earthRadius = 6371; // km
+        $earthRadius = 6371;
         $dLat = deg2rad($lat2 - $lat1);
         $dLng = deg2rad($lng2 - $lng1);
         $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2) * sin($dLng/2);
@@ -117,14 +123,5 @@ class RouteOptimizationController extends Controller
         }
 
         return round($totalDistance, 2);
-    }
-
-    private function estimateTime($route)
-    {
-        $totalDistance = $this->calculateTotalDistance($route);
-        $avgSpeed = 30; // km/h
-        $stopTime = count($route) * 5; // 5 minutes per stop
-        
-        return round(($totalDistance / $avgSpeed * 60) + $stopTime, 0); // minutes
     }
 }
