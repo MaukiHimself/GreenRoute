@@ -61,6 +61,12 @@
                    class="form-control form-control-lg">
         </div>
         
+        <div class="mb-3">
+            <label for="site_locations" class="form-label fw-medium">Site Locations</label>
+            <textarea id="site_locations" name="site_locations" rows="3" required
+                      class="form-control form-control-lg" placeholder="List your service areas or site locations">{{ old('site_locations') }}</textarea>
+        </div>
+        
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="license_number" class="form-label fw-medium">Business License Number</label>

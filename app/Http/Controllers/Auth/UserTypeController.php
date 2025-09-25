@@ -166,6 +166,7 @@ class UserTypeController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
+            'site_locations' => ['required', 'string', 'max:1000'],
             'license_number' => ['required', 'string', 'max:50'],
             'certificate' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -178,11 +179,24 @@ class UserTypeController extends Controller
             'user_type' => 'contractor',
         ]);
 
-        // Handle file upload if needed
+        // Handle file upload
+        $certificatePath = null;
         if ($request->hasFile('certificate')) {
-            $path = $request->file('certificate')->store('certificates', 'public');
-            // Store path in a related model or user metadata if needed
+            $certificatePath = $request->file('certificate')->store('certificates', 'public');
         }
+
+        // Create contractor record
+        \App\Models\Contractor::create([
+            'user_id' => $user->id,
+            'company_name' => $request->company_name,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'site_locations' => $request->site_locations,
+            'license_number' => $request->license_number,
+            'certificate_path' => $certificatePath,
+        ]);
 
         event(new Registered($user));
 

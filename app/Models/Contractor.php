@@ -11,6 +11,13 @@ class Contractor extends Model
     protected $fillable = [
         'user_id',
         'company_name',
+        'name',
+        'email',
+        'phone',
+        'address',
+        'site_locations',
+        'license_number',
+        'certificate_path',
         'vehicle_type',
         'license_plate'
     ];
