@@ -209,6 +209,38 @@
 
                 <!-- Client Database Tab -->
                 <div id="clients-tab" class="tab-content" style="display: none;">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="text-success mb-0">Search Client Database</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="searchName" placeholder="Search by name...">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="searchCategory">
+                                        <option value="">All Categories</option>
+                                        <option value="residential">Residential</option>
+                                        <option value="commercial">Commercial</option>
+                                        <option value="industrial">Industrial</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by location...">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="searchRegNumber" placeholder="Registration number...">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button class="btn btn-success" onclick="searchClients()"><i class="bi bi-search me-1"></i>Search</button>
+                                    <button class="btn btn-outline-secondary" onclick="clearSearch()"><i class="bi bi-x-circle me-1"></i>Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card">
                         <div class="card-header">
                             <h5 class="text-success mb-0">Client Database</h5>
@@ -425,6 +457,52 @@
         
         function optimizeRoute() {
             alert('Route optimization activated');
+        }
+        
+        function searchClients() {
+            const name = document.getElementById('searchName').value;
+            const category = document.getElementById('searchCategory').value;
+            const location = document.getElementById('searchLocation').value;
+            const regNumber = document.getElementById('searchRegNumber').value;
+            
+            const params = new URLSearchParams();
+            if (name) params.append('name', name);
+            if (category) params.append('category', category);
+            if (location) params.append('location', location);
+            if (regNumber) params.append('registration_number', regNumber);
+            
+            fetch(`/contractor/clients/locations?${params.toString()}`)
+                .then(response => response.json())
+                .then(clients => {
+                    const tbody = document.getElementById('clientsTable');
+                    tbody.innerHTML = '';
+                    if (clients.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No clients found matching your search criteria</td></tr>';
+                        return;
+                    }
+                    clients.forEach(client => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${client.name}</td>
+                                <td>${client.email || 'N/A'}</td>
+                                <td>${client.phone || 'N/A'}</td>
+                                <td>${client.address}</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(() => {
+                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="5" class="text-center">Error searching clients</td></tr>';
+                });
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchCategory').value = '';
+            document.getElementById('searchLocation').value = '';
+            document.getElementById('searchRegNumber').value = '';
+            loadClientsTable();
         }
 
         // Chart
