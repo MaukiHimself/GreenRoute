@@ -1,102 +1,169 @@
-<x-dashboard-layout title="Edit Client">
-    <x-slot name="sidebar">
-        <ul class="nav nav-pills flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('dashboard.contractor') }}">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="{{ route('clients.index') }}">
-                    <i class="bi bi-people me-2"></i>Clients
-                </a>
-            </li>
-        </ul>
-    </x-slot>
-
-    <x-slot name="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('dashboard.contractor') }}">Waste Contractor</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('clients.index') }}">Clients</a></li>
-        <li class="breadcrumb-item active">Edit</li>
-    </x-slot>
-
-    <div class="container-fluid">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Edit Client</h4>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('clients.show', $client) }}" class="btn btn-outline-primary">
-                        <i class="bi bi-eye me-1"></i> View
-                    </a>
-                    <a href="{{ route('clients.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Back
-                    </a>
+<x-guest-layout>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="text-success mb-0">Edit Client</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('contractor.clients.update', $client) }}">
+                            @csrf
+                            @method('PUT')
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Business/Client Name *</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                           id="name" name="name" value="{{ old('name', $client->name) }}" required>
+                                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="contact_name" class="form-label">Contact Person Name *</label>
+                                    <input type="text" class="form-control @error('contact_name') is-invalid @enderror" 
+                                           id="contact_name" name="contact_name" value="{{ old('contact_name', $client->contact_name) }}" required>
+                                    @error('contact_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="category" class="form-label">Category/Type *</label>
+                                    <select class="form-select @error('category') is-invalid @enderror" id="category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="residential" {{ old('category', $client->category) == 'residential' ? 'selected' : '' }}>Residential</option>
+                                        <option value="commercial" {{ old('category', $client->category) == 'commercial' ? 'selected' : '' }}>Commercial</option>
+                                        <option value="industrial" {{ old('category', $client->category) == 'industrial' ? 'selected' : '' }}>Industrial</option>
+                                    </select>
+                                    @error('category')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Status *</label>
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+                                        <option value="active" {{ old('status', $client->status) == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="inactive" {{ old('status', $client->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                    @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="phone" class="form-label">Phone Number 1 *</label>
+                                    <input type="text" class="form-control @error('phone') is-invalid @enderror" 
+                                           id="phone" name="phone" value="{{ old('phone', $client->phone) }}" required>
+                                    @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="phone_2" class="form-label">Phone Number 2 *</label>
+                                    <input type="text" class="form-control @error('phone_2') is-invalid @enderror" 
+                                           id="phone_2" name="phone_2" value="{{ old('phone_2', $client->phone_2) }}" required>
+                                    @error('phone_2')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="phone_3" class="form-label">Phone Number 3 *</label>
+                                    <input type="text" class="form-control @error('phone_3') is-invalid @enderror" 
+                                           id="phone_3" name="phone_3" value="{{ old('phone_3', $client->phone_3) }}" required>
+                                    @error('phone_3')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="email" class="form-label">Email Address 1 *</label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                           id="email" name="email" value="{{ old('email', $client->email) }}" required>
+                                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="email_2" class="form-label">Email Address 2</label>
+                                    <input type="email" class="form-control @error('email_2') is-invalid @enderror" 
+                                           id="email_2" name="email_2" value="{{ old('email_2', $client->email_2) }}">
+                                    @error('email_2')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="email_3" class="form-label">Email Address 3</label>
+                                    <input type="email" class="form-control @error('email_3') is-invalid @enderror" 
+                                           id="email_3" name="email_3" value="{{ old('email_3', $client->email_3) }}">
+                                    @error('email_3')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Site Location/Address *</label>
+                                <input type="text" class="form-control @error('address') is-invalid @enderror" 
+                                       id="address" name="address" value="{{ old('address', $client->address) }}" required>
+                                @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="latitude" class="form-label">Latitude *</label>
+                                    <input type="number" step="any" class="form-control @error('latitude') is-invalid @enderror" 
+                                           id="latitude" name="latitude" value="{{ old('latitude', $client->latitude) }}" required readonly>
+                                    @error('latitude')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="longitude" class="form-label">Longitude *</label>
+                                    <input type="number" step="any" class="form-control @error('longitude') is-invalid @enderror" 
+                                           id="longitude" name="longitude" value="{{ old('longitude', $client->longitude) }}" required readonly>
+                                    @error('longitude')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-info" onclick="getLocation()">
+                                    <i class="bi bi-geo-alt"></i> Update Location
+                                </button>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $client->city) }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="state" class="form-label">State</label>
+                                    <input type="text" class="form-control" id="state" name="state" value="{{ old('state', $client->state) }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="zip_code" class="form-label">ZIP Code</label>
+                                    <input type="text" class="form-control" id="zip_code" name="zip_code" value="{{ old('zip_code', $client->zip_code) }}">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3">{{ old('notes', $client->notes) }}</textarea>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Update Client
+                                </button>
+                                <a href="{{ route('contractor.clients.show', $client) }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Details
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('clients.update', $client) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label">Full Name *</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $client->name) }}" required>
-                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="email" class="form-label">Email Address *</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $client->email) }}" required>
-                            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="phone" class="form-label">Phone Number *</label>
-                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $client->phone) }}" required>
-                            @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="status" class="form-label">Status *</label>
-                            <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                                <option value="">Select Status</option>
-                                <option value="active" {{ old('status', $client->status) === 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ old('status', $client->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-12">
-                            <label for="address" class="form-label">Street Address *</label>
-                            <input type="text" class="form-control @error('address') is-invalid @enderror" id="address" name="address" value="{{ old('address', $client->address) }}" required>
-                            @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="city" class="form-label">City *</label>
-                            <input type="text" class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city', $client->city) }}" required>
-                            @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="state" class="form-label">State *</label>
-                            <input type="text" class="form-control @error('state') is-invalid @enderror" id="state" name="state" value="{{ old('state', $client->state) }}" required>
-                            @error('state')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="zip_code" class="form-label">ZIP Code *</label>
-                            <input type="text" class="form-control @error('zip_code') is-invalid @enderror" id="zip_code" name="zip_code" value="{{ old('zip_code', $client->zip_code) }}" required>
-                            @error('zip_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-12">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3" placeholder="Optional notes about this client">{{ old('notes', $client->notes) }}</textarea>
-                            @error('notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('clients.show', $client) }}" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Update Client</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-</x-dashboard-layout>
+    
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                }, function(error) {
+                    alert('Error getting location: ' + error.message);
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+    </script>
+</x-guest-layout>

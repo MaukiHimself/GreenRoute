@@ -39,16 +39,25 @@ class ClientController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'category' => 'required|in:residential,commercial,industrial',
             'email' => [
                 'required',
                 'email',
+                'max:255',
                 Rule::unique('clients', 'email')->where(fn ($q) => $q->where('contractor_id', Auth::id())),
             ],
+            'email_2' => 'nullable|email|max:255',
+            'email_3' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
+            'phone_2' => 'required|string|max:20',
+            'phone_3' => 'required|string|max:20',
             'address' => 'required|string',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:10',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:10',
             'notes' => 'nullable|string',
             'status' => 'required|in:active,inactive'
         ]);
@@ -72,7 +81,9 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        $this->authorize('view', $client);
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
         return view('clients.show', compact('client'));
     }
 
@@ -81,7 +92,9 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        $this->authorize('update', $client);
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
         return view('clients.edit', compact('client'));
     }
 
@@ -90,22 +103,31 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-        $this->authorize('update', $client);
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'category' => 'required|in:residential,commercial,industrial',
             'email' => [
                 'required',
                 'email',
-                Rule::unique('clients', 'email')
-                    ->ignore($client->id)
-                    ->where(fn ($q) => $q->where('contractor_id', Auth::id())),
+                'max:255',
+                Rule::unique('clients', 'email')->ignore($client->id)->where(fn ($q) => $q->where('contractor_id', Auth::id())),
             ],
+            'email_2' => 'nullable|email|max:255',
+            'email_3' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
+            'phone_2' => 'required|string|max:20',
+            'phone_3' => 'required|string|max:20',
             'address' => 'required|string',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:10',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:10',
             'notes' => 'nullable|string',
             'status' => 'required|in:active,inactive'
         ]);
@@ -125,7 +147,9 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        $this->authorize('delete', $client);
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
         
         $client->delete();
 

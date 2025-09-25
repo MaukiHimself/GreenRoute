@@ -21,7 +21,14 @@ class Client extends Model
         'state',
         'zip_code',
         'notes',
-        'status'
+        'status',
+        'registration_number',
+        'contact_name',
+        'category',
+        'phone_2',
+        'phone_3',
+        'email_2',
+        'email_3'
     ];
 
     protected $casts = [
@@ -46,5 +53,21 @@ class Client extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+    
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($client) {
+            if (empty($client->registration_number)) {
+                $client->registration_number = 'CL' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+                
+                // Ensure uniqueness
+                while (static::where('registration_number', $client->registration_number)->exists()) {
+                    $client->registration_number = 'CL' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+                }
+            }
+        });
     }
 }

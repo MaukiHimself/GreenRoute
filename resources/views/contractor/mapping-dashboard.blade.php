@@ -242,19 +242,25 @@
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="text-success mb-0">Client Database</h5>
+                            <a href="/dashboard/contractor/clients/create" class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add New Client
+                            </a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
+                                            <th>Reg. Number</th>
                                             <th>Name</th>
-                                            <th>Email</th>
+                                            <th>Contact</th>
+                                            <th>Category</th>
                                             <th>Phone</th>
+                                            <th>Email</th>
                                             <th>Address</th>
-                                            <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="clientsTable">
@@ -398,17 +404,23 @@
                     clients.forEach(client => {
                         tbody.innerHTML += `
                             <tr>
+                                <td>${client.registration_number || 'N/A'}</td>
                                 <td>${client.name}</td>
-                                <td>${client.email || 'N/A'}</td>
-                                <td>${client.phone || 'N/A'}</td>
+                                <td>${client.contact_name || 'N/A'}</td>
+                                <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
+                                <td>${client.phone}<br><small>${client.phone_2 || ''}<br>${client.phone_3 || ''}</small></td>
+                                <td>${client.email}<br><small>${client.email_2 || ''}<br>${client.email_3 || ''}</small></td>
                                 <td>${client.address}</td>
-                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>
+                                </td>
                             </tr>
                         `;
                     });
                 })
                 .catch(() => {
-                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="5" class="text-center">No clients found</td></tr>';
+                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">No clients found</td></tr>';
                 });
         }
         
@@ -477,23 +489,29 @@
                     const tbody = document.getElementById('clientsTable');
                     tbody.innerHTML = '';
                     if (clients.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No clients found matching your search criteria</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No clients found matching your search criteria</td></tr>';
                         return;
                     }
                     clients.forEach(client => {
                         tbody.innerHTML += `
                             <tr>
+                                <td>${client.registration_number || 'N/A'}</td>
                                 <td>${client.name}</td>
-                                <td>${client.email || 'N/A'}</td>
-                                <td>${client.phone || 'N/A'}</td>
+                                <td>${client.contact_name || 'N/A'}</td>
+                                <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
+                                <td>${client.phone}<br><small>${client.phone_2 || ''}<br>${client.phone_3 || ''}</small></td>
+                                <td>${client.email}<br><small>${client.email_2 || ''}<br>${client.email_3 || ''}</small></td>
                                 <td>${client.address}</td>
-                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>
+                                </td>
                             </tr>
                         `;
                     });
                 })
                 .catch(() => {
-                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="5" class="text-center">Error searching clients</td></tr>';
+                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">Error searching clients</td></tr>';
                 });
         }
         

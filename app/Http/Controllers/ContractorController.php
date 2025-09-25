@@ -34,7 +34,7 @@ class ContractorController extends Controller
             $query->where('registration_number', 'like', '%' . request('registration_number') . '%');
         }
         
-        $clients = $query->select('id', 'name', 'address', 'latitude', 'longitude', 'phone', 'email')
+        $clients = $query->select('id', 'name', 'contact_name', 'category', 'registration_number', 'address', 'latitude', 'longitude', 'phone', 'phone_2', 'phone_3', 'email', 'email_2', 'email_3')
             ->get();
 
         return response()->json($clients);
