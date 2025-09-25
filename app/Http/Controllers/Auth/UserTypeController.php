@@ -245,7 +245,9 @@ class UserTypeController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+        
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             // Check if user is a client
@@ -274,11 +276,17 @@ class UserTypeController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+        
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             // Check if user is a contractor
             if (Auth::user()->user_type === 'contractor') {
+                // Check if contractor needs to complete subscription
+                if (Auth::user()->needsSubscription()) {
+                    return redirect()->route('subscription.profile');
+                }
                 return redirect()->intended(route('dashboard.contractor'));
             } else {
                 Auth::logout();
@@ -303,7 +311,9 @@ class UserTypeController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+        
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             // Check if user is an admin
