@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS Tracker</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
@@ -405,6 +406,13 @@
         let map, truckMarkers = {};
         
         function initMap() {
+            // Check if Google Maps API loaded successfully
+            if (typeof google === 'undefined' || !google.maps) {
+                console.error('Google Maps API failed to load');
+                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-warning"></i><p class="mt-3 text-muted">Google Maps failed to load</p><p class="small text-muted">Please check your internet connection and API key</p></div></div>';
+                return;
+            }
+            
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: { lat: -6.7924, lng: 39.2083 },
@@ -525,6 +533,13 @@
         }
     </script>
     
+    <script>
+        // Global error handler for Google Maps API
+        window.gm_authFailure = function() {
+            console.error('Google Maps API authentication failed');
+            document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-danger"></i><p class="mt-3 text-muted">Google Maps API authentication failed</p><p class="small text-muted">Please check your API key configuration</p></div></div>';
+        };
+    </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcwt701YioUFnzbJp9Bktla31qjKwM304&callback=initMap"></script>
 </body>
 </html>

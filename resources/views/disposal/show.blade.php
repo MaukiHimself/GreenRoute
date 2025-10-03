@@ -1,49 +1,147 @@
-<x-guest-layout>
-    <div class="container py-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="text-success mb-0">Disposal Record - {{ $schedule->pickup_location }}</h5>
-                <div>
-                    <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-warning btn-sm">Edit Data</a>
-                    <a href="{{ route('disposal.index') }}" class="btn btn-secondary btn-sm">Back</a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-success">Collection Information</h6>
-                        <p><strong>Route Name:</strong> {{ $schedule->pickup_location }}</p>
-                        <p><strong>Collection Date:</strong> {{ $schedule->pickup_date->format('M d, Y') }}</p>
-                        <p><strong>Collection Time:</strong> {{ $schedule->pickup_time }}</p>
-                        <p><strong>Site Location:</strong> {{ $schedule->pickup_address }}</p>
-                        <p><strong>Client:</strong> {{ $schedule->client->name }}</p>
-                        <p><strong>Service Type:</strong> {{ ucfirst($schedule->service_type) }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-success">Disposal Information</h6>
-                        @if($schedule->total_volume)
-                            <p><strong>Total Volume Collected:</strong> {{ number_format($schedule->total_volume, 2) }} m³</p>
-                            <p><strong>Disposal Site:</strong> {{ $schedule->disposal_site }}</p>
-                            <p><strong>Disposal Type:</strong> {{ ucfirst(str_replace('_', ' ', $schedule->disposal_type)) }}</p>
-                            @if($schedule->disposal_notes)
-                                <p><strong>Disposal Notes:</strong> {{ $schedule->disposal_notes }}</p>
-                            @endif
-                        @else
-                            <p class="text-muted">Disposal data not yet recorded</p>
-                            <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-warning btn-sm">Record Disposal Data</a>
-                        @endif
-                    </div>
-                </div>
-                
-                @if($schedule->notes)
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <h6 class="text-success">Collection Notes</h6>
-                        <p>{{ $schedule->notes }}</p>
-                    </div>
-                </div>
-                @endif
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposal Record</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .primary-dark { color: #055c5c; }
+        .primary-light { color: #055c5c; background-color: rgba(5, 92, 92, 0.1); }
+        .accent-color { color: #640404; }
+        .section-header { 
+            border-bottom: 2px solid #055c5c; 
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .info-card {
+            border-left: 4px solid #055c5c;
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .btn-primary-custom {
+            background-color: #055c5c;
+            border-color: #055c5c;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background-color: #044a4a;
+            border-color: #044a4a;
+        }
+        .btn-accent {
+            background-color: #640404;
+            border-color: #640404;
+            color: white;
+        }
+        .btn-accent:hover {
+            background-color: #530303;
+            border-color: #530303;
+        }
+        .empty-state {
+            border: 1px dashed #055c5c;
+            background-color: rgba(5, 92, 92, 0.05);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-white p-4">
+
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4 p-3 primary-light rounded">
+            <h4 class="primary-dark mb-0">Disposal Record - {{ $schedule->pickup_location }}</h4>
+            <div>
+                <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-accent btn-sm">Edit Data</a>
+                <a href="{{ route('disposal.index') }}" class="btn btn-outline-secondary btn-sm">Back to List</a>
             </div>
         </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Collection Information -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5 class="section-header primary-dark">Collection Information</h5>
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Route Name:</strong> 
+                            <span class="ms-2">{{ $schedule->pickup_location }}</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Collection Date:</strong> 
+                            <span class="ms-2">{{ $schedule->pickup_date->format('M d, Y') }}</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Collection Time:</strong> 
+                            <span class="ms-2">{{ $schedule->pickup_time }}</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Site Location:</strong> 
+                            <span class="ms-2">{{ $schedule->pickup_address }}</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Client:</strong> 
+                            <span class="ms-2">{{ $schedule->client->name }}</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <strong class="primary-dark">Service Type:</strong> 
+                            <span class="ms-2">{{ ucfirst($schedule->service_type) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disposal Information -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5 class="section-header primary-dark">Disposal Information</h5>
+                    @if($schedule->total_volume)
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <strong class="primary-dark">Total Volume Collected:</strong> 
+                                <span class="ms-2">{{ number_format($schedule->total_volume, 2) }} m³</span>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <strong class="primary-dark">Disposal Site:</strong> 
+                                <span class="ms-2">{{ $schedule->disposal_site }}</span>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <strong class="primary-dark">Disposal Type:</strong> 
+                                <span class="ms-2">{{ ucfirst(str_replace('_', ' ', $schedule->disposal_type)) }}</span>
+                            </div>
+                            @if($schedule->disposal_notes)
+                                <div class="col-12 mb-2">
+                                    <strong class="primary-dark">Disposal Notes:</strong> 
+                                    <span class="ms-2">{{ $schedule->disposal_notes }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="empty-state">
+                            <p class="accent-color mb-3">Disposal data not yet recorded</p>
+                            <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-primary-custom btn-sm">Record Disposal Data</a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Collection Notes -->
+        @if($schedule->notes)
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="info-card">
+                    <h5 class="section-header primary-dark">Collection Notes</h5>
+                    <p class="mb-0">{{ $schedule->notes }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
-</x-guest-layout>
+
+</body>
+</html>

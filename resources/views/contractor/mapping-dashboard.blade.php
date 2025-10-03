@@ -31,12 +31,13 @@
         }
         
         .sidebar .brand {
-            background-color: var(--primary-teal);
-            color: white;
+            background-color: white;
+            color: var(--primary-teal);
             padding: 20px 15px;
             font-weight: 700;
             font-size: 1.3rem;
             text-align: center;
+            border-bottom: 2px solid var(--primary-teal);
         }
         
         .sidebar .nav-link {
@@ -283,7 +284,7 @@
             <!-- Sidebar -->
             <div class="col-lg-2 sidebar">
                 <div class="brand">
-                    <span>AFIA ORBIT</span>
+                    <img src="/your-logo.png" alt="Logo" style="max-height: 40px; width: auto;">
                 </div>
                 <nav class="nav flex-column mt-3">
                     <a class="nav-link active" href="#" data-tab="dashboard">
@@ -454,7 +455,7 @@
                             <h5 class="mb-0">GPS Tracker & Route Map</h5>
                         </div>
                         <div class="card-body">
-                            <div id="map" class="map-container"></div>
+                            <div id="dashboardMap" class="map-container"></div>
                         </div>
                     </div>
                 </div>
@@ -744,18 +745,19 @@
                 });
         }
         
-        // Map functions (simplified for demo)
+        // Map functions
         function initMap() {
-            // This would be replaced with actual Google Maps initialization
-            document.getElementById('map').innerHTML = `
-                <div class="d-flex align-items-center justify-content-center h-100 bg-light">
-                    <div class="text-center">
-                        <i class="bi bi-map display-1 text-muted"></i>
-                        <p class="mt-3 text-muted">GPS Tracker & Route Map</p>
-                        <p class="small text-muted">Map integration would appear here</p>
-                    </div>
-                </div>
-            `;
+            const map = new google.maps.Map(document.getElementById('dashboardMap'), {
+                zoom: 12,
+                center: { lat: -6.7924, lng: 39.2083 }
+            });
+            
+            // Add a sample marker
+            new google.maps.Marker({
+                position: { lat: -6.7924, lng: 39.2083 },
+                map: map,
+                title: 'Current Location'
+            });
         }
         
         function initGPSMap() {
@@ -764,8 +766,9 @@
         
         // Initialize the map on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initMap();
+            loadDashboardData();
         });
     </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcwt701YioUFnzbJp9Bktla31qjKwM304&callback=initMap"></script>
 </body>
 </html>

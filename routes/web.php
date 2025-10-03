@@ -37,6 +37,16 @@ Route::get('/test-subscription', function () {
     return view('test-subscription');
 });
 
+// Test route for Google Maps API
+Route::get('/test-maps', function () {
+    return view('test-maps');
+});
+
+// Debug route for API testing
+Route::get('/debug-api', function () {
+    return view('debug-api');
+});
+
 // Subscription routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/subscription/profile', [SubscriptionController::class, 'profile'])->name('subscription.profile');
