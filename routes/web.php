@@ -60,6 +60,11 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // Type-specific dashboard routes
 Route::get('/dashboard/client', [DashboardController::class, 'clientDashboard'])->name('dashboard.client');
+
+// Client dashboard without auth (for client-side authentication)
+Route::get('/client/dashboard', function() {
+    return view('client.dashboard');
+})->name('client.dashboard.public');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
     Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('dashboard.admin');

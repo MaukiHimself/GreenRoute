@@ -21,20 +21,13 @@ class ClientAuthController extends Controller
 
     public function register(Request $request)
     {
-        \Log::info('Form data received:', $request->all());
-        
-        try {
-            $request->validate([
-                'registration_number' => ['required', 'string', 'max:50'],
-                'contact_name' => ['required', 'string', 'max:255'],
-                'phone' => ['required', 'string', 'max:20'],
-                'email' => ['required', 'email', 'max:255'],
-                'verification_method' => ['required', 'in:phone,email'],
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed:', $e->errors());
-            throw $e;
-        }
+        $request->validate([
+            'registration_number' => ['required', 'string', 'max:50'],
+            'contact_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'email', 'max:255'],
+            'verification_method' => ['required', 'in:phone,email'],
+        ]);
 
         // Find client record created by contractor
         $client = Client::where('registration_number', $request->registration_number)
@@ -53,7 +46,6 @@ class ClientAuthController extends Controller
         }
 
         if (!$client) {
-            \Log::info('Client not found with provided details');
             return back()->withErrors([
                 'registration_number' => 'No matching client record found. Please verify your details with your contractor.',
             ])->withInput();
@@ -95,10 +87,6 @@ class ClientAuthController extends Controller
 
     public function showVerifyPhone()
     {
-        if (!session('client_activation')) {
-            return redirect()->route('client.register');
-        }
-
         return view('auth.client.verify-phone');
     }
 

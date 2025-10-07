@@ -361,16 +361,13 @@
                                 <i class="bi bi-person"></i>
                             </div>
                             <div>
-                                <div class="fw-bold">{{ auth()->user()->name }}</div>
-                                <small class="text-muted">Client ID: {{ auth()->user()->id }}</small>
+                                <div class="fw-bold" id="clientName">Client</div>
+                                <small class="text-muted" id="clientId">Registration: N/A</small>
                             </div>
                         </div>
-                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-box-arrow-right me-1"></i>Logout
-                            </button>
-                        </form>
+                        <button onclick="logout()" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout
+                        </button>
                     </div>
                 </div>
                 
@@ -408,7 +405,7 @@
                     <!-- Dashboard Tab -->
                     <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
                         <div class="mb-4">
-                            <h3 class="text-primary mb-3">WELCOME, {{ auth()->user()->name }}</h3>
+                            <h3 class="text-primary mb-3" id="welcomeMessage">WELCOME, CLIENT</h3>
                     
                             @php
                                 $client = auth()->user()->isClient() ? \App\Models\Client::where('user_id', auth()->id())->first() : null;
@@ -1226,6 +1223,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientData = sessionStorage.getItem('clientLoggedIn');
+            if (!clientData) {
+                window.location.href = '/client/login';
+                return;
+            }
+            
+            const data = JSON.parse(clientData);
+            document.getElementById('welcomeMessage').textContent = `WELCOME, ${data.contact_name.toUpperCase()}`;
+            document.getElementById('clientName').textContent = data.contact_name;
+            document.getElementById('clientId').textContent = `Registration: ${data.registration_number}`;
+        });
+        
+        function logout() {
+            sessionStorage.removeItem('clientLoggedIn');
+            localStorage.removeItem('completedRegistration');
+            window.location.href = '/client/login';
+        }
+        
         // Rating stars functionality
         document.querySelectorAll('.rating-star').forEach(star => {
             star.addEventListener('click', function() {

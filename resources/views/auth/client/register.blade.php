@@ -276,64 +276,73 @@
                                 @endif
 
                                 <!-- Activation Form -->
-                                <form method="POST" action="{{ route('client.register') }}">
-                                    @csrf
-                                    
-                                    <div class="mb-4">
-                                        <label for="registration_number" class="form-label">Registration Number</label>
-                                        <input id="registration_number" type="text" name="registration_number" value="{{ old('registration_number') }}" required autofocus
-                                               class="form-control" placeholder="Enter registration number provided by contractor">
-                                        <small class="form-text">This unique number was provided by your waste management contractor</small>
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <label for="contact_name" class="form-label">Contact Name</label>
-                                        <input id="contact_name" type="text" name="contact_name" value="{{ old('contact_name') }}" required
-                                               class="form-control" placeholder="Enter your full name as registered with contractor">
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <label for="phone" class="form-label">Phone Number</label>
-                                        <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required
-                                               class="form-control" placeholder="Enter your active phone number">
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                                               class="form-control" placeholder="Enter your email address">
-                                    </div>
-                                    
-                                    <!-- Verification Methods -->
-                                    <div class="verification-methods">
-                                        <h6 class="verification-title">Send Verification Code To:</h6>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="verification_method" id="phone_method" value="phone" checked>
-                                                    <label class="form-check-label" for="phone_method">
-                                                        <i class="bi bi-phone me-2"></i>Phone Number (SMS)
-                                                    </label>
-                                                </div>
+                                <div class="mb-4">
+                                    <label for="registration_number" class="form-label">Registration Number</label>
+                                    <input id="registration_number" type="text" name="registration_number" required autofocus
+                                           class="form-control" placeholder="Enter registration number provided by contractor">
+                                    <small class="form-text">This unique number was provided by your waste management contractor</small>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="contact_name" class="form-label">Contact Name</label>
+                                    <input id="contact_name" type="text" name="contact_name" required
+                                           class="form-control" placeholder="Enter your full name as registered with contractor">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input id="phone" type="text" name="phone" required
+                                           class="form-control" placeholder="Enter your active phone number">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input id="email" type="email" name="email" required
+                                           class="form-control" placeholder="Enter your email address">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input id="password" type="password" name="password" required
+                                           class="form-control" placeholder="Create a secure password">
+                                    <small class="form-text">Password must be at least 8 characters long</small>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                    <input id="password_confirmation" type="password" name="password_confirmation" required
+                                           class="form-control" placeholder="Confirm your password">
+                                </div>
+                                
+                                <!-- Verification Methods -->
+                                <div class="verification-methods">
+                                    <h6 class="verification-title">Send Verification Code To:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="verification_method" id="phone_method" value="phone" checked>
+                                                <label class="form-check-label" for="phone_method">
+                                                    <i class="bi bi-phone me-2"></i>Phone Number (SMS)
+                                                </label>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="verification_method" id="email_method" value="email">
-                                                    <label class="form-check-label" for="email_method">
-                                                        <i class="bi bi-envelope me-2"></i>Email Address
-                                                    </label>
-                                                </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="verification_method" id="email_method" value="email">
+                                                <label class="form-check-label" for="email_method">
+                                                    <i class="bi bi-envelope me-2"></i>Email Address
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Submit Button -->
-                                    <div class="d-grid">
-                                        <button type="submit" class="btn btn-activate">
-                                            <i class="bi bi-shield-check me-2"></i>Verify & Activate Account
-                                        </button>
-                                    </div>
-                                </form>
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="button" onclick="submitRegistration()" class="btn btn-activate">
+                                        <i class="bi bi-shield-check me-2"></i>Verify & Activate Account
+                                    </button>
+                                </div>
 
                                 <!-- Login Link -->
                                 <div class="login-section">
@@ -348,5 +357,47 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function submitRegistration() {
+            // Get form data
+            const regNumber = document.getElementById('registration_number').value;
+            const contactName = document.getElementById('contact_name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const passwordConfirmation = document.getElementById('password_confirmation').value;
+            const verificationMethod = document.querySelector('input[name="verification_method"]:checked').value;
+            
+            // Basic validation
+            if (!regNumber || !contactName || !phone || !email || !password || !passwordConfirmation) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Password validation
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long.');
+                return;
+            }
+            
+            if (password !== passwordConfirmation) {
+                alert('Passwords do not match.');
+                return;
+            }
+            
+            // Store data in session storage for verification page
+            sessionStorage.setItem('clientRegistration', JSON.stringify({
+                registration_number: regNumber,
+                contact_name: contactName,
+                phone: phone,
+                email: email,
+                password: password,
+                verification_method: verificationMethod
+            }));
+            
+            // Redirect to verification page
+            window.location.href = '/client/verify-phone';
+        }
+    </script>
 </body>
 </html>
