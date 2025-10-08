@@ -269,39 +269,37 @@
                                 @endif
 
                                 <!-- Login Form -->
-                                <form method="POST" action="{{ route('client.login') }}">
-                                    @csrf
-                                    
+                                <div>
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
                                             <label for="registration_number" class="form-label">Registration Number</label>
-                                            <input id="registration_number" type="text" name="registration_number" value="{{ old('registration_number') }}" required autofocus
+                                            <input id="registration_number" type="text" required autofocus
                                                    class="form-control" placeholder="Enter registration number">
                                         </div>
                                         
                                         <div class="col-md-6 mb-4">
                                             <label for="phone" class="form-label">Phone Number</label>
-                                            <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required
+                                            <input id="phone" type="text" required
                                                    class="form-control" placeholder="Enter phone number">
                                         </div>
                                     </div>
                                     
                                     <div class="mb-4">
                                         <label for="email" class="form-label">Email Address</label>
-                                        <input id="email" type="email" name="email" value="{{ old('email') }}" required
+                                        <input id="email" type="email" required
                                                class="form-control" placeholder="Enter email address">
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
                                             <label for="account_name" class="form-label">Account Name</label>
-                                            <input id="account_name" type="text" name="account_name" value="{{ old('account_name') }}" required
+                                            <input id="account_name" type="text" required
                                                    class="form-control" placeholder="Enter account name">
                                         </div>
                                         
                                         <div class="col-md-6 mb-4">
                                             <label for="password" class="form-label">Password</label>
-                                            <input id="password" type="password" name="password" required
+                                            <input id="password" type="password" required
                                                    class="form-control" placeholder="Enter password">
                                         </div>
                                     </div>
@@ -312,7 +310,7 @@
                                             <i class="bi bi-box-arrow-in-right me-2"></i>Access Client Portal
                                         </button>
                                     </div>
-                                </form>
+                                </div>
 
                                 <!-- Support Link -->
                                 <div class="support-section">

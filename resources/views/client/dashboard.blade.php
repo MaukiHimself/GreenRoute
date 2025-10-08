@@ -408,7 +408,7 @@
                             <h3 class="text-primary mb-3" id="welcomeMessage">WELCOME, CLIENT</h3>
                     
                             @php
-                                $client = auth()->user()->isClient() ? \App\Models\Client::where('user_id', auth()->id())->first() : null;
+                                $client = auth()->user() && auth()->user()->isClient() ? \App\Models\Client::where('user_id', auth()->id())->first() : null;
                                 $upcomingSchedules = $client ? \App\Models\Schedule::where('client_id', $client->id)->where('pickup_date', '>=', now())->get() : collect();
                                 $allSchedules = $client ? \App\Models\Schedule::where('client_id', $client->id)->get() : collect();
                                 $missedPickups = $allSchedules->where('status', 'missed')->count();
@@ -466,7 +466,7 @@
                                         </div>
                                         <div class="card-body">
                                             @php
-                                                $client = auth()->user()->isClient() ? \App\Models\Client::where('user_id', auth()->id())->first() : null;
+                                                $client = auth()->user() && auth()->user()->isClient() ? \App\Models\Client::where('user_id', auth()->id())->first() : null;
                                                 $upcomingSchedules = $client ? \App\Models\Schedule::where('client_id', $client->id)->where('pickup_date', '>=', now())->orderBy('pickup_date')->limit(3)->get() : collect();
                                             @endphp
                                             @forelse($upcomingSchedules as $schedule)
@@ -678,7 +678,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <strong>Member Since:</strong>
-                                            <div class="text-muted">{{ auth()->user()->created_at ? auth()->user()->created_at->format('M Y') : 'N/A' }}</div>
+                                            <div class="text-muted">{{ auth()->user() && auth()->user()->created_at ? auth()->user()->created_at->format('M Y') : 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </div>

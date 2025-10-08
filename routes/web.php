@@ -123,17 +123,19 @@ Route::get('/register', function () {
 Route::get('/register/client', [UserTypeController::class, 'createClient'])->name('register.client');
 Route::post('/register/client', [UserTypeController::class, 'storeClient'])->name('register.client.store');
 
-// New Client Authentication Routes
-Route::get('/client/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'showRegister'])->name('client.register');
-Route::post('/client/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'register']);
-Route::get('/client/verify-phone', [App\Http\Controllers\Auth\ClientAuthController::class, 'showVerifyPhone'])->name('client.verify-phone');
-Route::post('/client/verify-phone', [App\Http\Controllers\Auth\ClientAuthController::class, 'verifyPhone']);
-Route::get('/client/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'showLogin'])->name('client.login');
-Route::post('/client/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'login']);
-Route::get('/client/verify-setup', [App\Http\Controllers\Auth\ClientAuthController::class, 'showVerifySetup'])->name('client.verify-setup');
-Route::post('/client/verify-setup', [App\Http\Controllers\Auth\ClientAuthController::class, 'verifySetup']);
-Route::get('/client/set-password', [App\Http\Controllers\Auth\ClientAuthController::class, 'showSetPassword'])->name('client.set-password');
-Route::post('/client/set-password', [App\Http\Controllers\Auth\ClientAuthController::class, 'setPassword']);
+// New Client Authentication Routes (client-side authentication)
+Route::get('/client/register', function() {
+    return view('auth.client.register');
+})->name('client.register');
+Route::get('/client/verify-phone', function() {
+    return view('auth.client.verify-phone');
+})->name('client.verify-phone');
+Route::get('/client/login', function() {
+    return view('auth.client.login');
+})->name('client.login');
+Route::get('/client/set-password', function() {
+    return view('auth.client.set-password');
+})->name('client.set-password');
 
 // Contractor registration routes
 Route::get('/register/contractor', [UserTypeController::class, 'createContractor'])->name('register.contractor');
