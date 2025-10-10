@@ -271,40 +271,30 @@ class UserTypeController extends Controller
      */
     public function authenticateContractor(Request $request)
     {
-        try {
-            $credentials = $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required'],
-            ]);
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-            $remember = $request->boolean('remember');
-            
-            if (Auth::attempt($credentials, $remember)) {
-                $request->session()->regenerate();
+        $remember = $request->boolean('remember');
+        
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
 
-                // Check if user is a contractor
-                if (Auth::user()->user_type === 'contractor') {
-                    // Check if contractor needs to complete subscription
-                    if (Auth::user()->needsSubscription()) {
-                        return redirect()->route('subscription.profile');
-                    }
-                    return redirect('/dashboard/contractor');
-                } else {
-                    Auth::logout();
-                    return back()->withErrors([
-                        'email' => 'These credentials do not match our records for a contractor account.',
-                    ]);
-                }
+            // Check if user is a contractor
+            if (Auth::user()->user_type === 'contractor') {
+                return redirect()->route('dashboard.contractor');
+            } else {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'These credentials do not match our records for a contractor account.',
+                ]);
             }
-
-            return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ]);
-        } catch (\Exception $e) {
-            return back()->withErrors([
-                'email' => 'Login failed: ' . $e->getMessage(),
-            ]);
         }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
     /**

@@ -284,7 +284,7 @@
             <!-- Sidebar -->
             <div class="col-lg-2 sidebar">
                 <div class="brand">
-                    <img src="/your-logo.png" alt="Logo" style="max-height: 40px; width: auto;">
+                    <img src="/your-logo2.png" alt="Logo" style="max-height: 60px; width: 90%; background-color: white; object-fit: contain;">
                 </div>
                 <nav class="nav flex-column mt-3">
                     <a class="nav-link active" href="#" data-tab="dashboard">
