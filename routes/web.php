@@ -58,16 +58,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Type-specific dashboard routes
-Route::get('/dashboard/client', [DashboardController::class, 'clientDashboard'])->name('dashboard.client');
-
-// Client dashboard without auth (for client-side authentication)
-Route::get('/client/dashboard', [ClientPortalController::class, 'dashboard'])->name('client.dashboard.public');
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
-    Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('dashboard.admin');
-
-    // Client portal (client views)
+// Client portal routes (auth only, no verification required for invited clients)
+Route::middleware(['auth'])->group(function () {
     Route::prefix('dashboard/client')->group(function () {
         Route::get('/', [ClientPortalController::class, 'dashboard'])->name('client.dashboard');
         Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');
@@ -82,6 +74,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
         Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
     });
+});
+
+// Contractor and Admin routes (require email verification)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
+    Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('dashboard.admin');
     
     // Contractor routes
     Route::prefix('dashboard/contractor')->group(function () {
@@ -94,6 +92,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'update' => 'contractor.clients.update',
             'destroy' => 'contractor.clients.destroy'
         ]);
+        
+        // Client invitation management
+        Route::post('clients/{client}/resend-invitation', [ClientController::class, 'resendInvitation'])
+            ->name('contractor.clients.resend-invitation');
+        Route::post('clients/{client}/reset-password', [ClientController::class, 'resetPassword'])
+            ->name('contractor.clients.reset-password');
+        
         Route::get('feedback', [ContractorFeedbackController::class, 'index'])->name('contractor.feedback.index');
     });
     
@@ -128,19 +133,20 @@ Route::get('/register', function () {
 Route::get('/register/client', [UserTypeController::class, 'createClient'])->name('register.client');
 Route::post('/register/client', [UserTypeController::class, 'storeClient'])->name('register.client.store');
 
-// New Client Authentication Routes (client-side authentication)
-Route::get('/client/register', function() {
-    return view('auth.client.register');
-})->name('client.register');
-Route::get('/client/verify-phone', function() {
-    return view('auth.client.verify-phone');
-})->name('client.verify-phone');
-Route::get('/client/login', function() {
-    return view('auth.client.login');
-})->name('client.login');
-Route::get('/client/set-password', function() {
-    return view('auth.client.set-password');
-})->name('client.set-password');
+// Client Authentication Routes
+Route::prefix('client')->group(function () {
+    Route::get('/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'showLogin'])->name('client.login');
+    Route::post('/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'login'])->name('client.login.submit');
+    
+    Route::get('/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'showRegister'])->name('client.register');
+    Route::post('/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'register'])->name('client.register.submit');
+    
+    Route::get('/verify-phone', [App\Http\Controllers\Auth\ClientAuthController::class, 'showVerifyPhone'])->name('client.verify-phone');
+    Route::post('/verify-phone', [App\Http\Controllers\Auth\ClientAuthController::class, 'verifyPhone'])->name('client.verify-phone.submit');
+    
+    Route::get('/set-password', [App\Http\Controllers\Auth\ClientAuthController::class, 'showSetPassword'])->name('client.set-password');
+    Route::post('/set-password', [App\Http\Controllers\Auth\ClientAuthController::class, 'setPassword'])->name('client.set-password.submit');
+});
 
 // Contractor registration routes
 Route::get('/register/contractor', [UserTypeController::class, 'createContractor'])->name('register.contractor');

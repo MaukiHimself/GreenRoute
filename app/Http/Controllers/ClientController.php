@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Contractor;
+use App\Services\ClientInvitationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -35,7 +37,7 @@ class ClientController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ClientInvitationService $invitationService)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -64,16 +66,67 @@ class ClientController extends Controller
 
         $validated['contractor_id'] = Auth::id();
         
-        // Auto-link to existing user account (client role) by email
-        $maybeUser = User::whereRaw('LOWER(email) = ?', [strtolower($validated['email'])])->first();
-        if ($maybeUser && $maybeUser->isClient()) {
-            $validated['user_id'] = $maybeUser->id;
-        }
+        // Get contractor record for email service
+        $contractor = Contractor::where('user_id', Auth::id())->first();
         
-        Client::create($validated);
+        if (!$contractor) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Contractor profile not found. Please contact support.');
+        }
 
-        return redirect()->route('contractor.clients.index')
-            ->with('success', 'Client created successfully.');
+        // Check if should send invitation email
+        $sendEmail = true; // You can make this configurable via checkbox in the form
+        $createUserAccount = true; // Create user account for client portal access
+        
+        try {
+            if ($sendEmail && filter_var($validated['email'], FILTER_VALIDATE_EMAIL)) {
+                // Use invitation service to create client and send email
+                $result = $invitationService->createClientWithInvitation(
+                    $validated,
+                    $contractor,
+                    $createUserAccount
+                );
+                
+                $client = $result['client'];
+                $temporaryPassword = $result['password'];
+                
+                // Link contractor to this client
+                $contractor->client_registration_number = $client->registration_number;
+                $contractor->save();
+                
+                // Show success with password info
+                return redirect()->route('contractor.clients.index')
+                    ->with('success', 'Client created successfully! Invitation email sent to ' . $client->email)
+                    ->with('client_password', $temporaryPassword)
+                    ->with('client_email', $client->email)
+                    ->with('client_registration', $client->registration_number);
+            } else {
+                // Create client without email (no invitation)
+                $maybeUser = User::whereRaw('LOWER(email) = ?', [strtolower($validated['email'])])->first();
+                if ($maybeUser && $maybeUser->isClient()) {
+                    $validated['user_id'] = $maybeUser->id;
+                }
+                
+                $client = Client::create($validated);
+                
+                // Link contractor to this client
+                $contractor->client_registration_number = $client->registration_number;
+                $contractor->save();
+                
+                return redirect()->route('contractor.clients.index')
+                    ->with('success', 'Client created successfully (no invitation sent).');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create client with invitation', [
+                'error' => $e->getMessage(),
+                'contractor_id' => Auth::id()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create client: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -155,5 +208,88 @@ class ClientController extends Controller
 
         return redirect()->route('contractor.clients.index')
             ->with('success', 'Client deleted successfully.');
+    }
+
+    /**
+     * Resend invitation email to client
+     */
+    public function resendInvitation(Client $client, ClientInvitationService $invitationService)
+    {
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
+
+        $contractor = Contractor::where('user_id', Auth::id())->first();
+
+        if (!$contractor) {
+            return redirect()->back()
+                ->with('error', 'Contractor profile not found.');
+        }
+
+        if (!$client->email) {
+            return redirect()->back()
+                ->with('error', 'Client does not have an email address.');
+        }
+
+        try {
+            $sent = $invitationService->resendInvitation($client, $contractor);
+
+            if ($sent) {
+                return redirect()->back()
+                    ->with('success', 'Invitation email resent successfully to ' . $client->email);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to send invitation email.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to resend invitation', [
+                'error' => $e->getMessage(),
+                'client_id' => $client->id
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Failed to resend invitation: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reset client password and send new credentials
+     */
+    public function resetPassword(Client $client, ClientInvitationService $invitationService)
+    {
+        if ($client->contractor_id !== Auth::id()) {
+            abort(404);
+        }
+
+        $contractor = Contractor::where('user_id', Auth::id())->first();
+        $user = $client->user;
+
+        if (!$user) {
+            return redirect()->back()
+                ->with('error', 'Client does not have a user account.');
+        }
+
+        try {
+            // Generate new temporary password
+            $newPassword = \Str::random(12);
+            $user->password = \Hash::make($newPassword);
+            $user->save();
+
+            // Send invitation with new password
+            $user->notify(new \App\Notifications\ClientInvitation($client, $contractor, $newPassword));
+
+            return redirect()->back()
+                ->with('success', 'Password reset successfully! New credentials sent to ' . $client->email)
+                ->with('client_password', $newPassword)
+                ->with('client_email', $client->email);
+        } catch (\Exception $e) {
+            \Log::error('Failed to reset client password', [
+                'error' => $e->getMessage(),
+                'client_id' => $client->id
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Failed to reset password: ' . $e->getMessage());
+        }
     }
 }

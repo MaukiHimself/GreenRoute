@@ -157,46 +157,46 @@ class ClientAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'registration_number' => ['required', 'string'],
-            'phone' => ['required', 'string'],
-            'account_name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
 
-        // Find client by registration number, phone, and name
-        $client = Client::where('registration_number', $request->registration_number)
-            ->where('phone', $request->phone)
-            ->where('name', $request->account_name)
+        // Find user by email with client user_type
+        $user = User::where('email', $request->email)
+            ->where('user_type', 'client')
             ->first();
 
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'No client account found with this email address.',
+            ])->withInput($request->only('email'));
+        }
+
+        // Check if client record exists and is linked to user
+        $client = Client::where('user_id', $user->id)->first();
+        
         if (!$client) {
             return back()->withErrors([
-                'registration_number' => 'Account details do not match our records.',
-            ]);
+                'email' => 'Client account not properly set up. Please contact your contractor.',
+            ])->withInput($request->only('email'));
         }
 
-        // Check if user has password set
-        $user = $client->user;
-        if (!$user || !$user->password) {
-            // Generate and send SMS verification code
-            $code = PhoneVerification::generateCode($client->phone);
-            $this->sendSMS($client->phone, "Your verification code is: {$code}");
-            
-            session(['client_setup' => ['client_id' => $client->id]]);
-            
-            return redirect()->route('client.verify-setup')
-                ->with('phone', $client->phone)
-                ->with('success', 'Verification code sent to your phone.');
-        }
-
-        // Login with existing password
-        if (Auth::loginUsingId($user->id)) {
+        // Attempt authentication
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'user_type' => 'client'], $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            \Log::info('Client logged in', [
+                'user_id' => $user->id,
+                'client_id' => $client->id,
+                'client_registration_number' => $client->registration_number
+            ]);
+            
             return redirect()->intended(route('client.dashboard'));
         }
 
         return back()->withErrors([
-            'registration_number' => 'Unable to access your account. Please try again.',
-        ]);
+            'email' => 'The provided credentials do not match our records.',
+        ])->withInput($request->only('email'));
     }
 
     public function showVerifySetup()

@@ -269,48 +269,56 @@
                                 @endif
 
                                 <!-- Login Form -->
-                                <div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-4">
-                                            <label for="registration_number" class="form-label">Registration Number</label>
-                                            <input id="registration_number" type="text" required autofocus
-                                                   class="form-control" placeholder="Enter registration number">
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-4">
-                                            <label for="phone" class="form-label">Phone Number</label>
-                                            <input id="phone" type="text" required
-                                                   class="form-control" placeholder="Enter phone number">
-                                        </div>
+                                <form method="POST" action="{{ route('client.login.submit') }}">
+                                    @csrf
+                                    
+                                    <div class="mb-4">
+                                        <label for="email" class="form-label">
+                                            <i class="bi bi-envelope me-2"></i>Email Address
+                                        </label>
+                                        <input id="email" type="email" name="email" 
+                                               value="{{ old('email') }}" 
+                                               required autofocus
+                                               class="form-control @error('email') is-invalid @enderror" 
+                                               placeholder="Enter your email address">
+                                        @error('email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted">
+                                            Use the email address provided in your invitation
+                                        </small>
                                     </div>
                                     
                                     <div class="mb-4">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input id="email" type="email" required
-                                               class="form-control" placeholder="Enter email address">
+                                        <label for="password" class="form-label">
+                                            <i class="bi bi-lock me-2"></i>Password
+                                        </label>
+                                        <input id="password" type="password" name="password" 
+                                               required
+                                               class="form-control @error('password') is-invalid @enderror" 
+                                               placeholder="Enter your password">
+                                        @error('password')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted">
+                                            Use the temporary password from your invitation email or your updated password
+                                        </small>
                                     </div>
                                     
-                                    <div class="row">
-                                        <div class="col-md-6 mb-4">
-                                            <label for="account_name" class="form-label">Account Name</label>
-                                            <input id="account_name" type="text" required
-                                                   class="form-control" placeholder="Enter account name">
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-4">
-                                            <label for="password" class="form-label">Password</label>
-                                            <input id="password" type="password" required
-                                                   class="form-control" placeholder="Enter password">
-                                        </div>
+                                    <div class="mb-4 form-check">
+                                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                        <label class="form-check-label" for="remember">
+                                            Remember me for 30 days
+                                        </label>
                                     </div>
                                     
                                     <!-- Submit Button -->
                                     <div class="d-grid">
-                                        <button type="button" onclick="handleLogin()" class="btn btn-login">
+                                        <button type="submit" class="btn btn-login">
                                             <i class="bi bi-box-arrow-in-right me-2"></i>Access Client Portal
                                         </button>
                                     </div>
-                                </div>
+                                </form>
 
                                 <!-- Support Link -->
                                 <div class="support-section">
@@ -372,48 +380,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function handleLogin() {
-            const regNumber = document.getElementById('registration_number').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            const accountName = document.getElementById('account_name').value;
-            const password = document.getElementById('password').value;
-            
-            if (!regNumber || !phone || !email || !accountName || !password) {
-                alert('Please fill in all fields.');
-                return;
-            }
-            
-            // Check against stored registration data
-            const storedData = localStorage.getItem('completedRegistration');
-            if (storedData) {
-                const data = JSON.parse(storedData);
-                
-                if (data.registration_number === regNumber && 
-                    data.phone === phone && 
-                    data.email === email &&
-                    data.contact_name === accountName && 
-                    data.password === password) {
-                    
-                    // Store login session
-                    sessionStorage.setItem('clientLoggedIn', JSON.stringify({
-                        registration_number: regNumber,
-                        contact_name: accountName,
-                        phone: phone,
-                        email: email
-                    }));
-                    
-                    // Redirect to dashboard
-                    window.location.href = '/client/dashboard';
-                    return;
-                }
-            }
-            
-            alert('Invalid credentials. Please check your details.');
-        }
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

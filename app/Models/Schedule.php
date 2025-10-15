@@ -11,6 +11,8 @@ class Schedule extends Model
     protected $fillable = [
         'contractor_id',
         'client_id',
+        'contractor_registration_number',
+        'client_registration_number',
         'pickup_date',
         'pickup_time',
         'pickup_location',
@@ -65,5 +67,15 @@ class Schedule extends Model
     {
         return $query->where('pickup_date', '>=', now()->toDateString())
                     ->where('status', '!=', 'cancelled');
+    }
+
+    public function scopeForClient($query, $clientRegistrationNumber)
+    {
+        return $query->where('client_registration_number', $clientRegistrationNumber);
+    }
+
+    public function scopeByContractorRegNumber($query, $contractorRegNumber)
+    {
+        return $query->where('contractor_registration_number', $contractorRegNumber);
     }
 }

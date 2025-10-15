@@ -33,12 +33,20 @@ class AuthenticatedSessionController extends Controller
             Auth::user()->update(['remember_login' => true]);
         }
 
+        $user = Auth::user();
+
         // Check if user needs to complete subscription
-        if (Auth::user()->needsSubscription()) {
+        if ($user->needsSubscription()) {
             return redirect()->route('subscription.profile');
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect based on user type
+        return match($user->user_type) {
+            'contractor' => redirect()->intended(route('dashboard.contractor')),
+            'client' => redirect()->intended(route('client.dashboard')),
+            'admin' => redirect()->intended(route('dashboard.admin')),
+            default => redirect()->intended(route('dashboard')),
+        };
     }
 
     /**

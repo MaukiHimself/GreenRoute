@@ -371,7 +371,7 @@
                         <!-- Collection Details -->
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header">Collection Schedule <small class="text-muted">(from contractor)</small></div>
+                                <div class="card-header">Collection Schedule</div>
                                 <div class="card-body">
                                     @forelse($upcomingSchedules->take(3) as $schedule)
                                         <div class="mb-2 p-2 border-bottom">
@@ -393,7 +393,7 @@
                         <!-- Pending Invoices -->
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header">Pending Unpaid Invoices <small class="text-muted">(from contractor)</small></div>
+                                <div class="card-header">Pending Unpaid Invoices</div>
                                 <div class="card-body">
                                     @forelse($pendingInvoices->take(3) as $invoice)
                                         <div class="mb-2 p-2 border-bottom">
@@ -415,7 +415,7 @@
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header">Monthly Payments (Last 6 Months) <small class="text-muted">(to contractor)</small></div>
+                                <div class="card-header">Monthly Payments (Last 6 Months)</div>
                                 <div class="card-body">
                                     @forelse($monthlyPayments->take(6) as $payment)
                                         <div class="mb-2 d-flex justify-content-between">
@@ -432,7 +432,7 @@
                         <!-- Customer Enquiries -->
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header">Recent Enquiries & Feedback <small class="text-muted">(with contractor)</small></div>
+                                <div class="card-header">Recent Enquiries & Feedback</div>
                                 <div class="card-body">
                                     @forelse($recentFeedback->take(3) as $feedback)
                                         <div class="mb-2 p-2 border-bottom">
@@ -507,7 +507,7 @@
 
                 <!-- Schedules Section -->
                 <div id="schedules" class="content-section">
-                    <h3>Collection Schedules <small class="text-muted">(from contractor James Harden)</small></h3>
+                    <h3>Collection Schedules</h3>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="card">
@@ -539,7 +539,7 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="5" class="text-center text-muted">No schedules found from contractor</td>
+                                                        <td colspan="5" class="text-center text-muted">No schedules found</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
@@ -564,7 +564,7 @@
 
                 <!-- Invoices Section -->
                 <div id="invoices" class="content-section">
-                    <h3>Payment Details <small class="text-muted">(from contractor James Harden)</small></h3>
+                    <h3>Payment Details</h3>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="card">
@@ -598,7 +598,7 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="6" class="text-center text-muted">No invoices found from contractor</td>
+                                                        <td colspan="6" class="text-center text-muted">No invoices found</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
@@ -619,7 +619,7 @@
                                 </div>
                             </div>
                             <div class="card">
-                                <div class="card-header">Monthly Payments to Contractor</div>
+                                <div class="card-header">Monthly Payments</div>
                                 <div class="card-body">
                                     @forelse($monthlyPayments as $payment)
                                         <div class="d-flex justify-content-between mb-2">
@@ -627,7 +627,7 @@
                                             <strong>${{ number_format($payment->total, 2) }}</strong>
                                         </div>
                                     @empty
-                                        <p class="text-muted">No payment history with contractor</p>
+                                        <p class="text-muted">No payment history</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -700,17 +700,19 @@
             event.target.classList.add('active');
         }
 
-        // Initialize client data
+        // Initialize client data from server-side (Laravel Auth)
         document.addEventListener('DOMContentLoaded', function() {
-            const clientData = sessionStorage.getItem('clientLoggedIn');
-            if (!clientData) {
-                window.location.href = '/client/login';
-                return;
-            }
+            // Client data is already passed from controller via Blade
+            // No need for sessionStorage check - Laravel middleware handles auth
+            const clientName = '{{ $client->contact_name ?? $client->name }}';
+            const clientReg = '{{ $client->registration_number }}';
             
-            const data = JSON.parse(clientData);
-            document.getElementById('welcomeMessage').textContent = `WELCOME, ${data.contact_name.toUpperCase()}`;
-            document.getElementById('clientInfo').textContent = `Client ${data.registration_number}, ${data.contact_name}`;
+            if (clientName && document.getElementById('welcomeMessage')) {
+                document.getElementById('welcomeMessage').textContent = `WELCOME, ${clientName.toUpperCase()}`;
+            }
+            if (clientReg && document.getElementById('clientInfo')) {
+                document.getElementById('clientInfo').textContent = `Client ${clientReg}, ${clientName}`;
+            }
         });
 
         // Form submissions

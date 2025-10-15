@@ -15,7 +15,8 @@ class ClientPortalController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'verified'])->except(['dashboard']);
+        // Only require auth for client portal (no email verification needed for invited clients)
+        $this->middleware(['auth']);
     }
 
     protected function resolveClient(): ?Client

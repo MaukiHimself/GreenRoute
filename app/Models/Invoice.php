@@ -12,6 +12,8 @@ class Invoice extends Model
         'invoice_number',
         'contractor_id',
         'client_id',
+        'contractor_registration_number',
+        'client_registration_number',
         'schedule_id',
         'invoice_date',
         'due_date',
@@ -87,6 +89,16 @@ class Invoice extends Model
     {
         return $query->where('status', '!=', 'paid')
                     ->where('total_amount', '>', 'amount_paid');
+    }
+
+    public function scopeForClient($query, $clientRegistrationNumber)
+    {
+        return $query->where('client_registration_number', $clientRegistrationNumber);
+    }
+
+    public function scopeByContractorRegNumber($query, $contractorRegNumber)
+    {
+        return $query->where('contractor_registration_number', $contractorRegNumber);
     }
 
     // Methods
