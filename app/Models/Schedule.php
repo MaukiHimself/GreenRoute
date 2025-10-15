@@ -13,6 +13,8 @@ class Schedule extends Model
         'client_id',
         'contractor_registration_number',
         'client_registration_number',
+        'route',
+        'route_group_id',
         'pickup_date',
         'pickup_time',
         'pickup_location',

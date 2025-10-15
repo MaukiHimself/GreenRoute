@@ -119,7 +119,8 @@
             font-size: 0.8rem;
         }
         
-        .badge.bg-success { background: var(--primary-color) !important; }
+        .badge.bg-primary { background: var(--primary-color) !important; }
+        .badge.bg-success { background: #28a745 !important; }
         .badge.bg-warning { background: #ffc107 !important; color: #000 !important; }
         
         .btn-group .btn {
@@ -129,25 +130,25 @@
         }
         
         .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
         }
         
         .btn-outline-primary:hover {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
         }
         
         .btn-outline-warning {
-            color: #ffc107;
-            border-color: #ffc107;
+            color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
         }
         
         .btn-outline-warning:hover {
-            background: #ffc107;
-            border-color: #ffc107;
-            color: #000;
+            background: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
         }
         
         /* Status Indicators */
@@ -171,7 +172,7 @@
         }
         
         .pagination .page-link {
-            color: var(--primary-color);
+            color: var(--primary-color) !important;
             border: 1px solid var(--border-color);
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
@@ -180,15 +181,15 @@
         }
         
         .pagination .page-link:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
         }
         
         .pagination .page-item.active .page-link {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
         }
         
         /* Responsive Design */
@@ -259,9 +260,14 @@
                     <tbody>
                         @forelse($schedules as $schedule)
                         <tr>
-                            <td>{{ $schedule->pickup_location }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ $schedule->route ?? 'N/A' }}</span>
+                            </td>
                             <td>{{ $schedule->pickup_date->format('M d, Y') }}</td>
-                            <td>{{ $schedule->pickup_address }}</td>
+                            <td>
+                                <strong>{{ $schedule->pickup_location }}</strong><br>
+                                <small class="text-muted">{{ $schedule->pickup_address }}</small>
+                            </td>
                             <td>
                                 @if($schedule->total_volume)
                                     {{ number_format($schedule->total_volume, 2) }}

@@ -28,7 +28,9 @@ class Client extends Model
         'phone_2',
         'phone_3',
         'email_2',
-        'email_3'
+        'email_3',
+        'route',
+        'route_sequence'
     ];
 
     protected $casts = [

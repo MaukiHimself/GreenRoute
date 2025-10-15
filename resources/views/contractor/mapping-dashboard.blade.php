@@ -553,7 +553,7 @@
                 </div>
 
                 <div id="disposal-tab" class="tab-content" style="display: none;">
-                    <iframe src="/disposal" width="100%" height="600" frameborder="0"></iframe>
+                    <iframe id="disposal-iframe" src="/disposal" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
                 </div>
 
                 <div id="sms-tab" class="tab-content" style="display: none;">
@@ -591,12 +591,21 @@
                 
                 // Show selected tab content
                 const tabId = this.getAttribute('data-tab') + '-tab';
+                const selectedTab = this.getAttribute('data-tab');
                 document.getElementById(tabId).style.display = 'block';
                 
+                // Refresh disposal iframe when tab is clicked to show latest completed schedules
+                if (selectedTab === 'disposal') {
+                    const disposalIframe = document.getElementById('disposal-iframe');
+                    if (disposalIframe) {
+                        disposalIframe.src = disposalIframe.src; // Force refresh
+                    }
+                }
+                
                 // Load specific content for tabs
-                if (this.getAttribute('data-tab') === 'clients') {
+                if (selectedTab === 'clients') {
                     loadClientsTable();
-                } else if (this.getAttribute('data-tab') === 'gps') {
+                } else if (selectedTab === 'gps') {
                     initGPSMap();
                 }
             });

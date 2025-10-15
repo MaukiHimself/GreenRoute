@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Collection Schedules</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
@@ -48,17 +49,18 @@
         }
         
         .btn-success {
-            background: var(--primary-color);
-            border: none;
+            background: var(--primary-color) !important;
+            border: none !important;
             border-radius: 10px;
             padding: 0.75rem 1.5rem;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);
             transition: all 0.3s ease;
+            color: white !important;
         }
         
         .btn-success:hover {
-            background: #044a4a;
+            background: #044a4a !important;
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(5, 92, 92, 0.4);
         }
@@ -148,25 +150,25 @@
         }
         
         .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
         }
         
         .btn-outline-primary:hover {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
         }
         
         .btn-outline-secondary {
-            color: var(--text-muted);
-            border-color: var(--text-muted);
+            color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
         }
         
         .btn-outline-secondary:hover {
-            background: var(--text-muted);
-            border-color: var(--text-muted);
-            color: white;
+            background: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
         }
         
         /* Pagination */
@@ -179,7 +181,7 @@
         }
         
         .pagination .page-link {
-            color: var(--primary-color);
+            color: var(--primary-color) !important;
             border: 1px solid var(--border-color);
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
@@ -188,15 +190,23 @@
         }
         
         .pagination .page-link:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
         }
         
         .pagination .page-item.active .page-link {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Route Badge Styling */
+        .badge.bg-primary {
+            background: var(--primary-color) !important;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
         }
         
         /* Responsive Design */
@@ -260,7 +270,8 @@
                         <tr>
                             <th>Route Name</th>
                             <th>Client</th>
-                            <th>Location</th>
+                            <th>Pickup Location</th>
+                            <th>Address</th>
                             <th>Pickup Date</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -269,8 +280,11 @@
                     <tbody>
                         @forelse($schedules as $schedule)
                         <tr>
-                            <td>{{ $schedule->pickup_location }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ $schedule->route ?? 'N/A' }}</span>
+                            </td>
                             <td>{{ $schedule->client->name }}</td>
+                            <td>{{ $schedule->pickup_location }}</td>
                             <td>{{ $schedule->pickup_address }}</td>
                             <td>{{ $schedule->pickup_date->format('M d, Y') }}</td>
                             <td>
@@ -290,7 +304,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">No schedules found</td>
+                            <td colspan="7" class="text-center">No schedules found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -316,10 +330,25 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ status: status })
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show message if schedule was completed
+                    if (data.redirectToDisposal) {
+                        if (confirm(data.message + '\n\nGo to Disposal page now?')) {
+                            window.location.href = '/disposal';
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        location.reload();
+                    }
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update status');
             });
         }
     </script>
