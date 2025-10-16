@@ -285,9 +285,12 @@
                 <h1 class="navbar-brand">AFIA ORBIT - Contractor</h1>
                 <div class="user-info">
                     <span class="user-name">{{ auth()->user()->name }}</span>
-                    <a href="/logout" class="logout-link">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="logout-link" style="background: none; border: none; cursor: pointer;">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

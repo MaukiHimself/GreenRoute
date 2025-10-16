@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\Feedback;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -308,5 +309,43 @@ class ClientPortalController extends Controller
         ]);
 
         return redirect()->route('client.feedback')->with('success', 'Feedback submitted successfully.');
+    }
+
+    public function chats()
+    {
+        $clientRecord = $this->resolveClient();
+        abort_unless($clientRecord, 404, 'Client not found');
+
+        // Get contractor info
+        $contractor = null;
+        if ($clientRecord->contractor_id) {
+            $contractor = User::find($clientRecord->contractor_id);
+        }
+
+        // Get all messages between client and contractor
+        $messages = collect();
+        if ($contractor) {
+            $messages = Message::where('contractor_id', $contractor->id)
+                ->where('client_id', $clientRecord->id)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            // Mark contractor's messages as read
+            Message::where('contractor_id', $contractor->id)
+                ->where('client_id', $clientRecord->id)
+                ->where('sender_type', 'contractor')
+                ->where('status', '!=', 'read')
+                ->update(['status' => 'read', 'read_at' => now()]);
+        }
+
+        return view('client_portal.chats-standalone', compact('clientRecord', 'contractor', 'messages'));
+    }
+
+    public function support()
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+        
+        return view('client_portal.support', compact('client'));
     }
 }

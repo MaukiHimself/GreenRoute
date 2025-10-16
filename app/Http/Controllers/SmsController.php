@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Message;
 use App\Models\Schedule;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
@@ -12,10 +13,22 @@ class SmsController extends Controller
 {
     public function index()
     {
-        $clients = Client::where('contractor_id', Auth::id())->get();
+        $contractorId = Auth::id();
+        
+        // Get all clients
+        $clients = Client::where('contractor_id', $contractorId)
+            ->orderBy('name')
+            ->get();
+        
+        // Group clients by route
+        $clientsByRoute = $clients->groupBy('route')->sortKeys();
+        
+        // Get all unique routes
+        $routes = $clients->pluck('route')->unique()->filter()->sort()->values();
+        
         $templates = $this->getMessageTemplates();
         
-        return view('sms.index', compact('clients', 'templates'));
+        return view('sms.index', compact('clients', 'clientsByRoute', 'routes', 'templates'));
     }
 
     public function send(Request $request)
@@ -32,13 +45,136 @@ class SmsController extends Controller
             ->where('contractor_id', Auth::id())
             ->get();
 
+        $sentCount = 0;
         foreach ($clients as $client) {
+            // Save message to database
+            Message::create([
+                'contractor_id' => Auth::id(),
+                'client_id' => $client->id,
+                'sender_type' => 'contractor',
+                'message' => $validated['message'],
+                'message_type' => $validated['message_type'],
+                'status' => 'sent'
+            ]);
+
             // Here you would integrate with SMS service (Twilio, etc.)
             // For now, we'll just log the message
             \Log::info("SMS to {$client->phone}: {$validated['message']}");
+            $sentCount++;
         }
 
-        return redirect()->back()->with('success', 'Messages sent successfully to ' . count($clients) . ' clients');
+        return redirect()->back()->with('success', 'Messages sent successfully to ' . $sentCount . ' clients');
+    }
+
+    /**
+     * Show inbox with all conversations
+     */
+    public function inbox()
+    {
+        $contractorId = Auth::id();
+        
+        // Get all clients with their latest message
+        $conversations = Client::where('contractor_id', $contractorId)
+            ->with(['messages' => function($query) {
+                $query->latest()->limit(1);
+            }])
+            ->withCount(['messages as unread_count' => function($query) use ($contractorId) {
+                $query->where('sender_type', 'client')
+                      ->where('status', '!=', 'read');
+            }])
+            ->get();
+
+        return view('sms.inbox', compact('conversations'));
+    }
+
+    /**
+     * Show conversation with specific client
+     */
+    public function conversation(Client $client)
+    {
+        // Verify client belongs to this contractor
+        if ($client->contractor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $messages = Message::conversation(Auth::id(), $client->id)->get();
+
+        // Mark contractor's unread messages as read
+        Message::where('contractor_id', Auth::id())
+            ->where('client_id', $client->id)
+            ->where('sender_type', 'client')
+            ->where('status', '!=', 'read')
+            ->update(['status' => 'read', 'read_at' => now()]);
+
+        return view('sms.conversation', compact('client', 'messages'));
+    }
+
+    /**
+     * Send message in conversation
+     */
+    public function sendMessage(Request $request, Client $client)
+    {
+        // Verify client belongs to this contractor
+        if ($client->contractor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'message' => 'required|string|max:1000'
+        ]);
+
+        $message = Message::create([
+            'contractor_id' => Auth::id(),
+            'client_id' => $client->id,
+            'sender_type' => 'contractor',
+            'message' => $validated['message'],
+            'message_type' => 'custom',
+            'status' => 'sent'
+        ]);
+
+        // Here you would send actual SMS
+        \Log::info("SMS to {$client->phone}: {$validated['message']}");
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Message sent successfully');
+    }
+
+    /**
+     * Client sends message to contractor (API endpoint)
+     */
+    public function clientSend(Request $request)
+    {
+        $validated = $request->validate([
+            'contractor_id' => 'required|exists:users,id',
+            'client_id' => 'required|exists:clients,id',
+            'message' => 'required|string|max:1000'
+        ]);
+
+        // Verify client-contractor relationship
+        $client = Client::where('id', $validated['client_id'])
+            ->where('contractor_id', $validated['contractor_id'])
+            ->firstOrFail();
+
+        $message = Message::create([
+            'contractor_id' => $validated['contractor_id'],
+            'client_id' => $validated['client_id'],
+            'sender_type' => 'client',
+            'message' => $validated['message'],
+            'message_type' => 'custom',
+            'status' => 'sent'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent successfully',
+            'data' => $message
+        ]);
     }
 
     public function getTemplate(Request $request)

@@ -248,6 +248,9 @@
                 <a href="#" class="menu-item" onclick="showSection('invoices')">
                     Invoices
                 </a>
+                <a href="#" class="menu-item" onclick="showSection('chats')">
+                    <i class="bi bi-chat-dots me-2"></i>Chats
+                </a>
                 <a href="#" class="menu-item" onclick="showSection('support')">
                     Support / Help
                 </a>
@@ -268,11 +271,25 @@
                 </nav>
                 <div class="user-info">
                     <div class="notification">Notification [1]</div>
-                    <div class="user-profile">
-                        <div class="user-avatar">
-                            <i class="bi bi-person"></i>
+                    <div class="dropdown">
+                        <div class="user-profile" data-bs-toggle="dropdown" style="cursor: pointer;">
+                            <div class="user-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <span>{{ auth()->user()->name }}</span>
                         </div>
-                        <span>User Profile</span>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -633,6 +650,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Chats Section -->
+                <div id="chats" class="content-section">
+                    <h3><i class="bi bi-chat-dots me-2"></i>Chat with Contractor</h3>
+                    <iframe src="{{ route('client.chats') }}" width="100%" height="700" frameborder="0" style="border: none; border-radius: 12px;"></iframe>
                 </div>
 
                 <!-- Support Section -->

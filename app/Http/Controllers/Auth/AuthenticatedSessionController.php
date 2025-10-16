@@ -35,7 +35,12 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Check if user needs to complete subscription
+        // Admins bypass subscription checks
+        if ($user->user_type === 'admin') {
+            return redirect()->intended(route('dashboard.admin'));
+        }
+
+        // Check if user needs to complete subscription (contractors only)
         if ($user->needsSubscription()) {
             return redirect()->route('subscription.profile');
         }
@@ -44,7 +49,6 @@ class AuthenticatedSessionController extends Controller
         return match($user->user_type) {
             'contractor' => redirect()->intended(route('dashboard.contractor')),
             'client' => redirect()->intended(route('client.dashboard')),
-            'admin' => redirect()->intended(route('dashboard.admin')),
             default => redirect()->intended(route('dashboard')),
         };
     }

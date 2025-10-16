@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'user_type',
+        'status',
         'subscription_completed',
         'business_license',
         'certificate_incorporation',

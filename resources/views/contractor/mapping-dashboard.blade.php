@@ -307,11 +307,15 @@
                         <i class="bi bi-trash"></i>
                         <span>Disposal Schedules</span>
                     </a>
-                    <a class="nav-link" href="#" data-tab="sms">
+                    <a class="nav-link" href="#" data-tab="chats">
                         <i class="bi bi-chat-dots"></i>
-                        <span>SMS Manager</span>
+                        <span>Chats</span>
                     </a>
-                    <a class="nav-link" href="#" data-tab="routes">
+                    <a class="nav-link" href="#" data-tab="route-management">
+                        <i class="bi bi-signpost-split"></i>
+                        <span>Routes Management</span>
+                    </a>
+                    <a class="nav-link" href="#" data-tab="route-optimization">
                         <i class="bi bi-geo-alt"></i>
                         <span>Route Optimization</span>
                     </a>
@@ -556,11 +560,15 @@
                     <iframe id="disposal-iframe" src="/disposal" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
                 </div>
 
-                <div id="sms-tab" class="tab-content" style="display: none;">
-                    <iframe src="/sms" width="100%" height="600" frameborder="0"></iframe>
+                <div id="chats-tab" class="tab-content" style="display: none;">
+                    <iframe id="chats-iframe" src="/sms/inbox" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
                 </div>
 
-                <div id="routes-tab" class="tab-content" style="display: none;">
+                <div id="route-management-tab" class="tab-content" style="display: none;">
+                    <iframe id="route-management-iframe" src="/route-management" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
+                </div>
+
+                <div id="route-optimization-tab" class="tab-content" style="display: none;">
                     <iframe src="/routes" width="100%" height="600" frameborder="0"></iframe>
                 </div>
 

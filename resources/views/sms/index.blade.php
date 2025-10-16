@@ -308,6 +308,25 @@
             font-weight: 500;
         }
         
+        /* Route Groups */
+        .route-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .route-header {
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .route-header .badge {
+            font-size: 0.85rem;
+        }
+        
         /* Responsive Design */
         @media (max-width: 992px) {
             .container-fluid {
@@ -342,10 +361,17 @@
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">
-                <i class="bi bi-chat-dots me-2"></i>SMS Manager
-            </h1>
-            <p class="page-subtitle">Send notifications and reminders to your clients</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">
+                        <i class="bi bi-chat-dots me-2"></i>SMS Manager
+                    </h1>
+                    <p class="page-subtitle mb-0">Send notifications and reminders to your clients</p>
+                </div>
+                <a href="{{ route('sms.inbox') }}" class="btn btn-light" style="border-radius: 8px;" target="_parent">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Inbox
+                </a>
+            </div>
         </div>
 
         <div class="row">
@@ -378,6 +404,20 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-funnel"></i>Filter by Route
+                                </label>
+                                <select class="form-select" id="routeFilter" onchange="filterByRoute()">
+                                    <option value="all">All Routes ({{ $clients->count() }} clients)</option>
+                                    @foreach($routes as $route)
+                                        <option value="{{ $route }}">{{ $route }} ({{ $clientsByRoute[$route]->count() }} clients)</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
                                 <div class="recipients-container">
                                     <div class="recipients-header">
                                         <label class="form-label mb-0">
@@ -386,27 +426,45 @@
                                         <span class="recipients-count" id="selectedCount">0 selected</span>
                                     </div>
                                     
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleAll()">
-                                        <label class="form-check-label fw-bold text-primary" for="selectAll">
-                                            Select All Clients
-                                        </label>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleAll()">
+                                            <label class="form-check-label fw-bold text-primary" for="selectAll">
+                                                Select All
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" onclick="selectByRoute()">
+                                            <i class="bi bi-check-square"></i> Select Current Route
+                                        </button>
                                     </div>
                                     
-                                    <div class="clients-list">
-                                        @foreach($clients as $client)
-                                        <div class="client-item">
-                                            <div class="form-check">
-                                                <input class="form-check-input client-checkbox" type="checkbox" name="recipients[]" value="{{ $client->id }}" id="client{{ $client->id }}" onchange="updateCount()">
-                                                <label class="form-check-label w-100" for="client{{ $client->id }}">
-                                                    <div class="fw-semibold text-dark">{{ $client->name }}</div>
-                                                    <div class="text-muted small">{{ $client->phone }}</div>
-                                                    <div class="text-muted small">
-                                                        {{ ucfirst($client->category) }} • {{ $client->address }}
+                                    <div class="clients-list" id="clientsList">
+                                        @foreach($clientsByRoute as $route => $routeClients)
+                                            <div class="route-group" data-route="{{ $route }}">
+                                                @if($route)
+                                                <div class="route-header">
+                                                    <span class="badge bg-primary">{{ $route }}</span>
+                                                    <small class="text-muted ms-2">{{ $routeClients->count() }} clients</small>
+                                                </div>
+                                                @endif
+                                                @foreach($routeClients as $client)
+                                                <div class="client-item" data-route="{{ $client->route ?? '' }}">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input client-checkbox" type="checkbox" name="recipients[]" value="{{ $client->id }}" id="client{{ $client->id }}" onchange="updateCount()" data-route="{{ $client->route ?? '' }}">
+                                                        <label class="form-check-label w-100" for="client{{ $client->id }}">
+                                                            <div class="fw-semibold text-dark">{{ $client->name }}</div>
+                                                            <div class="text-muted small">{{ $client->phone }}</div>
+                                                            <div class="text-muted small">
+                                                                {{ ucfirst($client->category) }}
+                                                                @if($client->route)
+                                                                    <span class="badge badge-sm bg-secondary">{{ $client->route }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </label>
                                                     </div>
-                                                </label>
+                                                </div>
+                                                @endforeach
                                             </div>
-                                        </div>
                                         @endforeach
                                     </div>
                                 </div>
@@ -521,11 +579,58 @@
         
         function toggleAll() {
             const selectAll = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.client-checkbox');
+            const checkboxes = document.querySelectorAll('.client-checkbox:not([style*="display: none"])');
             
             checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAll.checked;
+                const clientItem = checkbox.closest('.client-item');
+                if (clientItem && clientItem.style.display !== 'none') {
+                    checkbox.checked = selectAll.checked;
+                }
             });
+            updateCount();
+        }
+        
+        function filterByRoute() {
+            const routeFilter = document.getElementById('routeFilter').value;
+            const routeGroups = document.querySelectorAll('.route-group');
+            const clientItems = document.querySelectorAll('.client-item');
+            
+            if (routeFilter === 'all') {
+                // Show all
+                routeGroups.forEach(group => group.style.display = 'block');
+                clientItems.forEach(item => item.style.display = 'block');
+            } else {
+                // Show only selected route
+                routeGroups.forEach(group => {
+                    if (group.dataset.route === routeFilter) {
+                        group.style.display = 'block';
+                    } else {
+                        group.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Reset select all
+            document.getElementById('selectAll').checked = false;
+            updateCount();
+        }
+        
+        function selectByRoute() {
+            const routeFilter = document.getElementById('routeFilter').value;
+            
+            if (routeFilter === 'all') {
+                alert('Please select a specific route first');
+                return;
+            }
+            
+            const checkboxes = document.querySelectorAll('.client-checkbox');
+            checkboxes.forEach(checkbox => {
+                const clientItem = checkbox.closest('.client-item');
+                if (clientItem && clientItem.style.display !== 'none' && checkbox.dataset.route === routeFilter) {
+                    checkbox.checked = true;
+                }
+            });
+            
             updateCount();
         }
         

@@ -49,6 +49,25 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Check if the user is a contractor with rejected status
+        $user = Auth::user();
+        if ($user && $user->user_type === 'contractor' && $user->status === 'rejected') {
+            Auth::logout();
+            
+            throw ValidationException::withMessages([
+                'email' => 'Your contractor account has been rejected. Please contact support for more information.',
+            ]);
+        }
+
+        // Check if contractor account is pending approval
+        if ($user && $user->user_type === 'contractor' && (!$user->status || $user->status === 'pending')) {
+            Auth::logout();
+            
+            throw ValidationException::withMessages([
+                'email' => 'Your contractor account is pending approval. You will receive an email once your account is reviewed.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

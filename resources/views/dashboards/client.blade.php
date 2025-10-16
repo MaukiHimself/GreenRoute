@@ -22,6 +22,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.chats') }}">
+                    <i class="bi bi-chat-dots me-2"></i>Chats
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{{ route('client.support') }}">
                     <i class="bi bi-headset me-2"></i>Support/Help
                 </a>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator Dashboard - AFIA ORBIT</title>
+    <title>Contractor Verification - AFIA ORBIT Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
@@ -118,8 +118,9 @@
             font-size: 0.9rem;
         }
         
-        .breadcrumb-item {
+        .breadcrumb-item a {
             color: #666;
+            text-decoration: none;
         }
         
         .breadcrumb-item.active {
@@ -131,32 +132,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-        
-        .notification-badge {
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .notification-badge i {
-            font-size: 1.5rem;
-            color: var(--primary-teal);
-        }
-        
-        .notification-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--primary-red);
-            color: var(--white);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
         }
         
         .user-profile {
@@ -183,131 +158,111 @@
             padding: 2rem;
         }
         
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--primary-teal);
-            transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        
-        .stat-card.contractors {
-            border-left-color: var(--primary-teal);
-        }
-        
-        .stat-card.clients {
-            border-left-color: #10b981;
-        }
-        
-        .stat-card.routes {
-            border-left-color: #f59e0b;
-        }
-        
-        .stat-title {
-            font-size: 0.9rem;
-            color: #666;
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-teal);
             margin-bottom: 0.5rem;
         }
         
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #1e293b;
+        .page-description {
+            color: #666;
+            margin-bottom: 2rem;
         }
         
-        .stat-icon {
-            font-size: 2rem;
-            opacity: 0.2;
-            float: right;
-        }
-        
-        /* Tasks Section */
-        .tasks-section {
+        /* Contractor Cards */
+        .contractor-card {
             background: var(--white);
             border-radius: 12px;
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-teal);
         }
         
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--primary-teal);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-teal);
-        }
-        
-        .task-item {
+        .contractor-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
+            align-items: start;
+            margin-bottom: 1rem;
         }
         
-        .task-item:hover {
-            background: #f8f9fa;
-        }
-        
-        .task-item:last-child {
-            border-bottom: none;
-        }
-        
-        .task-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .task-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #e6f2f2;
-            color: var(--primary-teal);
-        }
-        
-        .task-details h5 {
-            margin: 0;
-            font-size: 1rem;
+        .contractor-info h4 {
+            margin: 0 0 0.5rem;
             color: #1e293b;
         }
         
-        .task-details p {
-            margin: 0;
-            font-size: 0.85rem;
+        .contractor-meta {
+            font-size: 0.9rem;
             color: #666;
         }
         
-        .task-action {
+        .contractor-meta i {
+            color: var(--primary-teal);
+            margin-right: 0.25rem;
+        }
+        
+        .contractor-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .action-buttons {
             display: flex;
             gap: 0.5rem;
+        }
+        
+        .btn-approve {
+            background: #10b981;
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-approve:hover {
+            background: #059669;
+        }
+        
+        .btn-reject {
+            background: var(--primary-red);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-reject:hover {
+            background: #7c0505;
         }
         
         .btn-view {
             background: var(--primary-teal);
             color: var(--white);
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1.25rem;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
@@ -317,24 +272,49 @@
             background: #044a4a;
         }
         
-        .badge-count {
-            background: var(--primary-red);
-            color: var(--white);
-            padding: 0.25rem 0.75rem;
+        .empty-state {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: #9ca3af;
+        }
+        
+        .status-badge {
+            padding: 0.35rem 0.75rem;
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: 600;
         }
         
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #999;
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
         
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
@@ -348,10 +328,10 @@
             
             <div class="menu-section">
                 <div class="menu-header">MENU</div>
-                <a href="{{ route('dashboard.admin') }}" class="menu-item active">
+                <a href="{{ route('dashboard.admin') }}" class="menu-item">
                     <span><i class="bi bi-speedometer2"></i>Administrator Dashboard</span>
                 </a>
-                <a href="{{ route('admin.verification') }}" class="menu-item">
+                <a href="{{ route('admin.verification') }}" class="menu-item active">
                     <span><i class="bi bi-check-circle"></i>Verification</span>
                     <i class="bi bi-chevron-right"></i>
                 </a>
@@ -382,15 +362,10 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('dashboard.admin') }}">Administrator</a></li>
-                        <li class="breadcrumb-item">Dashboard</li>
-                        <li class="breadcrumb-item active">Administrator - {{ auth()->user()->name }}</li>
+                        <li class="breadcrumb-item active">Verification</li>
                     </ol>
                 </nav>
                 <div class="header-right">
-                    <div class="notification-badge">
-                        <i class="bi bi-bell-fill"></i>
-                        <span class="notification-count">{{ $pendingVerifications ?? 0 }}</span>
-                    </div>
                     <div class="dropdown">
                         <div class="user-profile" data-bs-toggle="dropdown">
                             <div class="user-avatar">
@@ -416,56 +391,79 @@
 
             <!-- Content Area -->
             <div class="content-area">
-                <h2 class="mb-4">System Parameters</h2>
-                
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card contractors">
-                        <div class="stat-icon"><i class="bi bi-building"></i></div>
-                        <div class="stat-title">Contractors</div>
-                        <div class="stat-value">{{ $contractorsCount ?? 0 }}</div>
-                    </div>
-                    <div class="stat-card clients">
-                        <div class="stat-icon"><i class="bi bi-people"></i></div>
-                        <div class="stat-title">Clients</div>
-                        <div class="stat-value">{{ $clientsCount ?? 0 }}</div>
-                    </div>
-                    <div class="stat-card routes">
-                        <div class="stat-icon"><i class="bi bi-signpost-split"></i></div>
-                        <div class="stat-title">Active Routes</div>
-                        <div class="stat-value">{{ $activeRoutesCount ?? 0 }}</div>
-                    </div>
-                </div>
+                <h1 class="page-title">Contractor Verification</h1>
+                <p class="page-description">Review and approve contractor registrations</p>
 
-                <!-- Pending Tasks -->
-                <div class="tasks-section">
-                    <h3 class="section-title">Pending Tasks</h3>
-                    
-                    @if(isset($pendingTasks) && count($pendingTasks) > 0)
-                        @foreach($pendingTasks as $task)
-                            <div class="task-item">
-                                <div class="task-info">
-                                    <div class="task-icon">
-                                        <i class="bi bi-{{ $task['icon'] ?? 'exclamation-circle' }}"></i>
-                                    </div>
-                                    <div class="task-details">
-                                        <h5>{{ $task['title'] }}</h5>
-                                        <p>{{ $task['description'] }}</p>
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                @if($pendingContractors->count() > 0)
+                    @foreach($pendingContractors as $contractor)
+                        <div class="contractor-card">
+                            <div class="contractor-header">
+                                <div class="contractor-info">
+                                    <h4>{{ $contractor->name }}</h4>
+                                    <div class="contractor-meta">
+                                        <i class="bi bi-envelope"></i>{{ $contractor->email }}
+                                        <span class="ms-3"><i class="bi bi-calendar"></i>Registered: {{ $contractor->created_at->format('M d, Y') }}</span>
                                     </div>
                                 </div>
-                                <div class="task-action">
-                                    <span class="badge-count">{{ $task['count'] }}</span>
-                                    <a href="{{ $task['link'] }}" class="btn-view">View</a>
-                                </div>
+                                <span class="status-badge status-{{ $contractor->status ?? 'pending' }}">
+                                    {{ ucfirst($contractor->status ?? 'Pending') }}
+                                </span>
                             </div>
-                        @endforeach
-                    @else
-                        <div class="empty-state">
-                            <i class="bi bi-check-circle"></i>
-                            <p>No pending tasks. All caught up!</p>
+
+                            @if($contractor->contractor)
+                                <div class="contractor-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Company Name</span>
+                                        <span class="detail-value">{{ $contractor->contractor->company_name ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Phone</span>
+                                        <span class="detail-value">{{ $contractor->phone ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Business License</span>
+                                        <span class="detail-value">{{ $contractor->contractor->business_license ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Service Area</span>
+                                        <span class="detail-value">{{ $contractor->contractor->service_area ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="action-buttons">
+                                <form method="POST" action="{{ route('admin.verification.approve', $contractor) }}" style="display: inline;">
+                                    @csrf
+                                    <button type="submit" class="btn-approve">
+                                        <i class="bi bi-check-circle me-1"></i>Approve
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.verification.reject', $contractor) }}" style="display: inline;">
+                                    @csrf
+                                    <button type="submit" class="btn-reject" onclick="return confirm('Are you sure you want to reject this contractor?')">
+                                        <i class="bi bi-x-circle me-1"></i>Reject
+                                    </button>
+                                </form>
+                                <button class="btn-view" onclick="alert('View details feature coming soon')">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </button>
+                            </div>
                         </div>
-                    @endif
-                </div>
+                    @endforeach
+                @else
+                    <div class="empty-state">
+                        <i class="bi bi-check-circle"></i>
+                        <h3>All Caught Up!</h3>
+                        <p>No contractors pending verification at this time.</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -12,6 +12,7 @@ use App\Http\Controllers\ContractorFeedbackController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\BillingController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('landing');
@@ -71,6 +72,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('contractor-info', [ClientPortalController::class, 'contractorInfo'])->name('client.contractor.info');
         Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
         Route::get('payments', [ClientPortalController::class, 'payments'])->name('client.payments');
+        Route::get('chats', [ClientPortalController::class, 'chats'])->name('client.chats');
+        Route::get('support', [ClientPortalController::class, 'support'])->name('client.support');
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
         Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
     });
@@ -166,6 +169,28 @@ Route::post('/login/contractor', [UserTypeController::class, 'authenticateContra
 Route::get('/register/admin', [UserTypeController::class, 'createAdmin'])->name('register.admin');
 Route::post('/register/admin', [UserTypeController::class, 'storeAdmin'])->name('register.admin.store');
 
+// Admin login routes (separate from main login)
+Route::prefix('admin')->group(function () {
+    Route::get('/login', function () {
+        // If already logged in as admin, go to dashboard
+        if (Auth::check() && Auth::user()->user_type === 'admin') {
+            return redirect()->route('dashboard.admin');
+        }
+        
+        // If logged in as non-admin, logout first
+        if (Auth::check() && Auth::user()->user_type !== 'admin') {
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+        
+        return view('auth.admin-login');
+    })->name('admin.login');
+    
+    Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store'])
+        ->name('admin.login.submit')->middleware('guest');
+});
+
 // Public location validation for registration
 Route::post('/location/validate-public', [App\Http\Controllers\LocationController::class, 'validateLocationAccuracy'])->name('location.validate.public');
 Route::post('/location/reverse-geocode', [App\Http\Controllers\LocationController::class, 'reverseGeocode'])->name('location.reverse.geocode');
@@ -178,8 +203,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/location/geocode', [App\Http\Controllers\LocationController::class, 'geocodeAddress'])->name('location.geocode');
     Route::post('/location/validate', [App\Http\Controllers\LocationController::class, 'validateLocationAccuracy'])->name('location.validate');
     
-    // Admin routes
-    Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // Admin routes (protected with admin middleware)
+    Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard.admin');
+        Route::get('/verification', [App\Http\Controllers\AdminController::class, 'verification'])->name('admin.verification');
+        Route::post('/verification/approve/{user}', [App\Http\Controllers\AdminController::class, 'approveContractor'])->name('admin.verification.approve');
+        Route::post('/verification/reject/{user}', [App\Http\Controllers\AdminController::class, 'rejectContractor'])->name('admin.verification.reject');
+        Route::get('/clients', [App\Http\Controllers\AdminController::class, 'clients'])->name('admin.clients');
+        Route::get('/billing', [App\Http\Controllers\AdminController::class, 'billing'])->name('admin.billing');
+        Route::get('/schedules', [App\Http\Controllers\AdminController::class, 'schedules'])->name('admin.schedules');
+        Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
         Route::get('/contractors/locations', [App\Http\Controllers\AdminController::class, 'getContractorLocations'])->name('admin.contractors.locations');
     });
     
@@ -226,8 +259,14 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->prefix('sms')->group(function () {
         Route::get('/', [App\Http\Controllers\SmsController::class, 'index'])->name('sms.index');
         Route::post('/send', [App\Http\Controllers\SmsController::class, 'send'])->name('sms.send');
+        Route::get('/inbox', [App\Http\Controllers\SmsController::class, 'inbox'])->name('sms.inbox');
+        Route::get('/conversation/{client}', [App\Http\Controllers\SmsController::class, 'conversation'])->name('sms.conversation');
+        Route::post('/conversation/{client}', [App\Http\Controllers\SmsController::class, 'sendMessage'])->name('sms.sendMessage');
         Route::get('/template', [App\Http\Controllers\SmsController::class, 'getTemplate'])->name('sms.template');
     });
+    
+    // Client SMS API (for clients to send messages to contractors)
+    Route::post('/api/sms/client-send', [App\Http\Controllers\SmsController::class, 'clientSend'])->name('api.sms.clientSend');
     
     // Route Optimization routes
     Route::middleware(['auth'])->prefix('routes')->group(function () {
@@ -247,6 +286,17 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\TruckController::class, 'store'])->name('trucks.store');
         Route::post('/{truck}/location', [App\Http\Controllers\TruckController::class, 'updateLocation'])->name('trucks.location');
         Route::get('/locations', [App\Http\Controllers\TruckController::class, 'getLocations'])->name('trucks.locations');
+    });
+    
+    // Route Management routes (for creating and managing collection routes)
+    Route::middleware(['auth'])->prefix('route-management')->group(function () {
+        Route::get('/', [App\Http\Controllers\RouteManagementController::class, 'index'])->name('route-management.index');
+        Route::get('/create', [App\Http\Controllers\RouteManagementController::class, 'create'])->name('route-management.create');
+        Route::post('/', [App\Http\Controllers\RouteManagementController::class, 'store'])->name('route-management.store');
+        Route::get('/{contractorRoute}', [App\Http\Controllers\RouteManagementController::class, 'show'])->name('route-management.show');
+        Route::get('/{contractorRoute}/edit', [App\Http\Controllers\RouteManagementController::class, 'edit'])->name('route-management.edit');
+        Route::put('/{contractorRoute}', [App\Http\Controllers\RouteManagementController::class, 'update'])->name('route-management.update');
+        Route::delete('/{contractorRoute}', [App\Http\Controllers\RouteManagementController::class, 'destroy'])->name('route-management.destroy');
     });
 });
 

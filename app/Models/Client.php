@@ -56,6 +56,11 @@ class Client extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
     
     protected static function boot()
     {
