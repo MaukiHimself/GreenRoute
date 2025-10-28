@@ -295,6 +295,32 @@
             color: #9ca3af;
         }
         
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-teal);
+            transition: transform 0.3s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-teal);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
         .status-badge {
             padding: 0.35rem 0.75rem;
             border-radius: 12px;
@@ -391,8 +417,36 @@
 
             <!-- Content Area -->
             <div class="content-area">
-                <h1 class="page-title">Contractor Verification</h1>
-                <p class="page-description">Review and approve contractor registrations</p>
+                <h1 class="page-title">Contractor Verification & Management</h1>
+                <p class="page-description">Review and manage contractor registrations</p>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card" style="border-left-color: #fbbf24;">
+                            <div class="stats-number">{{ $stats['pending'] }}</div>
+                            <div class="stats-label">Pending Approval</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card" style="border-left-color: #10b981;">
+                            <div class="stats-number">{{ $stats['approved'] }}</div>
+                            <div class="stats-label">Approved</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card" style="border-left-color: var(--primary-red);">
+                            <div class="stats-number">{{ $stats['rejected'] }}</div>
+                            <div class="stats-label">Rejected</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card" style="border-left-color: var(--primary-teal);">
+                            <div class="stats-number">{{ $stats['total'] }}</div>
+                            <div class="stats-label">Total Contractors</div>
+                        </div>
+                    </div>
+                </div>
 
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -401,69 +455,198 @@
                     </div>
                 @endif
 
-                @if($pendingContractors->count() > 0)
-                    @foreach($pendingContractors as $contractor)
-                        <div class="contractor-card">
-                            <div class="contractor-header">
-                                <div class="contractor-info">
-                                    <h4>{{ $contractor->name }}</h4>
-                                    <div class="contractor-meta">
-                                        <i class="bi bi-envelope"></i>{{ $contractor->email }}
-                                        <span class="ms-3"><i class="bi bi-calendar"></i>Registered: {{ $contractor->created_at->format('M d, Y') }}</span>
-                                    </div>
-                                </div>
-                                <span class="status-badge status-{{ $contractor->status ?? 'pending' }}">
-                                    {{ ucfirst($contractor->status ?? 'Pending') }}
-                                </span>
-                            </div>
-
-                            @if($contractor->contractor)
-                                <div class="contractor-details">
-                                    <div class="detail-item">
-                                        <span class="detail-label">Company Name</span>
-                                        <span class="detail-value">{{ $contractor->contractor->company_name ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Phone</span>
-                                        <span class="detail-value">{{ $contractor->phone ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Business License</span>
-                                        <span class="detail-value">{{ $contractor->contractor->business_license ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Service Area</span>
-                                        <span class="detail-value">{{ $contractor->contractor->service_area ?? 'N/A' }}</span>
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="action-buttons">
-                                <form method="POST" action="{{ route('admin.verification.approve', $contractor) }}" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn-approve">
-                                        <i class="bi bi-check-circle me-1"></i>Approve
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.verification.reject', $contractor) }}" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn-reject" onclick="return confirm('Are you sure you want to reject this contractor?')">
-                                        <i class="bi bi-x-circle me-1"></i>Reject
-                                    </button>
-                                </form>
-                                <button class="btn-view" onclick="alert('View details feature coming soon')">
-                                    <i class="bi bi-eye me-1"></i>View Details
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                @else
-                    <div class="empty-state">
-                        <i class="bi bi-check-circle"></i>
-                        <h3>All Caught Up!</h3>
-                        <p>No contractors pending verification at this time.</p>
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
+
+                <!-- Tabs for different statuses -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                            <i class="bi bi-hourglass-split me-2"></i>Pending ({{ $stats['pending'] }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approved" type="button">
+                            <i class="bi bi-check-circle me-2"></i>Approved ({{ $stats['approved'] }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
+                            <i class="bi bi-x-circle me-2"></i>Rejected ({{ $stats['rejected'] }})
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        @if($pendingContractors->count() > 0)
+                            @foreach($pendingContractors as $contractor)
+                                <div class="contractor-card">
+                                    <div class="contractor-header">
+                                        <div class="contractor-info">
+                                            <h4>{{ $contractor->name }}</h4>
+                                            <div class="contractor-meta">
+                                                <i class="bi bi-envelope"></i>{{ $contractor->email }}
+                                                <span class="ms-3"><i class="bi bi-calendar"></i>Registered: {{ $contractor->created_at->format('M d, Y H:i') }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="status-badge status-pending">Pending Review</span>
+                                    </div>
+
+                                    @if($contractor->contractor)
+                                        <div class="contractor-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Company Name</span>
+                                                <span class="detail-value">{{ $contractor->contractor->company_name ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Phone</span>
+                                                <span class="detail-value">{{ $contractor->contractor->phone ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">License Number</span>
+                                                <span class="detail-value">{{ $contractor->contractor->license_number ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Service Locations</span>
+                                                <span class="detail-value">{{ $contractor->contractor->site_locations ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="action-buttons">
+                                        <form method="POST" action="{{ route('admin.contractors.approve', $contractor->id) }}" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn-approve" onclick="return confirm('Approve this contractor? They will be able to access their dashboard immediately.')">
+                                                <i class="bi bi-check-circle me-1"></i>Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.contractors.reject', $contractor->id) }}" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn-reject" onclick="return confirm('Reject this contractor? They will not be able to login.')">
+                                                <i class="bi bi-x-circle me-1"></i>Reject
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('admin.contractors.show', $contractor->id) }}" class="btn-view">
+                                            <i class="bi bi-eye me-1"></i>View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="empty-state">
+                                <i class="bi bi-check-circle"></i>
+                                <h3>All Caught Up!</h3>
+                                <p>No contractors pending verification at this time.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Approved Tab -->
+                    <div class="tab-pane fade" id="approved" role="tabpanel">
+                        @if($approvedContractors->count() > 0)
+                            @foreach($approvedContractors as $contractor)
+                                <div class="contractor-card">
+                                    <div class="contractor-header">
+                                        <div class="contractor-info">
+                                            <h4>{{ $contractor->name }}</h4>
+                                            <div class="contractor-meta">
+                                                <i class="bi bi-envelope"></i>{{ $contractor->email }}
+                                                <span class="ms-3"><i class="bi bi-calendar-check"></i>Approved: {{ $contractor->updated_at->format('M d, Y H:i') }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="status-badge status-approved">Approved</span>
+                                    </div>
+
+                                    @if($contractor->contractor)
+                                        <div class="contractor-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Company Name</span>
+                                                <span class="detail-value">{{ $contractor->contractor->company_name ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Phone</span>
+                                                <span class="detail-value">{{ $contractor->contractor->phone ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Registration Number</span>
+                                                <span class="detail-value">{{ $contractor->contractor->registration_number ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="action-buttons">
+                                        <form method="POST" action="{{ route('admin.contractors.toggle', $contractor->id) }}" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn-reject" onclick="return confirm('Suspend this contractor? They will not be able to login.')">
+                                                <i class="bi bi-pause-circle me-1"></i>Suspend
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('admin.contractors.show', $contractor->id) }}" class="btn-view">
+                                            <i class="bi bi-eye me-1"></i>View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No Approved Contractors</h3>
+                                <p>No contractors have been approved yet.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel">
+                        @if($rejectedContractors->count() > 0)
+                            @foreach($rejectedContractors as $contractor)
+                                <div class="contractor-card">
+                                    <div class="contractor-header">
+                                        <div class="contractor-info">
+                                            <h4>{{ $contractor->name }}</h4>
+                                            <div class="contractor-meta">
+                                                <i class="bi bi-envelope"></i>{{ $contractor->email }}
+                                                <span class="ms-3"><i class="bi bi-calendar-x"></i>Rejected: {{ $contractor->updated_at->format('M d, Y H:i') }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="status-badge status-rejected">Rejected</span>
+                                    </div>
+
+                                    @if($contractor->contractor)
+                                        <div class="contractor-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Company Name</span>
+                                                <span class="detail-value">{{ $contractor->contractor->company_name ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Phone</span>
+                                                <span class="detail-value">{{ $contractor->contractor->phone ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="action-buttons">
+                                        <a href="{{ route('admin.contractors.show', $contractor->id) }}" class="btn-view">
+                                            <i class="bi bi-eye me-1"></i>View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No Rejected Contractors</h3>
+                                <p>No contractors have been rejected.</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>

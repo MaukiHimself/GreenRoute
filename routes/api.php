@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ContractorLinkingController;
 use App\Http\Controllers\Api\InvoiceApiController;
 use App\Http\Controllers\Api\ScheduleApiController;
+use App\Http\Controllers\LocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,3 +87,22 @@ Route::delete('/schedules/{id}', [ScheduleApiController::class, 'destroy']);
 
 // Update schedule status
 Route::patch('/schedules/{id}/status', [ScheduleApiController::class, 'updateStatus']);
+
+// ===================================
+// Location API Routes (Tanzania Locations)
+// ===================================
+
+// Get all regions
+Route::get('/locations/regions', [LocationController::class, 'getRegions']);
+
+// Get districts for a region
+Route::get('/locations/districts', [LocationController::class, 'getDistricts']);
+
+// Get wards for a district
+Route::get('/locations/wards', [LocationController::class, 'getWards']);
+
+// Get streets for a ward
+Route::get('/locations/streets', [LocationController::class, 'getStreets']);
+
+// Search locations by keyword
+Route::get('/locations/search', [LocationController::class, 'searchLocations']);

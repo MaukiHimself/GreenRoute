@@ -62,14 +62,37 @@ class AdminController extends Controller
     {
         // Get contractors pending verification
         $pendingContractors = User::where('user_type', 'contractor')
-            ->where('status', '!=', 'approved')
+            ->where('status', 'pending')
             ->with('contractor')
             ->orderBy('created_at', 'desc')
             ->get();
+            
+        // Get recently approved contractors
+        $approvedContractors = User::where('user_type', 'contractor')
+            ->where('status', 'approved')
+            ->with('contractor')
+            ->orderBy('updated_at', 'desc')
+            ->take(10)
+            ->get();
+            
+        // Get rejected contractors
+        $rejectedContractors = User::where('user_type', 'contractor')
+            ->where('status', 'rejected')
+            ->with('contractor')
+            ->orderBy('updated_at', 'desc')
+            ->take(10)
+            ->get();
+            
+        // Statistics
+        $stats = [
+            'pending' => User::where('user_type', 'contractor')->where('status', 'pending')->count(),
+            'approved' => User::where('user_type', 'contractor')->where('status', 'approved')->count(),
+            'rejected' => User::where('user_type', 'contractor')->where('status', 'rejected')->count(),
+            'suspended' => User::where('user_type', 'contractor')->where('status', 'suspended')->count(),
+            'total' => User::where('user_type', 'contractor')->count(),
+        ];
         
-        return view('admin.verification', [
-            'pendingContractors' => $pendingContractors
-        ]);
+        return view('admin.verification', compact('pendingContractors', 'approvedContractors', 'rejectedContractors', 'stats'));
     }
 
     public function clients()
@@ -582,7 +605,12 @@ class AdminController extends Controller
             ->orderBy('frequency')
             ->get();
         
-        // Get unique locations for filtering
+        // Get unique categories and locations for filtering
+        $categories = BillingRate::select('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category');
+            
         $locations = BillingRate::select('location')
             ->distinct()
             ->orderBy('location')
@@ -591,10 +619,10 @@ class AdminController extends Controller
         // Statistics
         $totalRates = BillingRate::count();
         $activeRates = BillingRate::where('is_active', true)->count();
-        $residentialRates = BillingRate::where('category', 'residential')->count();
-        $commercialRates = BillingRate::where('category', 'commercial')->count();
+        $residentialRates = BillingRate::where('category', 'LIKE', 'Residential%')->count();
+        $commercialRates = BillingRate::where('category', 'LIKE', 'Commercial%')->count();
         
-        return view('admin.billing-rates', compact('rates', 'locations', 'totalRates', 'activeRates', 'residentialRates', 'commercialRates'));
+        return view('admin.billing-rates', compact('rates', 'categories', 'locations', 'totalRates', 'activeRates', 'residentialRates', 'commercialRates'));
     }
 
     public function createBillingRate()
@@ -605,10 +633,10 @@ class AdminController extends Controller
     public function storeBillingRate(Request $request)
     {
         $validated = $request->validate([
-            'category' => 'required|in:residential,commercial',
+            'category' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'collection_fee' => 'required|numeric|min:0',
-            'frequency' => 'nullable|in:daily,weekly,bi-weekly,monthly',
+            'frequency' => 'nullable|in:daily,weekly,bi-weekly,monthly,per-trip',
             'description' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
@@ -635,10 +663,10 @@ class AdminController extends Controller
     public function updateBillingRate(Request $request, BillingRate $rate)
     {
         $validated = $request->validate([
-            'category' => 'required|in:residential,commercial',
+            'category' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'collection_fee' => 'required|numeric|min:0',
-            'frequency' => 'nullable|in:daily,weekly,bi-weekly,monthly',
+            'frequency' => 'nullable|in:daily,weekly,bi-weekly,monthly,per-trip',
             'description' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
@@ -663,5 +691,40 @@ class AdminController extends Controller
         
         return redirect()->route('admin.billing.rates')
             ->with('success', 'Billing rate deleted successfully.');
+    }
+
+    // Contractor Verification & Management Methods
+
+    /**
+     * Show contractor details for verification
+     */
+    public function showContractor($id)
+    {
+        $user = User::where('user_type', 'contractor')
+            ->with('contractor')
+            ->findOrFail($id);
+            
+        return view('admin.contractor-details', compact('user'));
+    }
+
+    /**
+     * Suspend/Unsuspend a contractor
+     */
+    public function toggleContractorStatus($id)
+    {
+        $user = User::where('user_type', 'contractor')->findOrFail($id);
+        
+        if ($user->status === 'approved') {
+            $user->update(['status' => 'suspended']);
+            $message = "Contractor {$user->name} has been suspended.";
+        } elseif ($user->status === 'suspended') {
+            $user->update(['status' => 'approved']);
+            $message = "Contractor {$user->name} has been reactivated.";
+        } else {
+            return back()->with('error', 'Cannot change status of pending or rejected contractors.');
+        }
+        
+        return redirect()->route('admin.verification')
+            ->with('success', $message);
     }
 }

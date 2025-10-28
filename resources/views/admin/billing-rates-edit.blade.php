@@ -212,12 +212,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Client Category <span class="required">*</span></label>
-                            <select name="category" class="form-control" required>
-                                <option value="">Select Category</option>
-                                <option value="residential" {{ old('category', $rate->category) == 'residential' ? 'selected' : '' }}>Residential</option>
-                                <option value="commercial" {{ old('category', $rate->category) == 'commercial' ? 'selected' : '' }}>Commercial</option>
-                            </select>
-                            <div class="help-text">Type of client for this rate</div>
+                            <input type="text" name="category" class="form-control" value="{{ old('category', $rate->category) }}" required readonly style="background-color: #f8f9fa;">
+                            <div class="help-text">Category is set and cannot be changed - create a new rate to use a different category</div>
                             @error('category')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror
@@ -251,8 +247,9 @@
                                 <option value="weekly" {{ old('frequency', $rate->frequency) == 'weekly' ? 'selected' : '' }}>Weekly</option>
                                 <option value="bi-weekly" {{ old('frequency', $rate->frequency) == 'bi-weekly' ? 'selected' : '' }}>Bi-Weekly</option>
                                 <option value="monthly" {{ old('frequency', $rate->frequency) == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                <option value="per-trip" {{ old('frequency', $rate->frequency) == 'per-trip' ? 'selected' : '' }}>Per Trip</option>
                             </select>
-                            <div class="help-text">Optional - specific frequency for this rate</div>
+                            <div class="help-text">Billing frequency (use "Per Trip" for construction waste, etc.)</div>
                             @error('frequency')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror

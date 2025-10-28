@@ -192,11 +192,11 @@
         </div>
         
         <h1 class="page-title">Add New Billing Rate</h1>
-        <p class="page-description">Set collection fee by category and location</p>
+        <p class="page-description">Set collection fees based on AFIA ORBIT by-laws pricing structure</p>
 
         <div class="info-box">
             <p><i class="bi bi-info-circle me-2"></i>
-                Create billing rates for different client categories and locations. These rates will be visible to contractors and used for invoice generation.
+                Create billing rates for different client categories and locations. Categories are based on the official AFIA ORBIT by-laws with default prices shown in TZS. You can adjust prices according to updates from the field.
             </p>
         </div>
 
@@ -213,10 +213,84 @@
                             <label>Client Category <span class="required">*</span></label>
                             <select name="category" class="form-control" required>
                                 <option value="">Select Category</option>
-                                <option value="residential" {{ old('category') == 'residential' ? 'selected' : '' }}>Residential</option>
-                                <option value="commercial" {{ old('category') == 'commercial' ? 'selected' : '' }}>Commercial</option>
+                                <optgroup label="Residential">
+                                    <option value="Residential (Unplanned)" {{ old('category') == 'Residential (Unplanned)' ? 'selected' : '' }}>Residential (Unplanned) - 10,000 TZS</option>
+                                    <option value="Residential (Planned/Modern)" {{ old('category') == 'Residential (Planned/Modern)' ? 'selected' : '' }}>Residential (Planned/Modern) - 20,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Commercial Residential">
+                                    <option value="Commercial Residential (Apartment)" {{ old('category') == 'Commercial Residential (Apartment)' ? 'selected' : '' }}>Commercial Residential (Apartment) - 30,000 TZS</option>
+                                    <option value="Commercial Residential Storey" {{ old('category') == 'Commercial Residential Storey' ? 'selected' : '' }}>Commercial Residential Storey - 80,000 TZS</option>
+                                    <option value="Commercial Residential above 2 storey" {{ old('category') == 'Commercial Residential above 2 storey' ? 'selected' : '' }}>Commercial Residential above 2 storey - 100,000 TZS</option>
+                                    <option value="Commercial Industrial & Institutions" {{ old('category') == 'Commercial Industrial & Institutions' ? 'selected' : '' }}>Commercial Industrial & Institutions - 150,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Food & Beverage">
+                                    <option value="Tea Room" {{ old('category') == 'Tea Room' ? 'selected' : '' }}>Tea Room - 10,000 TZS</option>
+                                    <option value="Café" {{ old('category') == 'Café' ? 'selected' : '' }}>Café - 10,000 TZS</option>
+                                    <option value="Ice Par Lour" {{ old('category') == 'Ice Par Lour' ? 'selected' : '' }}>Ice Par Lour - 10,000 TZS</option>
+                                    <option value="Restaurant" {{ old('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant - 15,000 TZS</option>
+                                    <option value="Bar" {{ old('category') == 'Bar' ? 'selected' : '' }}>Bar - 15,000 TZS</option>
+                                    <option value="Butcher" {{ old('category') == 'Butcher' ? 'selected' : '' }}>Butcher - 10,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Accommodation">
+                                    <option value="Guest House" {{ old('category') == 'Guest House' ? 'selected' : '' }}>Guest House - 10,000 TZS</option>
+                                    <option value="Hotels" {{ old('category') == 'Hotels' ? 'selected' : '' }}>Hotels - 150,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Healthcare">
+                                    <option value="Dispensary (domestic waste)" {{ old('category') == 'Dispensary (domestic waste)' ? 'selected' : '' }}>Dispensary (domestic waste) - 15,000 TZS</option>
+                                    <option value="Health Centre (Domestic waste)" {{ old('category') == 'Health Centre (Domestic waste)' ? 'selected' : '' }}>Health Centre (Domestic waste) - 20,000 TZS</option>
+                                    <option value="Hospital (Domestic waste)" {{ old('category') == 'Hospital (Domestic waste)' ? 'selected' : '' }}>Hospital (Domestic waste) - 35,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Manufacturing & Workshops">
+                                    <option value="Sawing mills" {{ old('category') == 'Sawing mills' ? 'selected' : '' }}>Sawing mills - 35,000 TZS</option>
+                                    <option value="Furniture making" {{ old('category') == 'Furniture making' ? 'selected' : '' }}>Furniture making - 22,000 TZS</option>
+                                    <option value="Metal workshops" {{ old('category') == 'Metal workshops' ? 'selected' : '' }}>Metal workshops - 22,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Industries">
+                                    <option value="Industries (Light waste)" {{ old('category') == 'Industries (Light waste)' ? 'selected' : '' }}>Industries (Light waste) - 35,000 TZS</option>
+                                    <option value="Industries (Heavy Industries)" {{ old('category') == 'Industries (Heavy Industries)' ? 'selected' : '' }}>Industries (Heavy Industries) - 40,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Retail & Shops">
+                                    <option value="Wholesale shops (general)" {{ old('category') == 'Wholesale shops (general)' ? 'selected' : '' }}>Wholesale shops (general) - 15,000 TZS</option>
+                                    <option value="Retail shops (food and other items)" {{ old('category') == 'Retail shops (food and other items)' ? 'selected' : '' }}>Retail shops (food and other items) - 10,000 TZS</option>
+                                    <option value="Retail shops (other commodities)" {{ old('category') == 'Retail shops (other commodities)' ? 'selected' : '' }}>Retail shops (other commodities) - 10,000 TZS</option>
+                                    <option value="Groceries" {{ old('category') == 'Groceries' ? 'selected' : '' }}>Groceries - 10,000 TZS</option>
+                                    <option value="Pharmacy" {{ old('category') == 'Pharmacy' ? 'selected' : '' }}>Pharmacy - 15,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Education">
+                                    <option value="Private Day Primary School" {{ old('category') == 'Private Day Primary School' ? 'selected' : '' }}>Private Day Primary School - 10,000 TZS</option>
+                                    <option value="Private Boarding Secondary schools (Standard)" {{ old('category') == 'Private Boarding Secondary schools (Standard)' ? 'selected' : '' }}>Private Boarding Secondary schools (Standard) - 15,000 TZS</option>
+                                    <option value="Private Day Secondary schools" {{ old('category') == 'Private Day Secondary schools' ? 'selected' : '' }}>Private Day Secondary schools - 10,000 TZS</option>
+                                    <option value="Private Boarding Secondary schools (Full Service)" {{ old('category') == 'Private Boarding Secondary schools (Full Service)' ? 'selected' : '' }}>Private Boarding Secondary schools (Full Service) - 25,000 TZS</option>
+                                    <option value="Institution per month" {{ old('category') == 'Institution per month' ? 'selected' : '' }}>Institution per month - 25,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Markets & Vendors">
+                                    <option value="Markets" {{ old('category') == 'Markets' ? 'selected' : '' }}>Markets - 50,000 TZS</option>
+                                    <option value="Street Market (Magenge) per table" {{ old('category') == 'Street Market (Magenge) per table' ? 'selected' : '' }}>Street Market (Magenge) per table - 2,000 TZS</option>
+                                    <option value="Food vendors (Mama ntilie)" {{ old('category') == 'Food vendors (Mama ntilie)' ? 'selected' : '' }}>Food vendors (Mama ntilie) - 5,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Transport">
+                                    <option value="Bus stations (per bus per day)" {{ old('category') == 'Bus stations (per bus per day)' ? 'selected' : '' }}>Bus stations (per bus per day) - 5,000 TZS</option>
+                                    <option value="Petrol stations" {{ old('category') == 'Petrol stations' ? 'selected' : '' }}>Petrol stations - 30,000 TZS</option>
+                                    <option value="Garage" {{ old('category') == 'Garage' ? 'selected' : '' }}>Garage - 10,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Religious & Public">
+                                    <option value="Mosque/church" {{ old('category') == 'Mosque/church' ? 'selected' : '' }}>Mosque/church - 20,000 TZS</option>
+                                    <option value="Offices" {{ old('category') == 'Offices' ? 'selected' : '' }}>Offices - 100,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Informal Sector">
+                                    <option value="Informal dry cleaners, tailors" {{ old('category') == 'Informal dry cleaners, tailors' ? 'selected' : '' }}>Informal dry cleaners, tailors - 10,000 TZS</option>
+                                    <option value="Informal Carpenter" {{ old('category') == 'Informal Carpenter' ? 'selected' : '' }}>Informal Carpenter - 10,000 TZS</option>
+                                    <option value="Shoe makers" {{ old('category') == 'Shoe makers' ? 'selected' : '' }}>Shoe makers - 5,000 TZS</option>
+                                    <option value="Electronic gadgets repair" {{ old('category') == 'Electronic gadgets repair' ? 'selected' : '' }}>Electronic gadgets repair - 10,000 TZS</option>
+                                    <option value="Street Barbers" {{ old('category') == 'Street Barbers' ? 'selected' : '' }}>Street Barbers - 10,000 TZS</option>
+                                    <option value="Female Saloons" {{ old('category') == 'Female Saloons' ? 'selected' : '' }}>Female Saloons - 15,000 TZS</option>
+                                </optgroup>
+                                <optgroup label="Storage & Construction">
+                                    <option value="Warehouses" {{ old('category') == 'Warehouses' ? 'selected' : '' }}>Warehouses - 30,000 TZS</option>
+                                    <option value="Construction waste per trip" {{ old('category') == 'Construction waste per trip' ? 'selected' : '' }}>Construction waste per trip - 25,000 TZS</option>
+                                </optgroup>
                             </select>
-                            <div class="help-text">Type of client for this rate</div>
+                            <div class="help-text">Select from standard by-laws categories (default prices shown)</div>
                             @error('category')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror
@@ -250,8 +324,9 @@
                                 <option value="weekly" {{ old('frequency') == 'weekly' ? 'selected' : '' }}>Weekly</option>
                                 <option value="bi-weekly" {{ old('frequency') == 'bi-weekly' ? 'selected' : '' }}>Bi-Weekly</option>
                                 <option value="monthly" {{ old('frequency') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                <option value="per-trip" {{ old('frequency') == 'per-trip' ? 'selected' : '' }}>Per Trip</option>
                             </select>
-                            <div class="help-text">Optional - specific frequency for this rate</div>
+                            <div class="help-text">Billing frequency (use "Per Trip" for construction waste, etc.)</div>
                             @error('frequency')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror

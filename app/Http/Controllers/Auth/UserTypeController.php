@@ -185,6 +185,7 @@ class UserTypeController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'user_type' => 'contractor',
+            'status' => 'pending', // Contractor must be approved by admin
         ]);
 
         // Handle file upload
@@ -225,9 +226,11 @@ class UserTypeController extends Controller
             // Continue even if event fails (email notification)
         }
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard.contractor');
+        // Don't auto-login, redirect to pending page instead
+        return redirect()->route('contractor.pending')
+            ->with('email', $user->email)
+            ->with('name', $user->name)
+            ->with('success', 'Registration successful! Your account is pending approval.');
     }
 
     /**
@@ -314,15 +317,40 @@ class UserTypeController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
             // Check if user is a contractor
-            if (Auth::user()->user_type === 'contractor') {
-                return redirect()->route('dashboard.contractor');
-            } else {
+            if ($user->user_type !== 'contractor') {
                 Auth::logout();
                 return back()->withErrors([
                     'email' => 'These credentials do not match our records for a contractor account.',
                 ]);
             }
+
+            // CRITICAL: Check contractor approval status
+            if ($user->status === 'rejected') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Your contractor account has been rejected. Please contact support at support@afiaorbit.com for more information.',
+                ])->withInput();
+            }
+
+            if ($user->status === 'pending' || !$user->status) {
+                Auth::logout();
+                return redirect()->route('contractor.pending')
+                    ->with('email', $user->email)
+                    ->with('name', $user->name);
+            }
+
+            // Only allow approved contractors
+            if ($user->status !== 'approved') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Your account status is under review. Please contact support for more information.',
+                ]);
+            }
+
+            return redirect()->route('dashboard.contractor');
         }
 
         return back()->withErrors([

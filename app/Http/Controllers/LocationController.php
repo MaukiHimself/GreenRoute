@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class LocationController extends Controller
 {
@@ -108,6 +109,126 @@ class LocationController extends Controller
             'in_tanzania' => $inTanzania,
             'in_moshi' => $inMoshi,
             'accuracy' => $request->accuracy
+        ]);
+    }
+
+    /**
+     * Get all regions from tbl_locations
+     */
+    public function getRegions()
+    {
+        $regions = DB::table('tbl_locations')
+            ->select('region')
+            ->distinct()
+            ->orderBy('region')
+            ->pluck('region');
+            
+        return response()->json([
+            'success' => true,
+            'data' => $regions
+        ]);
+    }
+    
+    /**
+     * Get districts for a specific region
+     */
+    public function getDistricts(Request $request)
+    {
+        $request->validate([
+            'region' => 'required|string'
+        ]);
+
+        $districts = DB::table('tbl_locations')
+            ->where('region', $request->region)
+            ->select('district')
+            ->distinct()
+            ->orderBy('district')
+            ->pluck('district');
+            
+        return response()->json([
+            'success' => true,
+            'data' => $districts
+        ]);
+    }
+    
+    /**
+     * Get wards for a specific district
+     */
+    public function getWards(Request $request)
+    {
+        $request->validate([
+            'region' => 'required|string',
+            'district' => 'required|string'
+        ]);
+
+        $wards = DB::table('tbl_locations')
+            ->where('region', $request->region)
+            ->where('district', $request->district)
+            ->select('ward')
+            ->distinct()
+            ->orderBy('ward')
+            ->pluck('ward');
+            
+        return response()->json([
+            'success' => true,
+            'data' => $wards
+        ]);
+    }
+    
+    /**
+     * Get streets for a specific ward
+     */
+    public function getStreets(Request $request)
+    {
+        $request->validate([
+            'region' => 'required|string',
+            'district' => 'required|string',
+            'ward' => 'required|string'
+        ]);
+
+        $streets = DB::table('tbl_locations')
+            ->where('region', $request->region)
+            ->where('district', $request->district)
+            ->where('ward', $request->ward)
+            ->whereNotNull('street')
+            ->where('street', '!=', '')
+            ->select('street')
+            ->distinct()
+            ->orderBy('street')
+            ->pluck('street');
+            
+        return response()->json([
+            'success' => true,
+            'data' => $streets
+        ]);
+    }
+
+    /**
+     * Search locations by keyword
+     */
+    public function searchLocations(Request $request)
+    {
+        $request->validate([
+            'keyword' => 'required|string|min:2'
+        ]);
+
+        $keyword = '%' . $request->keyword . '%';
+
+        $results = DB::table('tbl_locations')
+            ->where(function($query) use ($keyword) {
+                $query->where('region', 'LIKE', $keyword)
+                      ->orWhere('district', 'LIKE', $keyword)
+                      ->orWhere('ward', 'LIKE', $keyword)
+                      ->orWhere('street', 'LIKE', $keyword);
+            })
+            ->select('region', 'district', 'ward', 'street')
+            ->distinct()
+            ->limit(50)
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'data' => $results
         ]);
     }
 }

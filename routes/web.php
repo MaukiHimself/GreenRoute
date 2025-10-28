@@ -163,6 +163,11 @@ Route::prefix('client')->group(function () {
 Route::get('/register/contractor', [UserTypeController::class, 'createContractor'])->name('register.contractor');
 Route::post('/register/contractor', [UserTypeController::class, 'storeContractor'])->name('register.contractor.store');
 
+// Contractor pending approval page
+Route::get('/contractor/pending', function () {
+    return view('contractor.pending');
+})->name('contractor.pending');
+
 // Login routes for different user types
 Route::get('/login/admin', [UserTypeController::class, 'loginAdmin'])->name('login.admin');
 Route::post('/login/admin', [UserTypeController::class, 'authenticateAdmin'])->name('login.admin.authenticate');
@@ -217,9 +222,12 @@ Route::middleware(['auth'])->group(function () {
 // Admin routes (protected with admin middleware)
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard.admin');
+        // Contractor Verification & Management
         Route::get('/verification', [App\Http\Controllers\AdminController::class, 'verification'])->name('admin.verification');
-        Route::post('/verification/approve/{user}', [App\Http\Controllers\AdminController::class, 'approveContractor'])->name('admin.verification.approve');
-        Route::post('/verification/reject/{user}', [App\Http\Controllers\AdminController::class, 'rejectContractor'])->name('admin.verification.reject');
+        Route::get('/contractors/{id}', [App\Http\Controllers\AdminController::class, 'showContractor'])->name('admin.contractors.show');
+        Route::post('/contractors/{id}/approve', [App\Http\Controllers\AdminController::class, 'approveContractor'])->name('admin.contractors.approve');
+        Route::post('/contractors/{id}/reject', [App\Http\Controllers\AdminController::class, 'rejectContractor'])->name('admin.contractors.reject');
+        Route::post('/contractors/{id}/toggle-status', [App\Http\Controllers\AdminController::class, 'toggleContractorStatus'])->name('admin.contractors.toggle');
         Route::get('/clients', [App\Http\Controllers\AdminController::class, 'clients'])->name('admin.clients');
         Route::get('/clients/create', [App\Http\Controllers\AdminController::class, 'createClient'])->name('admin.clients.create');
         Route::post('/clients', [App\Http\Controllers\AdminController::class, 'storeClient'])->name('admin.clients.store');
