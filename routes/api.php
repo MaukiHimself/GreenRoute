@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ScheduleApiController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\Api\LocationInvoiceController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\SystemDiagnosticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ use App\Http\Controllers\Api\AnalyticsController;
 Route::get('/user', function (Request $request) {
     return response()->json(['message' => 'API endpoint']);
 });
+
+// System diagnostics - check database and tables
+Route::get('/diagnostics/system', [SystemDiagnosticsController::class, 'checkSystem']);
 
 // ===================================
 // Contractor-Client Linking API
