@@ -112,6 +112,9 @@ Route::get('/locations/search', [LocationController::class, 'searchLocations']);
 // Autocomplete location search (fast, optimized for dropdowns)
 Route::get('/locations/autocomplete', [LocationController::class, 'autocomplete']);
 
+// Diagnostics - check if locations exist
+Route::get('/locations/diagnostics', [LocationController::class, 'diagnostics']);
+
 // Get location statistics
 Route::get('/locations/statistics', [LocationController::class, 'getStatistics']);
 

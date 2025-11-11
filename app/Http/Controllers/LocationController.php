@@ -237,6 +237,31 @@ class LocationController extends Controller
     }
     
     /**
+     * Quick diagnostic check for locations
+     */
+    public function diagnostics()
+    {
+        try {
+            $count = Location::count();
+            $sample = Location::limit(3)->get();
+            
+            return response()->json([
+                'success' => true,
+                'total_locations' => $count,
+                'database_table' => 'tbl_locations',
+                'sample_data' => $sample,
+                'message' => $count > 0 ? 'Locations table is populated' : 'WARNING: Locations table is empty!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Database connection or table issue'
+            ], 500);
+        }
+    }
+    
+    /**
      * Autocomplete location search (fast, cached)
      */
     public function autocomplete(Request $request)
