@@ -174,10 +174,10 @@ class UserTypeController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
-            'site_locations' => ['nullable', 'string', 'max:1000'],
-            'region' => ['required', 'string', 'max:255'],
-            'district' => ['required', 'string', 'max:255'],
-            'ward' => ['required', 'string', 'max:255'],
+            'site_locations' => ['required', 'string', 'max:2000'], // Required - at least one location must be selected
+            'region' => ['nullable', 'string', 'max:255'], // Made nullable as site_locations contains full info
+            'district' => ['nullable', 'string', 'max:255'],
+            'ward' => ['nullable', 'string', 'max:255'],
             'street' => ['nullable', 'string', 'max:255'],
             'license_number' => ['required', 'string', 'max:50'],
             'certificate' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],

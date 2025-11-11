@@ -59,6 +59,96 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
+        
+        /* Location Autocomplete Styles */
+        .location-autocomplete-container {
+            position: relative;
+        }
+        
+        .location-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 50px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            margin-bottom: 10px;
+        }
+        
+        .location-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(5, 92, 92, 0.1);
+            border: 1px solid #055c5c;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #055c5c;
+        }
+        
+        .location-tag .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+            color: #640404;
+            padding: 0 4px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .location-tag .remove-tag:hover {
+            background: #640404;
+            color: white;
+        }
+        
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .autocomplete-suggestions.show {
+            display: block;
+        }
+        
+        .autocomplete-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        .autocomplete-suggestion:hover {
+            background: rgba(5, 92, 92, 0.05);
+        }
+        
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-loading {
+            padding: 12px 16px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .autocomplete-no-results {
+            padding: 12px 16px;
+            text-align: center;
+            color: #999;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -141,10 +231,29 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label for="site_locations" class="form-label primary-dark">Site Locations *</label>
-                            <textarea id="site_locations" name="site_locations" rows="3" required
-                                      class="form-control form-control-lg" placeholder="List your service areas or site locations (separate with commas)">{{ old('site_locations') }}</textarea>
-                            <div class="form-text">Specify all areas where you provide services</div>
+                            <label for="site_locations_input" class="form-label primary-dark">Site Locations *</label>
+                            
+                            <!-- Selected Locations Tags -->
+                            <div id="location-tags-container" class="location-tags">
+                                <span class="text-muted small">Start typing to search locations...</span>
+                            </div>
+                            
+                            <!-- Autocomplete Input Container -->
+                            <div class="location-autocomplete-container">
+                                <input type="text" id="site_locations_input" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Type location name (e.g., ARUSHA, SEKEI, etc.)"
+                                       autocomplete="off">
+                                <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                            
+                            <!-- Hidden field to store selected locations -->
+                            <input type="hidden" name="site_locations" id="site_locations_hidden" required value="{{ old('site_locations') }}">
+                            
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Search and select locations in format: Region → District → Ward → Street
+                            </div>
                         </div>
                         
                         <!-- Business Documentation -->
@@ -228,5 +337,170 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Location Autocomplete System
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('site_locations_input');
+            const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+            const tagsContainer = document.getElementById('location-tags-container');
+            const hiddenField = document.getElementById('site_locations_hidden');
+            
+            let selectedLocations = [];
+            let debounceTimer;
+            
+            // Load old locations if they exist (for validation errors)
+            const oldLocations = hiddenField.value;
+            if (oldLocations) {
+                selectedLocations = oldLocations.split(',').filter(loc => loc.trim());
+                renderTags();
+            }
+            
+            // Input event listener with debouncing
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+                
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+            
+            // Fetch suggestions from API
+            async function fetchSuggestions(query) {
+                suggestionsContainer.innerHTML = '<div class="autocomplete-loading"><i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i>Loading...</div>';
+                suggestionsContainer.classList.add('show');
+                
+                try {
+                    const response = await fetch(`/api/locations/autocomplete?q=${encodeURIComponent(query)}&type=all&limit=15`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data.length > 0) {
+                        displaySuggestions(data.data);
+                    } else {
+                        suggestionsContainer.innerHTML = '<div class="autocomplete-no-results">No locations found</div>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching locations:', error);
+                    suggestionsContainer.innerHTML = '<div class="autocomplete-no-results text-danger">Error loading locations</div>';
+                }
+            }
+            
+            // Display suggestions
+            function displaySuggestions(suggestions) {
+                suggestionsContainer.innerHTML = '';
+                
+                suggestions.forEach(location => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-suggestion';
+                    
+                    // Format: Region → District → Ward → Street
+                    const locationText = location.value;
+                    
+                    div.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
+                            <div>
+                                <div class="fw-semibold">${locationText}</div>
+                                <small class="text-muted">
+                                    ${location.region} • ${location.district} • ${location.ward}
+                                    ${location.street ? ' • ' + location.street : ''}
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    div.addEventListener('click', () => {
+                        selectLocation(location);
+                    });
+                    
+                    suggestionsContainer.appendChild(div);
+                });
+                
+                suggestionsContainer.classList.add('show');
+            }
+            
+            // Select a location
+            function selectLocation(location) {
+                const locationText = location.value;
+                
+                // Check if already selected
+                if (!selectedLocations.includes(locationText)) {
+                    selectedLocations.push(locationText);
+                    renderTags();
+                    updateHiddenField();
+                }
+                
+                // Clear input and hide suggestions
+                input.value = '';
+                hideSuggestions();
+                input.focus();
+            }
+            
+            // Remove a location
+            function removeLocation(locationText) {
+                selectedLocations = selectedLocations.filter(loc => loc !== locationText);
+                renderTags();
+                updateHiddenField();
+            }
+            
+            // Render location tags
+            function renderTags() {
+                if (selectedLocations.length === 0) {
+                    tagsContainer.innerHTML = '<span class="text-muted small">Start typing to search locations...</span>';
+                    return;
+                }
+                
+                tagsContainer.innerHTML = '';
+                
+                selectedLocations.forEach(location => {
+                    const tag = document.createElement('div');
+                    tag.className = 'location-tag';
+                    tag.innerHTML = `
+                        <span>${location}</span>
+                        <span class="remove-tag" title="Remove location">×</span>
+                    `;
+                    
+                    tag.querySelector('.remove-tag').addEventListener('click', () => {
+                        removeLocation(location);
+                    });
+                    
+                    tagsContainer.appendChild(tag);
+                });
+            }
+            
+            // Update hidden field
+            function updateHiddenField() {
+                hiddenField.value = selectedLocations.join(', ');
+            }
+            
+            // Hide suggestions
+            function hideSuggestions() {
+                suggestionsContainer.classList.remove('show');
+            }
+            
+            // Form validation
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                if (selectedLocations.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one site location');
+                    input.focus();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
