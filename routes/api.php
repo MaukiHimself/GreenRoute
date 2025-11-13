@@ -49,6 +49,57 @@ Route::get('/locations/test', function() {
     }
 });
 
+// Simple autocomplete (bypass LocationController)
+Route::get('/locations/autocomplete-simple', function(Request $request) {
+    try {
+        $query = $request->query('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'count' => 0
+            ]);
+        }
+        
+        $results = DB::table('tbl_locations')
+            ->where(function($q) use ($query) {
+                $q->where('region', 'LIKE', "{$query}%")
+                  ->orWhere('district', 'LIKE', "{$query}%")
+                  ->orWhere('ward', 'LIKE', "{$query}%")
+                  ->orWhere('street', 'LIKE', "{$query}%");
+            })
+            ->limit(15)
+            ->get()
+            ->map(function($location) {
+                return [
+                    'value' => implode(' → ', array_filter([
+                        $location->region,
+                        $location->district,
+                        $location->ward,
+                        $location->street
+                    ])),
+                    'region' => $location->region,
+                    'district' => $location->district,
+                    'ward' => $location->ward,
+                    'street' => $location->street,
+                ];
+            });
+        
+        return response()->json([
+            'success' => true,
+            'data' => $results,
+            'count' => count($results)
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
 // Location import endpoints
 Route::post('/locations/import', [LocationImportController::class, 'importFromJson']);
 Route::post('/locations/clear', [LocationImportController::class, 'clearAll']);
