@@ -29,6 +29,26 @@ Route::get('/user', function (Request $request) {
 // System diagnostics - check database and tables
 Route::get('/diagnostics/system', [SystemDiagnosticsController::class, 'checkSystem']);
 
+// Simple test endpoint
+Route::get('/locations/test', function() {
+    try {
+        $count = DB::table('tbl_locations')->count();
+        $sample = DB::table('tbl_locations')->where('region', 'LIKE', 'ARUSHA%')->limit(3)->get();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Working!',
+            'total_locations' => $count,
+            'sample' => $sample
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 // Location import endpoints
 Route::post('/locations/import', [LocationImportController::class, 'importFromJson']);
 Route::post('/locations/clear', [LocationImportController::class, 'clearAll']);
