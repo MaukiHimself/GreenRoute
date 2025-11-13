@@ -279,67 +279,69 @@ class LocationController extends Controller
                 ]);
             }
             
-            $cacheKey = "location:autocomplete:{$type}:{$query}:{$limit}";
+            // Query database directly (no cache to avoid SQLite issues on Render)
+            $queryBuilder = Location::query();
             
-            $results = Cache::remember($cacheKey, 3600, function () use ($query, $type, $limit) {
-                $queryBuilder = Location::query();
-                
-                switch ($type) {
-                    case 'region':
-                        return $queryBuilder->select('region as value')
-                            ->where('region', 'LIKE', "{$query}%")
-                            ->distinct()
-                            ->limit($limit)
-                            ->pluck('value');
-                            
-                    case 'district':
-                        return $queryBuilder->select('district as value')
-                            ->where('district', 'LIKE', "{$query}%")
-                            ->distinct()
-                            ->limit($limit)
-                            ->pluck('value');
-                            
-                    case 'ward':
-                        return $queryBuilder->select('ward as value')
-                            ->where('ward', 'LIKE', "{$query}%")
-                            ->distinct()
-                            ->limit($limit)
-                            ->pluck('value');
-                            
-                    case 'street':
-                        return $queryBuilder->select('street as value')
-                            ->whereNotNull('street')
-                            ->where('street', '!=', '')
-                            ->where('street', 'LIKE', "{$query}%")
-                            ->distinct()
-                            ->limit($limit)
-                            ->pluck('value');
-                            
-                    default: // all
-                        return $queryBuilder->where(function($q) use ($query) {
-                            $q->where('region', 'LIKE', "{$query}%")
-                              ->orWhere('district', 'LIKE', "{$query}%")
-                              ->orWhere('ward', 'LIKE', "{$query}%")
-                              ->orWhere('street', 'LIKE', "{$query}%");
-                        })
+            switch ($type) {
+                case 'region':
+                    $results = $queryBuilder->select('region as value')
+                        ->where('region', 'LIKE', "{$query}%")
+                        ->distinct()
                         ->limit($limit)
-                        ->get()
-                        ->map(function($location) {
-                            return [
-                                'value' => implode(' → ', array_filter([
-                                    $location->region,
-                                    $location->district,
-                                    $location->ward,
-                                    $location->street
-                                ])),
-                                'region' => $location->region,
-                                'district' => $location->district,
-                                'ward' => $location->ward,
-                                'street' => $location->street,
-                            ];
-                        });
-                }
-            });
+                        ->pluck('value');
+                    break;
+                        
+                case 'district':
+                    $results = $queryBuilder->select('district as value')
+                        ->where('district', 'LIKE', "{$query}%")
+                        ->distinct()
+                        ->limit($limit)
+                        ->pluck('value');
+                    break;
+                        
+                case 'ward':
+                    $results = $queryBuilder->select('ward as value')
+                        ->where('ward', 'LIKE', "{$query}%")
+                        ->distinct()
+                        ->limit($limit)
+                        ->pluck('value');
+                    break;
+                        
+                case 'street':
+                    $results = $queryBuilder->select('street as value')
+                        ->whereNotNull('street')
+                        ->where('street', '!=', '')
+                        ->where('street', 'LIKE', "{$query}%")
+                        ->distinct()
+                        ->limit($limit)
+                        ->pluck('value');
+                    break;
+                        
+                default: // all
+                    $results = $queryBuilder->where(function($q) use ($query) {
+                        $q->where('region', 'LIKE', "{$query}%")
+                          ->orWhere('district', 'LIKE', "{$query}%")
+                          ->orWhere('ward', 'LIKE', "{$query}%")
+                          ->orWhere('street', 'LIKE', "{$query}%");
+                    })
+                    ->limit($limit)
+                    ->get()
+                    ->map(function($location) {
+                        return [
+                            'value' => implode(' → ', array_filter([
+                                $location->region,
+                                $location->district,
+                                $location->ward,
+                                $location->street
+                            ])),
+                            'region' => $location->region,
+                            'district' => $location->district,
+                            'ward' => $location->ward,
+                            'street' => $location->street,
+                        ];
+                    });
+                    break;
+            }
             
             return response()->json([
                 'success' => true,
