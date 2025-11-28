@@ -88,7 +88,7 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label for="subtotal" class="form-label">Subtotal ($) *</label>
+                        <label for="subtotal" class="form-label">Subtotal (TZS) *</label>
                         <input type="number" class="form-control @error('subtotal') is-invalid @enderror" id="subtotal" name="subtotal" step="0.01" value="{{ old('subtotal') }}" required>
                         @error('subtotal')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

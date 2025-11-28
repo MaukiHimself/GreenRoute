@@ -86,7 +86,7 @@
                     </div>
                     <div class="mb-2">
                         <strong class="primary-dark">Client:</strong> 
-                        <span class="ms-2">{{ $invoice->client->name }}</span>
+                        <span class="ms-2">{{ $invoice->client ? $invoice->client->name : 'Unknown Client' }}</span>
                     </div>
                     <div class="mb-2">
                         <strong class="primary-dark">Service Type:</strong> 
@@ -144,23 +144,23 @@
                     <table class="table table-borderless">
                         <tr>
                             <td><strong class="primary-dark">Subtotal:</strong></td>
-                            <td class="text-end">${{ number_format($invoice->subtotal, 2) }}</td>
+                            <td class="text-end">TZS {{ number_format($invoice->subtotal, 2) }}</td>
                         </tr>
                         <tr>
                             <td><strong class="primary-dark">Tax ({{ $invoice->tax_rate }}%):</strong></td>
-                            <td class="text-end">${{ number_format($invoice->tax_amount, 2) }}</td>
+                            <td class="text-end">TZS {{ number_format($invoice->tax_amount, 2) }}</td>
                         </tr>
                         <tr class="border-top">
                             <td><strong class="primary-dark">Total Amount:</strong></td>
-                            <td class="text-end"><strong>${{ number_format($invoice->total_amount, 2) }}</strong></td>
+                            <td class="text-end"><strong>TZS {{ number_format($invoice->total_amount, 2) }}</strong></td>
                         </tr>
                         <tr>
                             <td><strong class="primary-dark">Amount Paid:</strong></td>
-                            <td class="text-end">${{ number_format($invoice->amount_paid, 2) }}</td>
+                            <td class="text-end">TZS {{ number_format($invoice->amount_paid, 2) }}</td>
                         </tr>
                         <tr class="border-top">
                             <td><strong class="primary-dark">Balance Due:</strong></td>
-                            <td class="text-end"><strong>${{ number_format($invoice->balance_due, 2) }}</strong></td>
+                            <td class="text-end"><strong>TZS {{ number_format($invoice->balance_due, 2) }}</strong></td>
                         </tr>
                     </table>
                 </div>

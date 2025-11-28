@@ -50,12 +50,12 @@
                                 <tr>
                                     <td class="fw-semibold">{{ $invoice->invoice_number }}</td>
                                     <td>
-                                        <div class="fw-semibold">{{ $invoice->client->name }}</div>
-                                        <small class="text-muted">{{ $invoice->client->email }}</small>
+                                        <div class="fw-semibold">{{ $invoice->client ? $invoice->client->name : 'Unknown Client' }}</div>
+                                        <small class="text-muted">{{ $invoice->client ? $invoice->client->email : 'N/A' }}</small>
                                     </td>
                                     <td class="text-muted">{{ $invoice->service_type }}</td>
                                     <td class="text-muted">{{ $invoice->invoice_date->format('M d, Y') }}</td>
-                                    <td class="fw-semibold">${{ number_format($invoice->total_amount, 2) }}</td>
+                                    <td class="fw-semibold">TZS {{ number_format($invoice->total_amount, 2) }}</td>
                                     <td>
                                         @php $st=$invoice->status; @endphp
                                         <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : 'bg-secondary')) }}">{{ ucfirst($st) }}</span>

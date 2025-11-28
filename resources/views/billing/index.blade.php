@@ -415,7 +415,7 @@
                 <div class="stat-label">Overdue</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value revenue">${{ number_format($stats['total_revenue'], 2) }}</div>
+                <div class="stat-value revenue">TZS {{ number_format($stats['total_revenue'], 2) }}</div>
                 <div class="stat-label">Total Revenue</div>
             </div>
         </div>
@@ -443,10 +443,10 @@
                         @forelse($invoices as $invoice)
                         <tr>
                             <td>{{ $invoice->invoice_number }}</td>
-                            <td>{{ $invoice->client->name }}</td>
+                            <td>{{ $invoice->client ? $invoice->client->name : 'Unknown Client' }}</td>
                             <td>{{ $invoice->service_type }}</td>
-                            <td>${{ number_format($invoice->total_amount, 2) }}</td>
-                            <td>{{ $invoice->due_date->format('M d, Y') }}</td>
+                            <td>TZS {{ number_format($invoice->total_amount, 2) }}</td>
+                            <td>{{ $invoice->due_date ? $invoice->due_date->format('M d, Y') : 'N/A' }}</td>
                             <td>
                                 @if($invoice->status === 'paid')
                                     <span class="badge bg-success">Paid</span>
@@ -461,9 +461,11 @@
                                     <a href="{{ route('billing.show', $invoice) }}" class="btn btn-outline-primary">View</a>
                                     @if($invoice->status !== 'paid')
                                         <button class="btn btn-outline-success" onclick="markPaid({{ $invoice->id }})">Mark Paid</button>
-                                        <button class="btn btn-outline-info" onclick="sendInvoice({{ $invoice->id }})">Send</button>
-                                        @if($invoice->is_overdue)
-                                            <button class="btn btn-outline-danger" onclick="sendReminder({{ $invoice->id }})">Remind</button>
+                                        @if($invoice->client)
+                                            <button class="btn btn-outline-info" onclick="sendInvoice({{ $invoice->id }})">Send</button>
+                                            @if($invoice->is_overdue)
+                                                <button class="btn btn-outline-danger" onclick="sendReminder({{ $invoice->id }})">Remind</button>
+                                            @endif
                                         @endif
                                     @endif
                                 </div>
