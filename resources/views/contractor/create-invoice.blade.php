@@ -89,7 +89,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="subtotal" class="block text-sm font-medium text-gray-700 mb-2">
-                            Subtotal ($) <span class="text-red-500">*</span>
+                            Subtotal (TZS) <span class="text-red-500">*</span>
                         </label>
                         <input type="number" name="subtotal" id="subtotal" step="0.01" min="0" required
                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -110,15 +110,15 @@
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg">
                     <div class="flex justify-between mb-2">
                         <span class="text-gray-600">Subtotal:</span>
-                        <span class="font-semibold" id="display_subtotal">$0.00</span>
+                        <span class="font-semibold" id="display_subtotal">TZS 0.00</span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span class="text-gray-600">Tax:</span>
-                        <span class="font-semibold" id="display_tax">$0.00</span>
+                        <span class="font-semibold" id="display_tax">TZS 0.00</span>
                     </div>
                     <div class="flex justify-between text-lg border-t pt-2">
                         <span class="font-bold text-gray-900">Total:</span>
-                        <span class="font-bold text-blue-600" id="display_total">$0.00</span>
+                        <span class="font-bold text-blue-600" id="display_total">TZS 0.00</span>
                     </div>
                 </div>
 
@@ -172,9 +172,9 @@ function calculateTotals() {
     const taxAmount = subtotal * (taxRate / 100);
     const total = subtotal + taxAmount;
     
-    document.getElementById('display_subtotal').textContent = '$' + subtotal.toFixed(2);
-    document.getElementById('display_tax').textContent = '$' + taxAmount.toFixed(2);
-    document.getElementById('display_total').textContent = '$' + total.toFixed(2);
+    document.getElementById('display_subtotal').textContent = 'TZS ' + subtotal.toFixed(2);
+    document.getElementById('display_tax').textContent = 'TZS ' + taxAmount.toFixed(2);
+    document.getElementById('display_total').textContent = 'TZS ' + total.toFixed(2);
 }
 
 // Alternative: Create invoice via API

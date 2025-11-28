@@ -266,7 +266,7 @@
                         @endif
                     </td>
                     <td>{{ $invoice->service_type }}</td>
-                    <td style="text-align: right;">${{ number_format($invoice->subtotal, 2) }}</td>
+                    <td style="text-align: right;">TZS {{ number_format($invoice->subtotal, 2) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -277,24 +277,24 @@
         <table class="totals-table">
             <tr>
                 <td class="label">Subtotal:</td>
-                <td class="amount">${{ number_format($invoice->subtotal, 2) }}</td>
+                <td class="amount">TZS {{ number_format($invoice->subtotal, 2) }}</td>
             </tr>
             <tr>
                 <td class="label">Tax ({{ number_format($invoice->tax_rate, 2) }}%):</td>
-                <td class="amount">${{ number_format($invoice->tax_amount, 2) }}</td>
+                <td class="amount">TZS {{ number_format($invoice->tax_amount, 2) }}</td>
             </tr>
             <tr class="total-row">
                 <td class="label">Total Amount:</td>
-                <td class="amount">${{ number_format($invoice->total_amount, 2) }}</td>
+                <td class="amount">TZS {{ number_format($invoice->total_amount, 2) }}</td>
             </tr>
             @if($invoice->amount_paid > 0)
                 <tr>
                     <td class="label">Amount Paid:</td>
-                    <td class="amount" style="color: #059669;">${{ number_format($invoice->amount_paid, 2) }}</td>
+                    <td class="amount" style="color: #059669;">TZS {{ number_format($invoice->amount_paid, 2) }}</td>
                 </tr>
                 <tr>
                     <td class="label">Balance Due:</td>
-                    <td class="amount" style="color: #dc2626; font-weight: bold;">${{ number_format($invoice->total_amount - $invoice->amount_paid, 2) }}</td>
+                    <td class="amount" style="color: #dc2626; font-weight: bold;">TZS {{ number_format($invoice->total_amount - $invoice->amount_paid, 2) }}</td>
                 </tr>
             @endif
         </table>

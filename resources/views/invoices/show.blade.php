@@ -101,24 +101,24 @@
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Subtotal:</span>
-                                <span class="font-medium">${{ number_format($invoice->subtotal, 2) }}</span>
+                                <span class="font-medium">TZS {{ number_format($invoice->subtotal, 2) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Tax ({{ $invoice->tax_rate }}%):</span>
-                                <span class="font-medium">${{ number_format($invoice->tax_amount, 2) }}</span>
+                                <span class="font-medium">TZS {{ number_format($invoice->tax_amount, 2) }}</span>
                             </div>
                             <div class="border-t pt-2 flex justify-between text-lg font-bold">
                                 <span>Total Amount:</span>
-                                <span>${{ number_format($invoice->total_amount, 2) }}</span>
+                                <span>TZS {{ number_format($invoice->total_amount, 2) }}</span>
                             </div>
                             @if($invoice->amount_paid > 0)
                                 <div class="flex justify-between text-green-600">
                                     <span>Amount Paid:</span>
-                                    <span class="font-medium">${{ number_format($invoice->amount_paid, 2) }}</span>
+                                    <span class="font-medium">TZS {{ number_format($invoice->amount_paid, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between text-red-600 font-medium">
                                     <span>Balance Due:</span>
-                                    <span>${{ number_format($invoice->balance_due, 2) }}</span>
+                                    <span>TZS {{ number_format($invoice->balance_due, 2) }}</span>
                                 </div>
                             @endif
                         </div>
@@ -157,7 +157,7 @@
                     <div class="text-center">
                         <i class="fas fa-clock text-yellow-500 text-3xl mb-2"></i>
                         <p class="text-yellow-600 font-medium">Pending Payment</p>
-                        <p class="text-sm text-gray-600 mb-4">Balance: ${{ number_format($invoice->balance_due, 2) }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Balance: TZS {{ number_format($invoice->balance_due, 2) }}</p>
                         
                         <form action="{{ route('invoices.mark-paid', $invoice) }}" method="POST">
                             @csrf

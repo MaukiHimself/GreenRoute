@@ -206,7 +206,7 @@
 
                 <!-- Rate Information -->
                 <div class="form-section">
-                    <h3><i class="bi bi-currency-dollar me-2"></i>Rate Information</h3>
+                    <h3><i class="bi bi-cash-coin me-2"></i>Rate Information</h3>
                     
                     <div class="form-row">
                         <div class="form-group">

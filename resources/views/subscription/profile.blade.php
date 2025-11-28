@@ -303,9 +303,9 @@
                                         <h4 class="section-title">Payment Information</h4>
                                         
                                         <div class="mb-4">
-                                            <label for="initial_payment" class="form-label required-field">Initial Payment Amount (USD)</label>
+                                            <label for="initial_payment" class="form-label required-field">Initial Payment Amount (TZS)</label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-light border-end-0">$</span>
+                                                <span class="input-group-text bg-light border-end-0">TZS</span>
                                                 <input type="number" class="form-control @error('initial_payment') is-invalid @enderror border-start-0" 
                                                        id="initial_payment" name="initial_payment" step="0.01" min="0" required placeholder="0.00">
                                             </div>

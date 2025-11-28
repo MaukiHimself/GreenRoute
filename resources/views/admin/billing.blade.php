@@ -226,15 +226,15 @@
         <div class="stats-grid">
             <div class="stat-card green">
                 <div class="stat-label">Total Revenue</div>
-                <div class="stat-value">${{ number_format($totalRevenue, 2) }}</div>
+                <div class="stat-value">TZS {{ number_format($totalRevenue, 2) }}</div>
             </div>
             <div class="stat-card orange">
                 <div class="stat-label">Pending</div>
-                <div class="stat-value">${{ number_format($pendingAmount, 2) }}</div>
+                <div class="stat-value">TZS {{ number_format($pendingAmount, 2) }}</div>
             </div>
             <div class="stat-card red">
                 <div class="stat-label">Overdue</div>
-                <div class="stat-value">${{ number_format($overdueAmount, 2) }}</div>
+                <div class="stat-value">TZS {{ number_format($overdueAmount, 2) }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Invoices</div>
@@ -272,7 +272,7 @@
                                 <td>{{ $invoice->created_at->format('M d, Y') }}</td>
                                 <td>{{ $invoice->client->name ?? 'N/A' }}</td>
                                 <td>{{ $invoice->contractor->name ?? 'N/A' }}</td>
-                                <td><strong>${{ number_format($invoice->total_amount, 2) }}</strong></td>
+                                <td><strong>TZS {{ number_format($invoice->total_amount, 2) }}</strong></td>
                                 <td>{{ $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') : 'N/A' }}</td>
                                 <td>
                                     <span class="badge badge-{{ $invoice->status }}">

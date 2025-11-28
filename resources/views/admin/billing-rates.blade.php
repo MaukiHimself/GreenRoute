@@ -336,7 +336,7 @@
                                 <td><strong>{{ $rate->location }}</strong></td>
                                 <td>{{ $rate->frequency ? ucfirst(str_replace('-', ' ', $rate->frequency)) : 'Any' }}</td>
                                 <td>
-                                    <span class="price-display">${{ number_format($rate->collection_fee, 2) }}</span>
+                                    <span class="price-display">TZS {{ number_format($rate->collection_fee, 2) }}</span>
                                 </td>
                                 <td>{{ $rate->description ?? '-' }}</td>
                                 <td>
