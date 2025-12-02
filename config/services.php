@@ -39,4 +39,12 @@ return [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    'azampay' => [
+        'client_id' => env('AZAMPAY_CLIENT_ID'),
+        'client_secret' => env('AZAMPAY_CLIENT_SECRET'),
+        'api_key' => env('AZAMPAY_API_KEY'),
+        'app_name' => env('AZAMPAY_APP_NAME', 'AFIA ORBIT'),
+        'sandbox' => env('AZAMPAY_SANDBOX', true),
+    ],
+
 ];

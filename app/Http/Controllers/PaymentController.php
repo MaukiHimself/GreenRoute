@@ -90,7 +90,8 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Payment Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'System error processing payment'], 500);
+            // Return actual error for debugging
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
 
@@ -141,7 +142,8 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Bank Payment Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'System error processing payment'], 500);
+             // Return actual error for debugging
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
 
