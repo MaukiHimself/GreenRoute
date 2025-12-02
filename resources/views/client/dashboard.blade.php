@@ -369,7 +369,7 @@
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h4 class="text-success">${{ number_format($totalPaid ?? 0, 2) }}</h4>
+                                    <h4 class="text-success">TZS {{ number_format($totalPaid ?? 0, 2) }}</h4>
                                     <p class="mb-0">Total Paid</p>
                                 </div>
                             </div>
@@ -377,7 +377,7 @@
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h4 class="text-warning">${{ number_format($totalPending ?? 0, 2) }}</h4>
+                                    <h4 class="text-warning">TZS {{ number_format($totalPending ?? 0, 2) }}</h4>
                                     <p class="mb-0">Pending Amount</p>
                                 </div>
                             </div>
@@ -416,7 +416,7 @@
                                         <div class="mb-2 p-2 border-bottom">
                                             <strong>{{ $invoice->invoice_number }}</strong><br>
                                             <small class="text-muted">
-                                                ${{ number_format($invoice->total_amount ?? 0, 2) }} - 
+                                                TZS {{ number_format($invoice->total_amount ?? 0, 2) }} - 
                                                 {{ $invoice->invoice_date ? $invoice->invoice_date->format('M j, Y') : 'N/A' }}
                                             </small>
                                         </div>
@@ -437,7 +437,7 @@
                                     @forelse($monthlyPayments->take(6) as $payment)
                                         <div class="mb-2 d-flex justify-content-between">
                                             <span>{{ date('M Y', mktime(0, 0, 0, $payment->month, 1, $payment->year)) }}</span>
-                                            <strong>${{ number_format($payment->total, 2) }}</strong>
+                                            <strong>TZS {{ number_format($payment->total, 2) }}</strong>
                                         </div>
                                     @empty
                                         <p class="text-muted">No payment history</p>
@@ -606,7 +606,7 @@
                                                         <td>{{ $invoice->invoice_number }}</td>
                                                         <td>{{ $invoice->invoice_date ? $invoice->invoice_date->format('M j, Y') : 'N/A' }}</td>
                                                         <td>{{ $invoice->service_type ?? 'Waste Collection' }}</td>
-                                                        <td>${{ number_format($invoice->total_amount ?? 0, 2) }}</td>
+                                                        <td>TZS {{ number_format($invoice->total_amount ?? 0, 2) }}</td>
                                                         <td>
                                                             <span class="badge {{ ($invoice->status ?? 'sent') === 'paid' ? 'bg-success' : 'bg-warning' }}">
                                                                 {{ ucfirst($invoice->status ?? 'sent') }}
@@ -649,7 +649,7 @@
                                     @forelse($monthlyPayments as $payment)
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>{{ date('M Y', mktime(0, 0, 0, $payment->month, 1, $payment->year)) }}</span>
-                                            <strong>${{ number_format($payment->total, 2) }}</strong>
+                                            <strong>TZS {{ number_format($payment->total, 2) }}</strong>
                                         </div>
                                     @empty
                                         <p class="text-muted">No payment history</p>

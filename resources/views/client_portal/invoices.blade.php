@@ -33,7 +33,7 @@
                                     <td class="fw-semibold">{{ $invoice->invoice_number }}</td>
                                     <td class="text-muted">{{ $invoice->invoice_date->format('M d, Y') }}</td>
                                     <td class="text-muted">{{ $invoice->service_type }}</td>
-                                    <td class="fw-semibold">${{ number_format($invoice->total_amount, 2) }}</td>
+                                    <td class="fw-semibold">TZS {{ number_format($invoice->total_amount, 2) }}</td>
                                     <td>
                                         @php $st=$invoice->status; @endphp
                                         <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : 'bg-secondary')) }}">{{ ucfirst($st) }}</span>

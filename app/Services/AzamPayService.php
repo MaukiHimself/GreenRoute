@@ -138,6 +138,8 @@ class AzamPayService
             'merchantName' => $this->appName,
         ];
 
+        Log::info('AzamPay Bank Checkout Request', $payload);
+
         $response = Http::withToken($token)
             ->withHeaders([
                 'X-API-KEY' => $this->apiKey,
@@ -145,6 +147,22 @@ class AzamPayService
             ])
             ->post("{$this->baseUrl}/azampay/bank/checkout", $payload);
 
-        return $response->json();
+        $result = $response->json();
+        
+        Log::info('AzamPay Bank Checkout Response', [
+            'status' => $response->status(),
+            'body' => $result
+        ]);
+
+        // Normalize response
+        if ($response->successful() && isset($result['success']) && $result['success'] === true) {
+            return $result;
+        }
+
+        // Return error with message
+        return [
+            'success' => false,
+            'message' => $result['message'] ?? $result['error'] ?? $response->body() ?? 'Bank checkout initialization failed'
+        ];
     }
 }
