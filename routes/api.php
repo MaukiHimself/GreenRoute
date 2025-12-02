@@ -62,12 +62,17 @@ Route::get('/locations/autocomplete-simple', function(Request $request) {
             ]);
         }
         
+        // Determine if we should use ILIKE (PostgreSQL) or LIKE (MySQL/SQLite)
+        $driver = DB::connection()->getDriverName();
+        $operator = $driver === 'pgsql' ? 'ILIKE' : 'LIKE';
+        $wildcardQuery = "{$query}%";
+        
         $results = DB::table('tbl_locations')
-            ->where(function($q) use ($query) {
-                $q->where('region', 'LIKE', "{$query}%")
-                  ->orWhere('district', 'LIKE', "{$query}%")
-                  ->orWhere('ward', 'LIKE', "{$query}%")
-                  ->orWhere('street', 'LIKE', "{$query}%");
+            ->where(function($q) use ($wildcardQuery, $operator) {
+                $q->where('region', $operator, $wildcardQuery)
+                  ->orWhere('district', $operator, $wildcardQuery)
+                  ->orWhere('ward', $operator, $wildcardQuery)
+                  ->orWhere('street', $operator, $wildcardQuery);
             })
             ->limit(15)
             ->get()
