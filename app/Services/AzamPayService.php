@@ -89,7 +89,7 @@ class AzamPayService
             'amount' => (string) $amount,
             'currency' => 'TZS',
             'externalId' => $transactionId,
-            'provider' => $provider, // Airtel, Tigo, Halotel, AzamPesa
+            'provider' => $provider, // Airtel, Tigo, Halopesa, Azampesa
         ];
 
         Log::info('AzamPay MNO Checkout Request', $payload);

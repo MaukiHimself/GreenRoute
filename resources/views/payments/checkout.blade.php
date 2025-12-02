@@ -161,12 +161,12 @@
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="provider-option" onclick="selectProvider('Halotel')">
+                                    <div class="provider-option" onclick="selectProvider('Halopesa')">
                                         Halo Pesa
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="provider-option" onclick="selectProvider('AzamPesa')">
+                                    <div class="provider-option" onclick="selectProvider('Azampesa')">
                                         AzamPesa
                                     </div>
                                 </div>

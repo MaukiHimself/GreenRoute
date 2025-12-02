@@ -38,7 +38,7 @@ class PaymentController extends Controller
     public function payMobile(Request $request, Invoice $invoice)
     {
         $request->validate([
-            'provider' => 'required|in:Airtel,Tigo,Halotel,AzamPesa',
+            'provider' => 'required|in:Airtel,Tigo,Halopesa,Azampesa',
             'phone_number' => 'required|string', // Format 255...
         ]);
 
