@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ContractorRoute;
 use App\Models\Client;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,7 +40,18 @@ class RouteManagementController extends Controller
         $existingRoutes = ContractorRoute::where('contractor_id', $contractorId)
             ->pluck('route_name');
         
-        return view('route-management.create', compact('clients', 'existingRoutes'));
+        // Get site locations from tbl_locations grouped by Region -> District
+        $siteLocations = Location::select('region', 'district')
+            ->distinct()
+            ->orderBy('region')
+            ->orderBy('district')
+            ->get()
+            ->groupBy('region')
+            ->map(function ($districts) {
+                return $districts->pluck('district')->unique()->values();
+            });
+        
+        return view('route-management.create', compact('clients', 'existingRoutes', 'siteLocations'));
     }
 
     /**

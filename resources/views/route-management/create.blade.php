@@ -135,9 +135,28 @@
                 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Assign Clients</label>
-                    <div class="mb-3">
-                        <input type="text" id="clientSearch" class="form-control" placeholder="Search by name, address, city, or coordinates..." onkeyup="filterClients()">
+                    
+                    <!-- Site Location Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Filter by Site Location</label>
+                            <select class="form-select" id="siteLocationFilter" onchange="filterByLocation()">
+                                <option value="">All Locations</option>
+                                @foreach($siteLocations as $region => $districts)
+                                    <optgroup label="{{ $region }}">
+                                        @foreach($districts as $district)
+                                            <option value="{{ $district }}">{{ $region }} → {{ $district }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Search Clients</label>
+                            <input type="text" id="clientSearch" class="form-control" placeholder="Search by name, address, city, or coordinates..." onkeyup="filterClients()">
+                        </div>
                     </div>
+                    
                     <div class="mb-2">
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">Select All</button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">Deselect All</button>
@@ -231,16 +250,24 @@
         
         function filterClients() {
             const searchTerm = document.getElementById('clientSearch').value.toLowerCase();
+            const locationFilter = document.getElementById('siteLocationFilter').value.toLowerCase();
             const clientItems = document.querySelectorAll('.client-item');
             
             clientItems.forEach(item => {
                 const text = item.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+                const matchesLocation = locationFilter === '' || text.includes(locationFilter);
+                
+                if (matchesSearch && matchesLocation) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';
                 }
             });
+        }
+        
+        function filterByLocation() {
+            filterClients();
         }
         
         // Initialize count

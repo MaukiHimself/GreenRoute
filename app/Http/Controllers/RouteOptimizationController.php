@@ -3,19 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RouteOptimizationController extends Controller
 {
     public function index()
     {
-        $locations = Client::where('contractor_id', Auth::id())
-            ->select('address')
+        // Get site locations from tbl_locations grouped by Region -> District
+        $siteLocations = Location::select('region', 'district')
             ->distinct()
-            ->pluck('address');
+            ->orderBy('region')
+            ->orderBy('district')
+            ->get()
+            ->groupBy('region')
+            ->map(function ($districts) {
+                return $districts->pluck('district')->unique()->values();
+            });
 
-        return view('routes.index', compact('locations'));
+        return view('routes.index', compact('siteLocations'));
     }
 
     public function optimize(Request $request)
@@ -24,8 +32,19 @@ class RouteOptimizationController extends Controller
             'site_location' => 'required|string'
         ]);
 
+        // Parse the site_location (format: "REGION → DISTRICT")
+        $locationParts = explode(' → ', $validated['site_location']);
+        $region = $locationParts[0] ?? '';
+        $district = $locationParts[1] ?? '';
+
+        // Find clients whose address matches the selected region/district
         $clients = Client::where('contractor_id', Auth::id())
-            ->where('address', 'like', '%' . $validated['site_location'] . '%')
+            ->where(function($query) use ($region, $district) {
+                $query->where('address', 'like', '%' . $region . '%')
+                      ->orWhere('address', 'like', '%' . $district . '%')
+                      ->orWhere('city', 'like', '%' . $district . '%')
+                      ->orWhere('state', 'like', '%' . $region . '%');
+            })
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get();

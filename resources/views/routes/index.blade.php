@@ -274,8 +274,12 @@
                             <label class="form-label">Site Location</label>
                             <select class="form-select" id="siteLocation" required>
                                 <option value="">Select Location</option>
-                                @foreach($locations as $location)
-                                    <option value="{{ $location }}">{{ $location }}</option>
+                                @foreach($siteLocations as $region => $districts)
+                                    <optgroup label="{{ $region }}">
+                                        @foreach($districts as $district)
+                                            <option value="{{ $region }} → {{ $district }}">{{ $region }} → {{ $district }}</option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
                         </div>
@@ -484,6 +488,6 @@
             document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-danger"></i><p class="mt-3 text-muted">Google Maps API authentication failed</p><p class="small text-muted">Please check your API key configuration</p></div></div>';
         };
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcwt701YioUFnzbJp9Bktla31qjKwM304&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap"></script>
 </body>
 </html>
