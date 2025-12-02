@@ -295,20 +295,27 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.href = data.redirect_url;
                 } else {
                     loader.style.display = 'none';
                     this.style.display = 'block';
-                    msgDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                    msgDiv.innerHTML = `<div class="alert alert-danger"><strong>Payment Failed:</strong><br>${data.message || 'Unable to process bank payment'}</div>`;
                 }
             })
             .catch(error => {
                 loader.style.display = 'none';
                 this.style.display = 'block';
-                msgDiv.innerHTML = `<div class="alert alert-danger">An error occurred.</div>`;
+                const errorMsg = error.message || 'Network error. Please check your connection and try again.';
+                msgDiv.innerHTML = `<div class="alert alert-danger"><strong>Error:</strong><br>${errorMsg}</div>`;
+                console.error('Bank payment error:', error);
             });
         });
     }

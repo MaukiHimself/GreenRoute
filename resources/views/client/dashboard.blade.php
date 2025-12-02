@@ -637,8 +637,8 @@
                                 <div class="card-header">Payment Summary</div>
                                 <div class="card-body">
                                     <p><strong>Total Invoices:</strong> {{ $recentInvoices->count() }}</p>
-                                    <p><strong>Total Paid:</strong> <span class="text-success">${{ number_format($totalPaid, 2) }}</span></p>
-                                    <p><strong>Pending:</strong> <span class="text-warning">${{ number_format($totalPending, 2) }}</span></p>
+                                    <p><strong>Total Paid:</strong> <span class="text-success">TZS {{ number_format($totalPaid, 2) }}</span></p>
+                                    <p><strong>Pending:</strong> <span class="text-warning">TZS {{ number_format($totalPending, 2) }}</span></p>
                                     <p><strong>Paid Invoices:</strong> {{ $paidInvoices->count() }}</p>
                                     <p><strong>Pending Invoices:</strong> {{ $pendingInvoices->count() }}</p>
                                 </div>

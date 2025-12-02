@@ -165,15 +165,51 @@ class AzamPayService
             'body' => $result
         ]);
 
-        // Normalize response
-        if ($response->successful() && isset($result['success']) && $result['success'] === true) {
-            return $result;
+        // Normalize response - check various response structures
+        if ($response->successful()) {
+            // Check if response has data wrapper
+            if (isset($result['data']) && is_array($result['data'])) {
+                $data = $result['data'];
+                // Look for redirect URL in various possible fields
+                $redirectUrl = $data['redirectUrl'] ?? $data['redirect_url'] ?? $data['url'] ?? $data['checkoutUrl'] ?? null;
+                
+                if ($redirectUrl) {
+                    return [
+                        'success' => true,
+                        'redirectUrl' => $redirectUrl,
+                        'transactionId' => $data['transactionId'] ?? $data['reference'] ?? null
+                    ];
+                }
+            }
+            
+            // Check if redirect URL is at root level
+            $redirectUrl = $result['redirectUrl'] ?? $result['redirect_url'] ?? $result['url'] ?? $result['checkoutUrl'] ?? null;
+            if ($redirectUrl) {
+                return [
+                    'success' => true,
+                    'redirectUrl' => $redirectUrl,
+                    'transactionId' => $result['transactionId'] ?? $result['reference'] ?? null
+                ];
+            }
         }
 
-        // Return error with message
+        // Return error with detailed message
+        $errorMessage = $result['message'] ?? $result['error'] ?? $result['statusMessage'] ?? null;
+        
+        // If no message, try to extract from nested data
+        if (!$errorMessage && isset($result['data']['message'])) {
+            $errorMessage = $result['data']['message'];
+        }
+        
+        // Log detailed error for debugging
+        Log::error('AzamPay Bank Checkout Failed', [
+            'status' => $response->status(),
+            'result' => $result
+        ]);
+        
         return [
             'success' => false,
-            'message' => $result['message'] ?? $result['error'] ?? $response->body() ?? 'Bank checkout initialization failed'
+            'message' => $errorMessage ?? 'Bank checkout initialization failed. Please contact support.'
         ];
     }
 }
