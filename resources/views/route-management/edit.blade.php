@@ -134,17 +134,18 @@
                     <textarea name="description" class="form-control" rows="3">{{ old('description', $contractorRoute->description) }}</textarea>
                 </div>
                 
-                <!-- Site Location Assignment -->
+                <!-- Site Location Assignment (only if data available) -->
+                @if(count($siteLocations) > 0)
                 <div class="mb-4">
                     <label class="form-label fw-bold">Route Site Location <span class="text-danger">*</span></label>
                     <select name="site_location" id="routeSiteLocation" class="form-select @error('site_location') is-invalid @enderror" required>
                         <option value="">Select site location for this route</option>
                         @php
                             $currentLocationValue = implode('|', array_filter([
-                                $contractorRoute->region,
-                                $contractorRoute->district,
-                                $contractorRoute->ward,
-                                $contractorRoute->street
+                                $contractorRoute->region ?? null,
+                                $contractorRoute->district ?? null,
+                                $contractorRoute->ward ?? null,
+                                $contractorRoute->street ?? null
                             ]));
                         @endphp
                         @foreach($siteLocations as $region => $locations)
@@ -177,6 +178,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                @endif
                 
                 <div class="mb-4">
                     <div class="form-check form-switch">

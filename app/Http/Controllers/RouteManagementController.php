@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class RouteManagementController extends Controller
 {
@@ -40,28 +41,37 @@ class RouteManagementController extends Controller
         $existingRoutes = ContractorRoute::where('contractor_id', $contractorId)
             ->pluck('route_name');
         
-        // Get site locations from tbl_locations (full details)
-        $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
-            ->distinct()
-            ->orderBy('region')
-            ->orderBy('district')
-            ->orderBy('ward')
-            ->orderBy('street')
-            ->get();
+        // Get site locations from tbl_locations (full details) - only if table exists
+        $siteLocations = collect([]);
         
-        // Group by region and get unique combinations
-        $siteLocations = $siteLocationsRaw->groupBy('region')
-            ->map(function ($items) {
-                return $items->map(function ($item) {
-                    return [
-                        'district' => $item->district,
-                        'ward' => $item->ward,
-                        'street' => $item->street,
-                    ];
-                })->unique(function ($item) {
-                    return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
-                })->values();
-            });
+        if (Schema::hasTable('tbl_locations')) {
+            try {
+                $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
+                    ->distinct()
+                    ->orderBy('region')
+                    ->orderBy('district')
+                    ->orderBy('ward')
+                    ->orderBy('street')
+                    ->get();
+                
+                // Group by region and get unique combinations
+                $siteLocations = $siteLocationsRaw->groupBy('region')
+                    ->map(function ($items) {
+                        return $items->map(function ($item) {
+                            return [
+                                'district' => $item->district,
+                                'ward' => $item->ward,
+                                'street' => $item->street,
+                            ];
+                        })->unique(function ($item) {
+                            return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
+                        })->values();
+                    });
+            } catch (\Exception $e) {
+                // If there's an error, use empty collection
+                $siteLocations = collect([]);
+            }
+        }
         
         return view('route-management.create', compact('clients', 'existingRoutes', 'siteLocations'));
     }
@@ -71,14 +81,23 @@ class RouteManagementController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Check if location columns exist in contractor_routes table
+        $hasLocationColumns = Schema::hasColumns('contractor_routes', ['region', 'district', 'ward', 'street']);
+        
+        $validationRules = [
             'route_name' => 'required|string|max:255',
-            'site_location' => 'required|string',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'client_ids' => 'nullable|array',
             'client_ids.*' => 'exists:clients,id',
-        ]);
+        ];
+        
+        // Only require site_location if columns exist
+        if ($hasLocationColumns) {
+            $validationRules['site_location'] = 'required|string';
+        }
+        
+        $validated = $request->validate($validationRules);
 
         $contractorId = Auth::id();
         
@@ -91,25 +110,26 @@ class RouteManagementController extends Controller
             return back()->withErrors(['route_name' => 'A route with this name already exists.'])->withInput();
         }
 
-        // Parse site location (format: "REGION|DISTRICT|WARD|STREET" or "REGION|DISTRICT")
-        $locationParts = explode('|', $validated['site_location']);
-        $region = $locationParts[0] ?? null;
-        $district = $locationParts[1] ?? null;
-        $ward = $locationParts[2] ?? null;
-        $street = $locationParts[3] ?? null;
-
-        // Create the route
-        $route = ContractorRoute::create([
+        // Prepare route data
+        $routeData = [
             'contractor_id' => $contractorId,
             'route_name' => $validated['route_name'],
-            'region' => $region,
-            'district' => $district,
-            'ward' => $ward,
-            'street' => $street,
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'] ?? '#055c5c',
             'is_active' => true,
-        ]);
+        ];
+        
+        // Add location data only if columns exist and data is provided
+        if ($hasLocationColumns && isset($validated['site_location'])) {
+            $locationParts = explode('|', $validated['site_location']);
+            $routeData['region'] = $locationParts[0] ?? null;
+            $routeData['district'] = $locationParts[1] ?? null;
+            $routeData['ward'] = $locationParts[2] ?? null;
+            $routeData['street'] = $locationParts[3] ?? null;
+        }
+
+        // Create the route
+        $route = ContractorRoute::create($routeData);
 
         // Assign clients to this route
         if (!empty($validated['client_ids'])) {
@@ -163,28 +183,36 @@ class RouteManagementController extends Controller
             ->pluck('id')
             ->toArray();
         
-        // Get site locations from tbl_locations (full details)
-        $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
-            ->distinct()
-            ->orderBy('region')
-            ->orderBy('district')
-            ->orderBy('ward')
-            ->orderBy('street')
-            ->get();
+        // Get site locations from tbl_locations (full details) - only if table exists
+        $siteLocations = collect([]);
         
-        // Group by region
-        $siteLocations = $siteLocationsRaw->groupBy('region')
-            ->map(function ($items) {
-                return $items->map(function ($item) {
-                    return [
-                        'district' => $item->district,
-                        'ward' => $item->ward,
-                        'street' => $item->street,
-                    ];
-                })->unique(function ($item) {
-                    return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
-                })->values();
-            });
+        if (Schema::hasTable('tbl_locations')) {
+            try {
+                $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
+                    ->distinct()
+                    ->orderBy('region')
+                    ->orderBy('district')
+                    ->orderBy('ward')
+                    ->orderBy('street')
+                    ->get();
+                
+                // Group by region
+                $siteLocations = $siteLocationsRaw->groupBy('region')
+                    ->map(function ($items) {
+                        return $items->map(function ($item) {
+                            return [
+                                'district' => $item->district,
+                                'ward' => $item->ward,
+                                'street' => $item->street,
+                            ];
+                        })->unique(function ($item) {
+                            return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
+                        })->values();
+                    });
+            } catch (\Exception $e) {
+                $siteLocations = collect([]);
+            }
+        }
         
         return view('route-management.edit', compact('contractorRoute', 'allClients', 'assignedClientIds', 'siteLocations'));
     }
@@ -199,15 +227,24 @@ class RouteManagementController extends Controller
             abort(403, 'Unauthorized action.');
         }
         
-        $validated = $request->validate([
+        // Check if location columns exist in contractor_routes table
+        $hasLocationColumns = Schema::hasColumns('contractor_routes', ['region', 'district', 'ward', 'street']);
+        
+        $validationRules = [
             'route_name' => 'required|string|max:255',
-            'site_location' => 'required|string',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'boolean',
             'client_ids' => 'nullable|array',
             'client_ids.*' => 'exists:clients,id',
-        ]);
+        ];
+        
+        // Only require site_location if columns exist
+        if ($hasLocationColumns) {
+            $validationRules['site_location'] = 'required|string';
+        }
+        
+        $validated = $request->validate($validationRules);
 
         $contractorId = Auth::id();
         $oldRouteName = $contractorRoute->route_name;
@@ -224,24 +261,25 @@ class RouteManagementController extends Controller
             }
         }
 
-        // Parse site location (format: "REGION|DISTRICT|WARD|STREET" or "REGION|DISTRICT")
-        $locationParts = explode('|', $validated['site_location']);
-        $region = $locationParts[0] ?? null;
-        $district = $locationParts[1] ?? null;
-        $ward = $locationParts[2] ?? null;
-        $street = $locationParts[3] ?? null;
-
-        // Update the route
-        $contractorRoute->update([
+        // Prepare update data
+        $updateData = [
             'route_name' => $validated['route_name'],
-            'region' => $region,
-            'district' => $district,
-            'ward' => $ward,
-            'street' => $street,
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'] ?? '#055c5c',
             'is_active' => $validated['is_active'] ?? true,
-        ]);
+        ];
+        
+        // Add location data only if columns exist and data is provided
+        if ($hasLocationColumns && isset($validated['site_location'])) {
+            $locationParts = explode('|', $validated['site_location']);
+            $updateData['region'] = $locationParts[0] ?? null;
+            $updateData['district'] = $locationParts[1] ?? null;
+            $updateData['ward'] = $locationParts[2] ?? null;
+            $updateData['street'] = $locationParts[3] ?? null;
+        }
+
+        // Update the route
+        $contractorRoute->update($updateData);
 
         // If route name changed, update all clients with old route name
         if ($validated['route_name'] !== $oldRouteName) {

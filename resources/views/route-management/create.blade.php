@@ -133,7 +133,8 @@
                     <textarea name="description" class="form-control" rows="3" placeholder="Add notes about this route...">{{ old('description') }}</textarea>
                 </div>
                 
-                <!-- Site Location Assignment -->
+                <!-- Site Location Assignment (only if data available) -->
+                @if(count($siteLocations) > 0)
                 <div class="mb-4">
                     <label class="form-label fw-bold">Route Site Location <span class="text-danger">*</span></label>
                     <select name="site_location" id="routeSiteLocation" class="form-select @error('site_location') is-invalid @enderror" required>
@@ -168,6 +169,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                @endif
                 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Assign Clients</label>
