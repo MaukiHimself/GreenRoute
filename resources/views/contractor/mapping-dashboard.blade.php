@@ -386,7 +386,7 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="stat-card payments">
-                                <h3 id="pendingPayments">$0</h3>
+                                <h3 id="pendingPayments">TZS 0</h3>
                                 <p>Pending Payments</p>
                             </div>
                         </div>
@@ -627,7 +627,7 @@
                 .then(data => {
                     document.getElementById('totalClients').textContent = data.total_clients || 0;
                     document.getElementById('totalInvoices').textContent = data.total_invoices || 0;
-                    document.getElementById('pendingPayments').textContent = '$' + (data.pending_payments || 0);
+                    document.getElementById('pendingPayments').textContent = 'TZS ' + (data.pending_payments || 0);
                     document.getElementById('activeRoutes').textContent = data.active_routes || 0;
                 })
                 .catch(() => {
@@ -652,7 +652,7 @@
                                     <small class="text-muted">${invoice.client_name}</small>
                                 </div>
                                 <div class="text-end">
-                                    <span class="fw-bold text-${invoice.status === 'paid' ? 'success' : 'warning'}">$${invoice.total_amount}</span><br>
+                                    <span class="fw-bold text-${invoice.status === 'paid' ? 'success' : 'warning'}">TZS ${invoice.total_amount}</span><br>
                                     <small class="badge bg-${invoice.status === 'paid' ? 'success' : 'warning'}">${invoice.status}</small>
                                 </div>
                             </div>
