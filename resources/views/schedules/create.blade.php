@@ -119,22 +119,29 @@
                                     Route Name <span class="required-star">*</span>
                                 </label>
                                 <input type="text" class="form-control @error('route_name') is-invalid @enderror" 
-                                       id="route_name" name="route_name" value="{{ old('route_name') }}" required>
+                                       id="route_name" name="route_name" value="{{ old('route_name') }}" 
+                                       list="route_names_list" placeholder="Select or type route name..." required>
+                                <datalist id="route_names_list">
+                                    @foreach($routeNames as $routeName)
+                                        <option value="{{ $routeName }}">{{ $routeName }}</option>
+                                    @endforeach
+                                </datalist>
                                 @error('route_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="site_location" class="form-label">
                                     Site Location <span class="required-star">*</span>
                                 </label>
-                                <select class="form-select @error('site_location') is-invalid @enderror" 
-                                        id="site_location" name="site_location" required>
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location }}" {{ old('site_location') == $location ? 'selected' : '' }}>
-                                            {{ $location }}
-                                        </option>
+                                <input type="text" class="form-control @error('site_location') is-invalid @enderror" 
+                                       id="site_location" name="site_location" value="{{ old('site_location') }}" 
+                                       list="site_locations_list" placeholder="Select or type location..." required>
+                                <datalist id="site_locations_list">
+                                    @foreach($siteLocations as $region => $districts)
+                                        @foreach($districts as $district)
+                                            <option value="{{ $region }} → {{ $district }}">{{ $region }} → {{ $district }}</option>
+                                        @endforeach
                                     @endforeach
-                                </select>
+                                </datalist>
                                 @error('site_location')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -186,5 +193,67 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Enhanced autocomplete functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const routeNameInput = document.getElementById('route_name');
+            const siteLocationInput = document.getElementById('site_location');
+            const routeDatalist = document.getElementById('route_names_list');
+            const locationDatalist = document.getElementById('site_locations_list');
+            
+            // Validate if selected value exists in datalist
+            function validateDatalistInput(input, datalist) {
+                const value = input.value.trim();
+                if (value === '') return;
+                
+                const options = Array.from(datalist.options).map(opt => opt.value);
+                const isValid = options.includes(value);
+                
+                if (isValid) {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                    // Don't mark as invalid while typing
+                }
+            }
+            
+            // Add validation on blur
+            routeNameInput.addEventListener('blur', function() {
+                validateDatalistInput(this, routeDatalist);
+            });
+            
+            siteLocationInput.addEventListener('blur', function() {
+                validateDatalistInput(this, locationDatalist);
+            });
+            
+            // Add click event to show all options when input is focused
+            routeNameInput.addEventListener('focus', function() {
+                this.click();
+            });
+            
+            siteLocationInput.addEventListener('focus', function() {
+                this.click();
+            });
+            
+            // Clear validation classes when typing
+            routeNameInput.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    validateDatalistInput(this, routeDatalist);
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+            
+            siteLocationInput.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    validateDatalistInput(this, locationDatalist);
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

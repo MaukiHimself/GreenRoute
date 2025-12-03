@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Schedule;
 use App\Models\Client;
+use App\Models\Location;
+use App\Models\ContractorRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,13 +34,24 @@ class ScheduleController extends Controller
             return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient'));
         }
         
-        // Default view for other user types
-        $locations = Client::where('contractor_id', Auth::id())
-            ->select('address')
+        // Get site locations from tbl_locations grouped by Region → District
+        $siteLocations = Location::select('region', 'district')
             ->distinct()
-            ->pluck('address');
+            ->orderBy('region')
+            ->orderBy('district')
+            ->get()
+            ->groupBy('region')
+            ->map(function ($districts) {
+                return $districts->pluck('district')->unique()->values();
+            });
+        
+        // Get route names from contractor's routes
+        $routeNames = ContractorRoute::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('route_name')
+            ->pluck('route_name');
 
-        return view('schedules.create', compact('locations'));
+        return view('schedules.create', compact('siteLocations', 'routeNames'));
     }
 
     public function store(Request $request)
@@ -187,9 +200,27 @@ class ScheduleController extends Controller
             'comments' => 'nullable|string'
         ]);
 
+        // Parse the site_location (format: "REGION → DISTRICT")
+        $locationParts = explode(' → ', $validated['site_location']);
+        $region = $locationParts[0] ?? '';
+        $district = $locationParts[1] ?? '';
+
         // Get clients at this location
         $clients = Client::where('contractor_id', Auth::id())
-            ->where('address', 'like', '%' . $validated['site_location'] . '%')
+            ->where(function($query) use ($region, $district, $validated) {
+                // Try to match region/district from the parsed location
+                if (!empty($region) && !empty($district)) {
+                    $query->where(function($q) use ($region, $district) {
+                        $q->where('address', 'like', '%' . $region . '%')
+                          ->orWhere('address', 'like', '%' . $district . '%')
+                          ->orWhere('city', 'like', '%' . $district . '%')
+                          ->orWhere('state', 'like', '%' . $region . '%');
+                    });
+                } else {
+                    // Fallback to full location string match
+                    $query->where('address', 'like', '%' . $validated['site_location'] . '%');
+                }
+            })
             ->get();
 
         // Create schedule for each client
