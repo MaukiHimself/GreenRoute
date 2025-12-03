@@ -31,45 +31,40 @@ class ScheduleController extends Controller
             $clients = Client::where('contractor_id', Auth::id())->get();
             $assignedClient = Client::where('contractor_id', Auth::id())->first();
             
-            // Get full site locations (Region-District-Ward-Street) from tbl_locations
-            $siteLocations = Location::select('region', 'district', 'ward', 'street')
+            // Get simplified site locations - only from routes that this contractor has created
+            // This is much faster than loading all locations from tbl_locations
+            $contractorRoutes = ContractorRoute::where('contractor_id', Auth::id())
+                ->where('is_active', true)
+                ->whereNotNull('region')
+                ->whereNotNull('district')
+                ->select('region', 'district', 'ward', 'street')
                 ->distinct()
                 ->orderBy('region')
                 ->orderBy('district')
-                ->orderBy('ward')
-                ->orderBy('street')
-                ->get()
-                ->map(function ($location) {
-                    return [
-                        'full' => implode(' - ', array_filter([
-                            $location->region,
-                            $location->district,
-                            $location->ward,
-                            $location->street
-                        ])),
-                        'region' => $location->region,
-                        'district' => $location->district,
-                        'ward' => $location->ward,
-                        'street' => $location->street,
-                    ];
-                })
-                ->unique('full')
-                ->values();
+                ->get();
             
-            // Get routes with their assigned locations
-            $routes = ContractorRoute::where('contractor_id', Auth::id())
-                ->where('is_active', true)
-                ->orderBy('route_name')
-                ->get()
-                ->map(function ($route) {
-                    $route->location_full = implode(' - ', array_filter([
+            $siteLocations = $contractorRoutes->map(function ($route) {
+                return [
+                    'full' => implode(' - ', array_filter([
                         $route->region,
                         $route->district,
                         $route->ward,
                         $route->street
-                    ]));
-                    return $route;
-                });
+                    ])),
+                    'region' => $route->region,
+                    'district' => $route->district,
+                    'ward' => $route->ward,
+                    'street' => $route->street,
+                ];
+            })->unique('full')->values();
+            
+            // Get routes with their assigned locations (only active routes with locations)
+            $routes = ContractorRoute::where('contractor_id', Auth::id())
+                ->where('is_active', true)
+                ->whereNotNull('region')
+                ->select('id', 'route_name', 'region', 'district', 'ward', 'street')
+                ->orderBy('route_name')
+                ->get();
             
             return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient', 'siteLocations', 'routes'));
         }

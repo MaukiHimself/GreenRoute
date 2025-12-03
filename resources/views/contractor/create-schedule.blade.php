@@ -138,19 +138,36 @@
                         <label for="site_location" class="form-label">
                             Site Location <span class="required-star">*</span>
                         </label>
-                        <select name="site_location" id="site_location" required class="form-select" onchange="loadRoutesBySiteLocation()">
-                            <option value="">Select site location</option>
-                            @foreach($siteLocations as $location)
-                            <option value="{{ $location['full'] }}" 
-                                    data-region="{{ $location['region'] }}"
-                                    data-district="{{ $location['district'] }}"
-                                    data-ward="{{ $location['ward'] }}"
-                                    data-street="{{ $location['street'] }}">
-                                {{ $location['full'] }}
-                            </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Format: Region - District - Ward - Street</small>
+                        
+                        @if(count($siteLocations) > 0)
+                            <select name="site_location" id="site_location" required class="form-select" onchange="loadRoutesBySiteLocation()">
+                                <option value="">Select site location</option>
+                                @foreach($siteLocations as $location)
+                                <option value="{{ $location['full'] }}" 
+                                        data-region="{{ $location['region'] }}"
+                                        data-district="{{ $location['district'] }}"
+                                        data-ward="{{ $location['ward'] }}"
+                                        data-street="{{ $location['street'] }}">
+                                    {{ $location['full'] }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Format: Region - District - Ward - Street</small>
+                        @else
+                            <div class="alert alert-warning" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>No site locations available yet.</strong><br>
+                                Please go to <a href="{{ route('route-management.index') }}" class="alert-link">Route Management</a> first and:
+                                <ol class="mb-0 mt-2">
+                                    <li>Create a new route OR edit an existing route</li>
+                                    <li>Assign a site location (Region - District - Ward - Street) to the route</li>
+                                    <li>Then return here to create schedules</li>
+                                </ol>
+                            </div>
+                            <select name="site_location" id="site_location" required class="form-select" disabled>
+                                <option value="">No locations available - Please create routes first</option>
+                            </select>
+                        @endif
                     </div>
 
                     <!-- Route Name Selection (filtered by site location) -->
@@ -299,7 +316,7 @@
                         <a href="{{ route('schedules.index') }}" class="btn-secondary-custom">
                             <i class="bi bi-x-circle me-1"></i> Cancel
                         </a>
-                        <button type="submit" class="btn-primary-custom">
+                        <button type="submit" class="btn-primary-custom" {{ count($siteLocations) == 0 ? 'disabled' : '' }}>
                             <i class="bi bi-check-circle me-1"></i> Create Schedule
                         </button>
                     </div>
@@ -314,6 +331,9 @@
 // Store all clients data and routes data
 const allClientsData = @json($clients);
 const allRoutesData = @json($routes);
+
+console.log('Clients loaded:', allClientsData.length);
+console.log('Routes loaded:', allRoutesData.length);
 
 // Function to load routes based on selected site location
 function loadRoutesBySiteLocation() {
@@ -335,18 +355,24 @@ function loadRoutesBySiteLocation() {
     if (!selectedLocation) return;
     
     // Get selected location parts
-    const region = selectedOption.dataset.region;
-    const district = selectedOption.dataset.district;
-    const ward = selectedOption.dataset.ward;
-    const street = selectedOption.dataset.street;
+    const region = selectedOption.dataset.region || '';
+    const district = selectedOption.dataset.district || '';
+    const ward = selectedOption.dataset.ward || '';
+    const street = selectedOption.dataset.street || '';
     
-    // Filter routes that match this location
+    console.log('Selected location:', { region, district, ward, street });
+    
+    // Filter routes that match this location (handle null/undefined values)
     const matchingRoutes = allRoutesData.filter(route => {
-        return route.region === region && 
-               route.district === district && 
-               route.ward === ward && 
-               route.street === street;
+        const regionMatch = route.region === region;
+        const districtMatch = route.district === district;
+        const wardMatch = (route.ward || '') === ward;
+        const streetMatch = (route.street || '') === street;
+        
+        return regionMatch && districtMatch && wardMatch && streetMatch;
     });
+    
+    console.log('Matching routes found:', matchingRoutes.length);
     
     if (matchingRoutes.length > 0) {
         routeNameSection.style.display = 'block';
@@ -360,7 +386,7 @@ function loadRoutesBySiteLocation() {
             routeNameSelect.appendChild(option);
         });
     } else {
-        alert('No routes found for this site location. Please create a route in Route Management first.');
+        alert('No routes found for this site location. Please create a route in Route Management first and assign it to this location.');
     }
 }
 
