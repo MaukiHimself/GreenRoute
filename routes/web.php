@@ -222,6 +222,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/location/clients', [App\Http\Controllers\LocationController::class, 'getClientLocations'])->name('location.clients');
     Route::post('/location/geocode', [App\Http\Controllers\LocationController::class, 'geocodeAddress'])->name('location.geocode');
     Route::post('/location/validate', [App\Http\Controllers\LocationController::class, 'validateLocationAccuracy'])->name('location.validate');
+    
+    // Location Hierarchy API (for dependent dropdowns)
+    Route::get('/location/regions', [App\Http\Controllers\LocationController::class, 'getRegions'])->name('location.regions');
+    Route::get('/location/districts', [App\Http\Controllers\LocationController::class, 'getDistricts'])->name('location.districts');
+    Route::get('/location/wards', [App\Http\Controllers\LocationController::class, 'getWards'])->name('location.wards');
+    Route::get('/location/streets', [App\Http\Controllers\LocationController::class, 'getStreets'])->name('location.streets');
 });
 
 // Admin routes (protected with admin middleware)

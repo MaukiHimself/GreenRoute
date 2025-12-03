@@ -41,39 +41,22 @@ class RouteManagementController extends Controller
         $existingRoutes = ContractorRoute::where('contractor_id', $contractorId)
             ->pluck('route_name');
         
-        // Get site locations from tbl_locations (full details) - only if table exists
-        $siteLocations = collect([]);
+        // Get regions only - for initial dropdown
+        // This is much faster than loading all locations
+        $regions = [];
         
         if (Schema::hasTable('tbl_locations')) {
             try {
-                $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
+                $regions = Location::select('region')
                     ->distinct()
                     ->orderBy('region')
-                    ->orderBy('district')
-                    ->orderBy('ward')
-                    ->orderBy('street')
-                    ->get();
-                
-                // Group by region and get unique combinations
-                $siteLocations = $siteLocationsRaw->groupBy('region')
-                    ->map(function ($items) {
-                        return $items->map(function ($item) {
-                            return [
-                                'district' => $item->district,
-                                'ward' => $item->ward,
-                                'street' => $item->street,
-                            ];
-                        })->unique(function ($item) {
-                            return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
-                        })->values();
-                    });
+                    ->pluck('region');
             } catch (\Exception $e) {
-                // If there's an error, use empty collection
-                $siteLocations = collect([]);
+                $regions = [];
             }
         }
         
-        return view('route-management.create', compact('clients', 'existingRoutes', 'siteLocations'));
+        return view('route-management.create', compact('clients', 'existingRoutes', 'regions'));
     }
 
     /**
@@ -183,38 +166,21 @@ class RouteManagementController extends Controller
             ->pluck('id')
             ->toArray();
         
-        // Get site locations from tbl_locations (full details) - only if table exists
-        $siteLocations = collect([]);
+        // Get regions only - for initial dropdown
+        $regions = [];
         
         if (Schema::hasTable('tbl_locations')) {
             try {
-                $siteLocationsRaw = Location::select('region', 'district', 'ward', 'street')
+                $regions = Location::select('region')
                     ->distinct()
                     ->orderBy('region')
-                    ->orderBy('district')
-                    ->orderBy('ward')
-                    ->orderBy('street')
-                    ->get();
-                
-                // Group by region
-                $siteLocations = $siteLocationsRaw->groupBy('region')
-                    ->map(function ($items) {
-                        return $items->map(function ($item) {
-                            return [
-                                'district' => $item->district,
-                                'ward' => $item->ward,
-                                'street' => $item->street,
-                            ];
-                        })->unique(function ($item) {
-                            return $item['district'] . '|' . $item['ward'] . '|' . $item['street'];
-                        })->values();
-                    });
+                    ->pluck('region');
             } catch (\Exception $e) {
-                $siteLocations = collect([]);
+                $regions = [];
             }
         }
         
-        return view('route-management.edit', compact('contractorRoute', 'allClients', 'assignedClientIds', 'siteLocations'));
+        return view('route-management.edit', compact('contractorRoute', 'allClients', 'assignedClientIds', 'regions'));
     }
 
     /**

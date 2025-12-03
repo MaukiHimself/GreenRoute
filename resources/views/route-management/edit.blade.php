@@ -134,51 +134,43 @@
                     <textarea name="description" class="form-control" rows="3">{{ old('description', $contractorRoute->description) }}</textarea>
                 </div>
                 
-                <!-- Site Location Assignment (only if data available) -->
-                @if(count($siteLocations) > 0)
+                <!-- Site Location Assignment -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Route Site Location <span class="text-danger">*</span></label>
-                    <select name="site_location" id="routeSiteLocation" class="form-select @error('site_location') is-invalid @enderror" required>
-                        <option value="">Select site location for this route</option>
-                        @php
-                            $currentLocationValue = implode('|', array_filter([
-                                $contractorRoute->region ?? null,
-                                $contractorRoute->district ?? null,
-                                $contractorRoute->ward ?? null,
-                                $contractorRoute->street ?? null
-                            ]));
-                        @endphp
-                        @foreach($siteLocations as $region => $locations)
-                            <optgroup label="{{ $region }}">
-                                @foreach($locations as $location)
-                                    @php
-                                        $locationValue = implode('|', array_filter([
-                                            $region,
-                                            $location['district'],
-                                            $location['ward'],
-                                            $location['street']
-                                        ]));
-                                        $locationDisplay = implode(' - ', array_filter([
-                                            $region,
-                                            $location['district'],
-                                            $location['ward'],
-                                            $location['street']
-                                        ]));
-                                    @endphp
-                                    <option value="{{ $locationValue }}" 
-                                            {{ (old('site_location', $currentLocationValue) == $locationValue) ? 'selected' : '' }}>
-                                        {{ $locationDisplay }}
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <select id="regionSelect" class="form-select" required onchange="loadDistricts()">
+                                <option value="">Select Region</option>
+                                @foreach($regions as $region)
+                                    <option value="{{ $region }}" {{ (old('region', $contractorRoute->region) == $region) ? 'selected' : '' }}>
+                                        {{ $region }}
                                     </option>
                                 @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
-                    <small class="form-text text-muted">Assign this route to a specific site location (Region - District - Ward - Street). This will be used in Collection Schedules.</small>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="districtSelect" class="form-select" required onchange="loadWards()" disabled>
+                                <option value="">Select District</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="wardSelect" class="form-select" required onchange="loadStreets()" disabled>
+                                <option value="">Select Ward</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="streetSelect" class="form-select" onchange="updateLocationValue()" disabled>
+                                <option value="">Select Street</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" name="site_location" id="site_location_input" required 
+                           value="{{ implode('|', array_filter([$contractorRoute->region, $contractorRoute->district, $contractorRoute->ward, $contractorRoute->street])) }}">
+                    <small class="form-text text-muted">Assign this route to a specific site location (Region - District - Ward - Street).</small>
                     @error('site_location')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
-                @endif
                 
                 <div class="mb-4">
                     <div class="form-check form-switch">
@@ -301,8 +293,148 @@
             });
         }
         
-        // Initialize count
+        // Dependent Dropdown Logic
+        const regionSelect = document.getElementById('regionSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        const streetSelect = document.getElementById('streetSelect');
+        const siteLocationInput = document.getElementById('site_location_input');
+        
+        // Initial values
+        const initialDistrict = @json($contractorRoute->district);
+        const initialWard = @json($contractorRoute->ward);
+        const initialStreet = @json($contractorRoute->street);
+
+        function updateLocationValue() {
+            const region = regionSelect.value;
+            const district = districtSelect.value;
+            const ward = wardSelect.value;
+            const street = streetSelect.value;
+
+            if (region && district && ward) {
+                const parts = [region, district, ward];
+                if (street) parts.push(street);
+                siteLocationInput.value = parts.join('|');
+            } else {
+                siteLocationInput.value = '';
+            }
+        }
+
+        function loadDistricts(selectedValue = null) {
+            const region = regionSelect.value;
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            districtSelect.disabled = true;
+            if (!selectedValue) { // Don't clear if pre-filling chain
+                wardSelect.innerHTML = '<option value="">Select Ward</option>';
+                wardSelect.disabled = true;
+                streetSelect.innerHTML = '<option value="">Select Street</option>';
+                streetSelect.disabled = true;
+            }
+            updateLocationValue();
+
+            if (region) {
+                fetch(`/location/districts?region=${encodeURIComponent(region)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            data.data.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district;
+                                option.textContent = district;
+                                if (selectedValue && district === selectedValue) {
+                                    option.selected = true;
+                                }
+                                districtSelect.appendChild(option);
+                            });
+                            districtSelect.disabled = false;
+                            
+                            // If we just set the value, trigger next level
+                            if (selectedValue) {
+                                loadWards(initialWard);
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error loading districts:', error));
+            }
+        }
+
+        function loadWards(selectedValue = null) {
+            const region = regionSelect.value;
+            const district = districtSelect.value;
+            wardSelect.innerHTML = '<option value="">Select Ward</option>';
+            wardSelect.disabled = true;
+            if (!selectedValue) {
+                streetSelect.innerHTML = '<option value="">Select Street</option>';
+                streetSelect.disabled = true;
+            }
+            updateLocationValue();
+
+            if (region && district) {
+                fetch(`/location/wards?region=${encodeURIComponent(region)}&district=${encodeURIComponent(district)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            data.data.forEach(ward => {
+                                const option = document.createElement('option');
+                                option.value = ward;
+                                option.textContent = ward;
+                                if (selectedValue && ward === selectedValue) {
+                                    option.selected = true;
+                                }
+                                wardSelect.appendChild(option);
+                            });
+                            wardSelect.disabled = false;
+                            
+                            if (selectedValue) {
+                                loadStreets(initialStreet);
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error loading wards:', error));
+            }
+        }
+
+        function loadStreets(selectedValue = null) {
+            const region = regionSelect.value;
+            const district = districtSelect.value;
+            const ward = wardSelect.value;
+            streetSelect.innerHTML = '<option value="">Select Street</option>';
+            streetSelect.disabled = true;
+            updateLocationValue();
+
+            if (region && district && ward) {
+                fetch(`/location/streets?region=${encodeURIComponent(region)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            data.data.forEach(street => {
+                                const option = document.createElement('option');
+                                option.value = street;
+                                option.textContent = street;
+                                if (selectedValue && street === selectedValue) {
+                                    option.selected = true;
+                                }
+                                streetSelect.appendChild(option);
+                            });
+                            streetSelect.disabled = false;
+                            
+                            // Ensure final value is updated
+                            if (selectedValue) {
+                                updateLocationValue();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error loading streets:', error));
+            }
+        }
+        
+        // Initialize
         updateCount();
+        
+        // Pre-load if region is selected
+        if (regionSelect.value) {
+            loadDistricts(initialDistrict);
+        }
     </script>
 </body>
 </html>
