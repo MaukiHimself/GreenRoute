@@ -98,6 +98,57 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(100, 4, 4, 0.3);
     }
+    
+    /* Autocomplete Dropdown Styles */
+    .autocomplete-dropdown {
+        position: absolute;
+        z-index: 1000;
+        background: white;
+        border: 2px solid var(--primary-teal);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        width: calc(100% - 4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: none;
+    }
+    
+    .autocomplete-dropdown.show {
+        display: block;
+    }
+    
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.2s;
+    }
+    
+    .autocomplete-item:hover {
+        background: #f0f9f9;
+        color: var(--primary-teal);
+        font-weight: 600;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item.active {
+        background: var(--primary-teal);
+        color: white;
+        font-weight: 600;
+    }
+    
+    #locationAutocomplete {
+        position: relative;
+    }
+    
+    #locationAutocomplete:focus {
+        border-color: var(--primary-teal);
+        box-shadow: 0 0 0 3px rgba(5, 92, 92, 0.1);
+    }
 </style>
 @endsection
 
@@ -136,36 +187,15 @@
                     <!-- Site Location Selection -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Site Location <span class="required-star">*</span></label>
-                        <div class="card bg-light border-0">
-                            <div class="card-body">
-                                <div class="row g-2">
-                                    <div class="col-md-3">
-                                        <select id="regionSelect" class="form-select" onchange="loadDistricts()">
-                                            <option value="">Select Region</option>
-                                            @foreach($regions as $region)
-                                                <option value="{{ $region }}">{{ $region }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <select id="districtSelect" class="form-select" onchange="loadWards()" disabled>
-                                            <option value="">Select District</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <select id="wardSelect" class="form-select" onchange="loadStreets()" disabled>
-                                            <option value="">Select Ward</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <select id="streetSelect" class="form-select" onchange="loadLocationData()" disabled>
-                                            <option value="">Select Street (Optional)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <input type="hidden" name="site_location" id="site_location_input">
-                            </div>
-                        </div>
+                        <input type="text" 
+                               id="locationAutocomplete" 
+                               class="form-control" 
+                               placeholder="Type to search location (e.g., ARUSHA → ARUMERU → Ward → Street)"
+                               autocomplete="off"
+                               required>
+                        <input type="hidden" name="site_location" id="site_location_input">
+                        <div id="locationDropdown" class="autocomplete-dropdown"></div>
+                        <small class="text-muted">Search and select a location in format: Region → District → Ward → Street</small>
                     </div>
 
                     <!-- Route Name Selection -->
@@ -331,118 +361,143 @@ const allRoutesData = @json($routes);
 console.log('Clients loaded:', allClientsData.length);
 console.log('Routes loaded:', allRoutesData.length);
 
-// Dependent Dropdowns Logic
-function loadDistricts() {
-    const region = document.getElementById('regionSelect').value;
-    const districtSelect = document.getElementById('districtSelect');
-    
-    // Reset lower dropdowns
-    districtSelect.innerHTML = '<option value="">Select District</option>';
-    districtSelect.disabled = true;
-    document.getElementById('wardSelect').innerHTML = '<option value="">Select Ward</option>';
-    document.getElementById('wardSelect').disabled = true;
-    document.getElementById('streetSelect').innerHTML = '<option value="">Select Street (Optional)</option>';
-    document.getElementById('streetSelect').disabled = true;
-    
-    // Clear selection
-    updateLocationInput();
-    loadLocationData(); // Refresh lists based on just Region
+// Build unique location list from clients
+const locationList = [];
+const locationMap = new Map();
 
-    if (region) {
-        fetch(`/location/districts?region=${encodeURIComponent(region)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    data.data.forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d;
-                        opt.textContent = d;
-                        districtSelect.appendChild(opt);
-                    });
-                    districtSelect.disabled = false;
-                }
+allClientsData.forEach(client => {
+    if (client.region) {
+        const parts = [
+            client.region,
+            client.district,
+            client.ward,
+            client.street
+        ].filter(p => p);
+        
+        const locationString = parts.join(' → ');
+        const locationKey = parts.join('|');
+        
+        if (!locationMap.has(locationKey)) {
+            locationMap.set(locationKey, {
+                display: locationString,
+                region: client.region,
+                district: client.district,
+                ward: client.ward,
+                street: client.street
             });
+            locationList.push({
+                display: locationString,
+                region: client.region,
+                district: client.district,
+                ward: client.ward,
+                street: client.street,
+                key: locationKey
+            });
+        }
     }
+});
+
+console.log('Unique locations:', locationList.length);
+
+// Autocomplete functionality
+const autocompleteInput = document.getElementById('locationAutocomplete');
+const dropdown = document.getElementById('locationDropdown');
+let currentFocus = -1;
+let selectedLocation = null;
+
+autocompleteInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    dropdown.innerHTML = '';
+    currentFocus = -1;
+    
+    if (searchTerm.length < 2) {
+        dropdown.classList.remove('show');
+        return;
+    }
+    
+    const filtered = locationList.filter(loc => 
+        loc.display.toLowerCase().includes(searchTerm)
+    );
+    
+    if (filtered.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-item" style="color: #999;">No locations found</div>';
+        dropdown.classList.add('show');
+        return;
+    }
+    
+    filtered.slice(0, 50).forEach((loc, index) => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.textContent = loc.display;
+        item.dataset.index = index;
+        
+        item.addEventListener('click', function() {
+            selectLocation(loc);
+        });
+        
+        dropdown.appendChild(item);
+    });
+    
+    dropdown.classList.add('show');
+});
+
+// Keyboard navigation
+autocompleteInput.addEventListener('keydown', function(e) {
+    const items = dropdown.querySelectorAll('.autocomplete-item');
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentFocus++;
+        if (currentFocus >= items.length) currentFocus = 0;
+        setActive(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentFocus--;
+        if (currentFocus < 0) currentFocus = items.length - 1;
+        setActive(items);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentFocus > -1 && items[currentFocus]) {
+            items[currentFocus].click();
+        }
+    } else if (e.key === 'Escape') {
+        dropdown.classList.remove('show');
+    }
+});
+
+function setActive(items) {
+    items.forEach((item, index) => {
+        if (index === currentFocus) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('active');
+        }
+    });
 }
 
-function loadWards() {
-    const region = document.getElementById('regionSelect').value;
-    const district = document.getElementById('districtSelect').value;
-    const wardSelect = document.getElementById('wardSelect');
+function selectLocation(location) {
+    selectedLocation = location;
+    autocompleteInput.value = location.display;
+    dropdown.classList.remove('show');
     
-    wardSelect.innerHTML = '<option value="">Select Ward</option>';
-    wardSelect.disabled = true;
-    document.getElementById('streetSelect').innerHTML = '<option value="">Select Street (Optional)</option>';
-    document.getElementById('streetSelect').disabled = true;
-    
-    updateLocationInput();
-    loadLocationData();
-
-    if (region && district) {
-        fetch(`/location/wards?region=${encodeURIComponent(region)}&district=${encodeURIComponent(district)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    data.data.forEach(w => {
-                        const opt = document.createElement('option');
-                        opt.value = w;
-                        opt.textContent = w;
-                        wardSelect.appendChild(opt);
-                    });
-                    wardSelect.disabled = false;
-                }
-            });
-    }
-}
-
-function loadStreets() {
-    const region = document.getElementById('regionSelect').value;
-    const district = document.getElementById('districtSelect').value;
-    const ward = document.getElementById('wardSelect').value;
-    const streetSelect = document.getElementById('streetSelect');
-    
-    streetSelect.innerHTML = '<option value="">Select Street (Optional)</option>';
-    streetSelect.disabled = true;
-    
-    updateLocationInput();
-    loadLocationData();
-
-    if (region && district && ward) {
-        fetch(`/location/streets?region=${encodeURIComponent(region)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    data.data.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s;
-                        opt.textContent = s;
-                        streetSelect.appendChild(opt);
-                    });
-                    streetSelect.disabled = false;
-                }
-            });
-    }
-}
-
-function updateLocationInput() {
-    const region = document.getElementById('regionSelect').value;
-    const district = document.getElementById('districtSelect').value;
-    const ward = document.getElementById('wardSelect').value;
-    const street = document.getElementById('streetSelect').value;
-    
-    const parts = [region, district, ward, street].filter(p => p);
+    // Update hidden input
+    const parts = [location.region, location.district, location.ward, location.street].filter(p => p);
     document.getElementById('site_location_input').value = parts.join('|');
+    
+    // Load routes and clients for this location
+    loadLocationData(location);
 }
 
-function loadLocationData() {
-    updateLocationInput();
-    
-    const region = document.getElementById('regionSelect').value;
-    const district = document.getElementById('districtSelect').value;
-    const ward = document.getElementById('wardSelect').value;
-    const street = document.getElementById('streetSelect').value;
-    
-    if (!region) {
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!autocompleteInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+function loadLocationData(location) {
+    if (!location || !location.region) {
         document.getElementById('routeNameSection').style.display = 'none';
         document.getElementById('clientsSection').style.display = 'none';
         return;
@@ -450,10 +505,10 @@ function loadLocationData() {
     
     // Filter Routes
     const matchingRoutes = allRoutesData.filter(route => {
-        if (route.region !== region) return false;
-        if (district && route.district !== district) return false;
-        if (ward && route.ward && route.ward !== ward) return false;
-        if (street && route.street && route.street !== street) return false;
+        if (route.region !== location.region) return false;
+        if (location.district && route.district !== location.district) return false;
+        if (location.ward && route.ward && route.ward !== location.ward) return false;
+        if (location.street && route.street && route.street !== location.street) return false;
         return true;
     });
     
@@ -469,10 +524,10 @@ function loadLocationData() {
     
     // Filter Clients
     const matchingClients = allClientsData.filter(client => {
-        if (client.region !== region) return false;
-        if (district && client.district !== district) return false;
-        if (ward && client.ward !== ward) return false;
-        if (street && client.street !== street) return false;
+        if (client.region !== location.region) return false;
+        if (location.district && client.district !== location.district) return false;
+        if (location.ward && client.ward !== location.ward) return false;
+        if (location.street && client.street !== location.street) return false;
         return true;
     });
     
@@ -524,12 +579,13 @@ function deselectAll() {
 
 // Form validation
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-    const region = document.getElementById('regionSelect').value;
+    const locationInput = document.getElementById('site_location_input').value;
     const routeName = document.getElementById('route_name').value;
     
-    if (!region) {
+    if (!locationInput || !selectedLocation) {
         e.preventDefault();
-        alert('Please select a Site Location (at least Region).');
+        alert('Please select a Site Location from the autocomplete dropdown.');
+        autocompleteInput.focus();
         return false;
     }
     
