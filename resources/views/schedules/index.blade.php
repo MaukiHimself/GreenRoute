@@ -283,10 +283,10 @@
                             <td>
                                 <span class="badge bg-primary">{{ $schedule->route ?? 'N/A' }}</span>
                             </td>
-                            <td>{{ $schedule->client->name }}</td>
+                            <td>{{ $schedule->client->name ?? 'Unknown Client' }}</td>
                             <td>{{ $schedule->pickup_location }}</td>
                             <td>{{ $schedule->pickup_address }}</td>
-                            <td>{{ $schedule->pickup_date->format('M d, Y') }}</td>
+                            <td>{{ $schedule->pickup_date ? $schedule->pickup_date->format('M d, Y') : 'N/A' }}</td>
                             <td>
                                 <select class="form-select form-select-sm" onchange="updateStatus({{ $schedule->id }}, this.value)">
                                     <option value="scheduled" {{ $schedule->status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>

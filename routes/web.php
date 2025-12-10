@@ -118,13 +118,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('feedback', [ContractorFeedbackController::class, 'index'])->name('contractor.feedback.index');
     });
     
-    // Schedule management for contractors
-    Route::resource('schedules', ScheduleController::class);
-    
     // Invoice management for contractors
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
     Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    
+    // Client Groups by Location
+    Route::prefix('client-groups')->group(function () {
+        Route::get('/', [App\Http\Controllers\ClientGroupController::class, 'index'])->name('client-groups.index');
+        Route::get('/group-clients', [App\Http\Controllers\ClientGroupController::class, 'getGroupClients'])->name('client-groups.clients');
+        Route::post('/create-schedule', [App\Http\Controllers\ClientGroupController::class, 'createScheduleForGroups'])->name('client-groups.create-schedule');
+        Route::post('/create-invoice', [App\Http\Controllers\ClientGroupController::class, 'createInvoiceForGroups'])->name('client-groups.create-invoice');
+    });
 });
 
 /*Route::middleware('auth')->group(function () {*/

@@ -522,6 +522,21 @@ function deselectAll() {
     updateCount();
 }
 
+// Pre-select clients from session (if coming from Client Groups page)
+const preSelectedIds = @json(session('selected_client_ids', []));
+if (preSelectedIds.length > 0) {
+    // Wait for clients to be rendered, then select them
+    setTimeout(() => {
+        preSelectedIds.forEach(id => {
+            const checkbox = document.querySelector(`.client-checkbox[value="${id}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+        updateCount();
+    }, 500);
+}
+
 // Form validation
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     const region = document.getElementById('regionSelect').value;

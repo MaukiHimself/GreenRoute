@@ -71,7 +71,7 @@ class ContractorController extends Controller
             ->map(function($invoice) {
                 return [
                     'id' => $invoice->id,
-                    'client_name' => $invoice->client->name,
+                    'client_name' => $invoice->client ? $invoice->client->name : 'Unknown Client',
                     'total_amount' => number_format($invoice->total_amount, 2),
                     'status' => $invoice->status
                 ];
@@ -92,7 +92,7 @@ class ContractorController extends Controller
             ->map(function($schedule) {
                 return [
                     'pickup_location' => $schedule->pickup_location,
-                    'client_name' => $schedule->client->name,
+                    'client_name' => $schedule->client ? $schedule->client->name : 'Unknown Client',
                     'pickup_date' => $schedule->pickup_date->format('M d, Y'),
                     'pickup_time' => $schedule->pickup_time
                 ];

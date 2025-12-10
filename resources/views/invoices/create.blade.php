@@ -354,5 +354,24 @@
     document.getElementById('subtotal').addEventListener('input', calculateTotals);
     document.getElementById('tax_rate').addEventListener('input', calculateTotals);
     calculateTotals();
+    
+    // Pre-select clients from session (if coming from Client Groups page)
+    const preSelectedIds = @json(session('selected_client_ids', []));
+    if (preSelectedIds.length > 0) {
+        // Auto-enable group mode
+        document.querySelector('input[name="mode"][value="group"]').checked = true;
+        toggleMode();
+        
+        // Wait for clients to be rendered, then select them
+        setTimeout(() => {
+            preSelectedIds.forEach(id => {
+                const checkbox = document.querySelector(`.client-checkbox[value="${id}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+            updateCount();
+        }, 500);
+    }
     </script>
 </x-dashboard-layout>

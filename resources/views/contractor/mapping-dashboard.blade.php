@@ -295,6 +295,10 @@
                         <i class="bi bi-people"></i>
                         <span>Client Database</span>
                     </a>
+                    <a class="nav-link" href="/client-groups">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Client Groups</span>
+                    </a>
                     <a class="nav-link" href="#" data-tab="billing">
                         <i class="bi bi-credit-card"></i>
                         <span>Billing & Payments</span>
