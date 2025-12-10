@@ -178,6 +178,7 @@
         width: 100%;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         display: none;
+        box-sizing: border-box;
     }
     
     .autocomplete-dropdown.show {
@@ -189,6 +190,8 @@
         cursor: pointer;
         border-bottom: 1px solid #f0f0f0;
         transition: all 0.2s;
+        white-space: normal;
+        word-break: break-word;
     }
     
     .autocomplete-item:hover {
