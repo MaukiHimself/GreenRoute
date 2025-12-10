@@ -109,9 +109,10 @@
         border-radius: 0 0 8px 8px;
         max-height: 300px;
         overflow-y: auto;
-        width: calc(100% - 4px);
+        width: 100%; /* Fix overflow: Use 100% of parent container */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         display: none;
+        box-sizing: border-box; /* Ensure padding/border is included in width */
     }
     
     .autocomplete-dropdown.show {
@@ -123,6 +124,8 @@
         cursor: pointer;
         border-bottom: 1px solid #f0f0f0;
         transition: all 0.2s;
+        white-space: normal; /* Allow text wrapping */
+        word-break: break-word; /* Break long words if needed */
     }
     
     .autocomplete-item:hover {
@@ -169,20 +172,7 @@
                 <form id="scheduleForm" method="POST" action="{{ route('schedules.store') }}">
                     @csrf
 
-                    <!-- Contractor Info -->
-                    <div class="info-box">
-                        <h3><i class="bi bi-person-badge me-2"></i>Your Information</h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <strong style="color: var(--primary-teal);">Registration Number:</strong>
-                                <span class="ms-2">{{ $contractor->registration_number }}</span>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong style="color: var(--primary-teal);">Assigned Client:</strong>
-                                <span class="ms-2">{{ $assignedClient->name ?? 'Not assigned' }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Contractor Info Removed -->
 
                     <!-- Site Location Selection -->
                     <div class="mb-4">
