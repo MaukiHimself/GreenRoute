@@ -459,6 +459,12 @@
                             <div id="address-loading" style="position: absolute; right: 10px; top: 10px; display: none;">
                                 <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
                             </div>
+                            
+                            <!-- Hidden fields for structured location data -->
+                            <input type="hidden" id="region" name="region" value="{{ old('region') }}">
+                            <input type="hidden" id="district" name="district" value="{{ old('district') }}">
+                            <input type="hidden" id="ward" name="ward" value="{{ old('ward') }}">
+                            <input type="hidden" id="street" name="street" value="{{ old('street') }}">
                         </div>
                         <div class="form-text text-muted">Start typing to search from known locations (Region, District, Ward, Street)</div>
                         @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -604,6 +610,19 @@
                         div.addEventListener('click', function() {
                             input.value = item.value;
                             suggestionsBox.style.display = 'none';
+                            
+                            // Populate hidden location fields for database storage
+                            document.getElementById('region').value = item.region || '';
+                            document.getElementById('district').value = item.district || '';
+                            document.getElementById('ward').value = item.ward || '';
+                            document.getElementById('street').value = item.street || '';
+                            
+                            console.log('Location selected:', {
+                                region: item.region,
+                                district: item.district,
+                                ward: item.ward,
+                                street: item.street
+                            });
                             
                             // Auto-fill City and State if available
                             const cityInput = document.getElementById('city');

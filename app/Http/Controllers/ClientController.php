@@ -55,6 +55,10 @@ class ClientController extends Controller
             'phone_2' => 'required|string|max:20',
             'phone_3' => 'nullable|string|max:20',
             'address' => 'required|string',
+            'region' => 'nullable|string|max:100',
+            'district' => 'nullable|string|max:100',
+            'ward' => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:100',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'city' => 'nullable|string|max:100',
@@ -176,12 +180,16 @@ class ClientController extends Controller
             'phone_2' => 'required|string|max:20',
             'phone_3' => 'nullable|string|max:20',
             'address' => 'required|string',
+            'region' => 'nullable|string|max:100',
+            'district' => 'nullable|string|max:100',
+            'ward' => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:100',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:10',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:100',
             'status' => 'required|in:active,inactive'
         ]);
 

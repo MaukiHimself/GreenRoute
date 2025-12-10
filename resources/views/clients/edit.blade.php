@@ -390,8 +390,22 @@
                     <h5 class="mb-3" style="color: var(--primary-color);">Location Information</h5>
                     <div class="mb-3">
                         <label for="address" class="form-label required">Site Location/Address</label>
-                        <input type="text" class="form-control @error('address') is-invalid @enderror" 
-                               id="address" name="address" value="{{ old('address', $client->address) }}" required>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control @error('address') is-invalid @enderror" 
+                                   id="address" name="address" value="{{ old('address', $client->address) }}" required
+                                   placeholder="Search for address (Region, District, Ward, or Street)" autocomplete="off">
+                            <div id="address-suggestions" class="autocomplete-suggestions"></div>
+                            <div id="address-loading" style="position: absolute; right: 10px; top: 10px; display: none;">
+                                <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                            </div>
+                            
+                            <!-- Hidden fields for structured location data -->
+                            <input type="hidden" id="region" name="region" value="{{ old('region', $client->region) }}">
+                            <input type="hidden" id="district" name="district" value="{{ old('district', $client->district) }}">
+                            <input type="hidden" id="ward" name="ward" value="{{ old('ward', $client->ward) }}">
+                            <input type="hidden" id="street" name="street" value="{{ old('street', $client->street) }}">
+                        </div>
+                        <div class="form-text text-muted">Start typing to search from known locations (Region, District, Ward, Street)</div>
                         @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     
@@ -473,6 +487,104 @@
     </div>
 
     <script>
+        // Address Autocomplete Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('address');
+            const suggestionsBox = document.getElementById('address-suggestions');
+            const loadingSpinner = document.getElementById('address-loading');
+            let debounceTimer;
+
+            if (input && suggestionsBox) {
+                input.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    
+                    clearTimeout(debounceTimer);
+                    suggestionsBox.style.display = 'none';
+                    
+                    if (query.length < 2) {
+                        return;
+                    }
+
+                    debounceTimer = setTimeout(() => {
+                        // Show loading spinner
+                        if(loadingSpinner) loadingSpinner.style.display = 'block';
+
+                        // Use the simple autocomplete endpoint
+                        fetch(`/api/locations/autocomplete-simple?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if(loadingSpinner) loadingSpinner.style.display = 'none';
+                                
+                                if (data.success && data.data && data.data.length > 0) {
+                                    renderSuggestions(data.data);
+                                } else {
+                                    suggestionsBox.style.display = 'none';
+                                }
+                            })
+                            .catch(err => {
+                                if(loadingSpinner) loadingSpinner.style.display = 'none';
+                                console.error('Autocomplete error:', err);
+                                suggestionsBox.style.display = 'none';
+                            });
+                    }, 300);
+                });
+
+                function renderSuggestions(suggestions) {
+                    suggestionsBox.innerHTML = '';
+                    
+                    suggestions.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-suggestion';
+                        
+                        div.innerHTML = `
+                            <div>${item.value}</div>
+                        `;
+                        
+                        div.addEventListener('click', function() {
+                            input.value = item.value;
+                            suggestionsBox.style.display = 'none';
+                            
+                            // Populate hidden location fields for database storage
+                            document.getElementById('region').value = item.region || '';
+                            document.getElementById('district').value = item.district || '';
+                            document.getElementById('ward').value = item.ward || '';
+                            document.getElementById('street').value = item.street || '';
+                            
+                            console.log('Location selected:', {
+                                region: item.region,
+                                district: item.district,
+                                ward: item.ward,
+                                street: item.street
+                            });
+                            
+                            // Auto-fill City and State if available
+                            const cityInput = document.getElementById('city');
+                            const stateInput = document.getElementById('state');
+                            
+                            if (cityInput && !cityInput.value) {
+                                cityInput.value = item.district || item.region || '';
+                            }
+                            
+                            if (stateInput && !stateInput.value) {
+                                stateInput.value = item.region || '';
+                            }
+                        });
+                        
+                        suggestionsBox.appendChild(div);
+                    });
+                    
+                    suggestionsBox.style.display = 'block';
+                }
+
+                // Close suggestions when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (e.target !== input && e.target !== suggestionsBox && !suggestionsBox.contains(e.target)) {
+                        suggestionsBox.style.display = 'none';
+                    }
+                });
+            }
+        });
+        
         function getLocation() {
             const locationBtn = document.getElementById('getLocationBtn');
             const statusDiv = document.getElementById('locationStatus');
