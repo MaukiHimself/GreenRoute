@@ -35,33 +35,57 @@ class BillingController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
+        $rules = [
+            'mode' => 'required|in:single,group',
             'service_type' => 'required|string',
             'description' => 'required|string',
             'subtotal' => 'required|numeric|min:0',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'due_date' => 'required|date|after:today',
             'notes' => 'nullable|string'
-        ]);
+        ];
 
-        $invoice = new Invoice();
-        $invoice->invoice_number = $invoice->generateInvoiceNumber();
-        $invoice->contractor_id = Auth::id();
-        $invoice->client_id = $validated['client_id'];
-        $invoice->invoice_date = now();
-        $invoice->due_date = $validated['due_date'];
-        $invoice->status = 'draft';
-        $invoice->subtotal = $validated['subtotal'];
-        $invoice->tax_rate = $validated['tax_rate'] ?? 0;
-        $invoice->service_type = $validated['service_type'];
-        $invoice->description = $validated['description'];
-        $invoice->notes = $validated['notes'];
-        $invoice->amount_paid = 0;
-        
-        $invoice->calculateTotals();
+        if ($request->input('mode') === 'single') {
+            $rules['client_id'] = 'required|exists:clients,id';
+        } else {
+            $rules['client_ids'] = 'required|array|min:1';
+            $rules['client_ids.*'] = 'exists:clients,id';
+        }
 
-        return redirect()->route('billing.index')->with('success', 'Invoice created successfully');
+        $validated = $request->validate($rules);
+
+        $clientIds = [];
+        if ($request->input('mode') === 'single') {
+            $clientIds[] = $validated['client_id'];
+        } else {
+            $clientIds = $validated['client_ids'];
+        }
+
+        $count = 0;
+        foreach ($clientIds as $clientId) {
+            $invoice = new Invoice();
+            $invoice->invoice_number = $invoice->generateInvoiceNumber();
+            $invoice->contractor_id = Auth::id();
+            $invoice->client_id = $clientId;
+            $invoice->invoice_date = now();
+            $invoice->due_date = $validated['due_date'];
+            $invoice->status = 'draft';
+            $invoice->subtotal = $validated['subtotal'];
+            $invoice->tax_rate = $validated['tax_rate'] ?? 0;
+            $invoice->service_type = $validated['service_type'];
+            $invoice->description = $validated['description'];
+            $invoice->notes = $validated['notes'];
+            $invoice->amount_paid = 0;
+            
+            $invoice->calculateTotals();
+            $count++;
+        }
+
+        $message = $count > 1 
+            ? "$count invoices created successfully" 
+            : 'Invoice created successfully';
+
+        return redirect()->route('billing.index')->with('success', $message);
     }
 
     public function show(Invoice $invoice)

@@ -100,13 +100,15 @@
                     <label class="form-label fw-bold primary-dark">Invoice Mode</label>
                     <div class="d-flex gap-4">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="mode" id="mode_single" value="single" checked onchange="toggleMode()">
+                            <input class="form-check-input" type="radio" name="mode" id="mode_single" value="single" 
+                                   {{ old('mode', 'single') == 'single' ? 'checked' : '' }} onchange="toggleMode()">
                             <label class="form-check-label" for="mode_single">
                                 Single Client
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="mode" id="mode_group" value="group" onchange="toggleMode()">
+                            <input class="form-check-input" type="radio" name="mode" id="mode_group" value="group" 
+                                   {{ old('mode') == 'group' ? 'checked' : '' }} onchange="toggleMode()">
                             <label class="form-check-label" for="mode_group">
                                 Group Invoice (by Location)
                             </label>
@@ -442,6 +444,9 @@
         document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = false);
         updateCount();
     }
+
+    // Initialize mode on page load
+    document.addEventListener('DOMContentLoaded', toggleMode);
     </script>
 </body>
 </html>
