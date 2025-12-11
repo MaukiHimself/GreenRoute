@@ -715,59 +715,81 @@
             locationBtn.disabled = true;
             statusDiv.innerHTML = '<div class="alert alert-info" style="background: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 8px;"><i class="bi bi-info-circle me-2"></i>Requesting location access...</div>';
             
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lng = position.coords.longitude.toFixed(6);
-                    
-                    latInput.value = lat;
-                    lngInput.value = lng;
-                    
-                    // CRITICAL: Validate Tanzania bounds
-                    if (lat < -11.7 || lat > -0.95 || lng < 29.3 || lng > 40.5) {
-                        statusDiv.innerHTML = '<div class="alert alert-warning" style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px;"><i class="bi bi-exclamation-triangle me-2"></i><strong>Warning:</strong> Location appears to be outside Tanzania (Lat: ' + lat + ', Lng: ' + lng + '). Please verify coordinates are correct.</div>';
-                        showNotification('Warning: Location appears to be outside Tanzania', 'error');
-                    } else {
-                        statusDiv.innerHTML = '<div class="alert alert-success" style="background: #d1e7dd; color: #0f5132; padding: 1rem; border-radius: 8px;"><i class="bi bi-check-circle me-2"></i><strong>Success!</strong> Location captured: ' + lat + ', ' + lng + '</div>';
-                        showNotification('Location captured successfully!', 'success');
-                    }
-                    
-                    // Update button
-                    locationBtn.innerHTML = '<i class="bi bi-check2"></i> Location Captured';
-                    locationBtn.disabled = false;
-                    locationBtn.classList.remove('btn-info');
-                    locationBtn.classList.add('btn-success');
-                },
-                function(error) {
-                    let errorMessage = 'Error getting location: ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage += 'Location access denied. Please enable location services and try again.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage += 'Location information is unavailable. Please check your device settings.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage += 'Location request timed out. Please try again.';
-                            break;
-                        default:
-                            errorMessage += 'An unknown error occurred.';
-                            break;
-                    }
-                    
-                    statusDiv.innerHTML = '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px;"><i class="bi bi-x-circle me-2"></i><strong>Error:</strong> ' + errorMessage + '</div>';
-                    
-                    // Restore button
-                    locationBtn.innerHTML = originalText;
-                    locationBtn.disabled = false;
-                    
-                    showNotification(errorMessage, 'error');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 0
+            };
+            
+            const successCallback = function(position) {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+                
+                latInput.value = lat;
+                lngInput.value = lng;
+                
+                // CRITICAL: Validate Tanzania bounds
+                if (lat < -11.7 || lat > -0.95 || lng < 29.3 || lng > 40.5) {
+                    statusDiv.innerHTML = '<div class="alert alert-warning" style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px;"><i class="bi bi-exclamation-triangle me-2"></i><strong>Warning:</strong> Location appears to be outside Tanzania (Lat: ' + lat + ', Lng: ' + lng + '). Please verify coordinates are correct.</div>';
+                    showNotification('Warning: Location appears to be outside Tanzania', 'error');
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-success" style="background: #d1e7dd; color: #0f5132; padding: 1rem; border-radius: 8px;"><i class="bi bi-check-circle me-2"></i><strong>Success!</strong> Location captured: ' + lat + ', ' + lng + '</div>';
+                    showNotification('Location captured successfully!', 'success');
                 }
+                
+                // Update button
+                locationBtn.innerHTML = '<i class="bi bi-check2"></i> Location Captured';
+                locationBtn.disabled = false;
+                locationBtn.classList.remove('btn-info');
+                locationBtn.classList.add('btn-success');
+            };
+
+            const errorCallback = function(error) {
+                // If high accuracy failed, try low accuracy
+                if (options.enableHighAccuracy) {
+                    statusDiv.innerHTML = '<div class="alert alert-info" style="background: #cff4fc; color: #055160; padding: 1rem; border-radius: 8px;"><i class="bi bi-arrow-repeat me-2"></i>High accuracy failed. Trying simpler location method...</div>';
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        successCallback,
+                        finalErrorCallback,
+                        { enableHighAccuracy: false, timeout: 30000, maximumAge: 0 }
+                    );
+                    return;
+                }
+                
+                finalErrorCallback(error);
+            };
+
+            const finalErrorCallback = function(error) {
+                let errorMessage = 'Error getting location: ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Location access denied. Please enable location services and try again.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location information is unavailable. Please check your device settings.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Location request timed out. Please try again or move to an open area.';
+                        break;
+                    default:
+                        errorMessage += 'An unknown error occurred (' + error.message + ').';
+                        break;
+                }
+                
+                statusDiv.innerHTML = '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px;"><i class="bi bi-x-circle me-2"></i><strong>Error:</strong> ' + errorMessage + ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="getLocation()">Retry</button></div>';
+                
+                // Restore button
+                locationBtn.innerHTML = originalText;
+                locationBtn.disabled = false;
+                
+                showNotification(errorMessage, 'error');
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                successCallback,
+                errorCallback,
+                options
             );
         }
         
