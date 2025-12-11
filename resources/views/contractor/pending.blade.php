@@ -260,7 +260,7 @@
         </div>
         
         <div class="mt-4">
-            <a href="{{ route('welcome') }}" class="btn-primary">
+            <a href="{{ url('/') }}" class="btn-primary">
                 <i class="bi bi-house-door me-2"></i>Return to Homepage
             </a>
             <a href="{{ route('login.contractor') }}" class="btn-secondary">

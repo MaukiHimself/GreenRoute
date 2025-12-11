@@ -87,8 +87,8 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// Contractor routes (require email verification)
-Route::middleware(['auth', 'verified'])->group(function () {
+// Contractor routes (require admin verification)
+Route::middleware(['auth', 'verified.contractor'])->group(function () {
     Route::get('/dashboard/contractor', [DashboardController::class, 'contractorDashboard'])->name('dashboard.contractor');
     
     // Contractor routes
