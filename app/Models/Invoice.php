@@ -132,8 +132,8 @@ class Invoice extends Model
 
     public function calculateTotals()
     {
-        $this->tax_amount = $this->subtotal * ($this->tax_rate / 100);
-        $this->total_amount = $this->subtotal + $this->tax_amount;
+        $this->tax_amount = 0;
+        $this->total_amount = $this->subtotal;
         $this->save();
     }
 }

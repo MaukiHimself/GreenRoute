@@ -182,17 +182,12 @@
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6" id="subtotal_section">
                         <label for="subtotal" class="form-label">Subtotal (TZS) *</label>
-                        <input type="number" class="form-control @error('subtotal') is-invalid @enderror" id="subtotal" name="subtotal" step="0.01" value="{{ old('subtotal') }}" required>
+                        <input type="number" class="form-control @error('subtotal') is-invalid @enderror" id="subtotal" name="subtotal" step="0.01" value="{{ old('subtotal') }}">
                         @error('subtotal')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-4">
-                        <label for="tax_rate" class="form-label">Tax Rate (%)</label>
-                        <input type="number" class="form-control @error('tax_rate') is-invalid @enderror" id="tax_rate" name="tax_rate" step="0.01" value="{{ old('tax_rate', 0) }}">
-                        @error('tax_rate')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label for="due_date" class="form-label">Due Date *</label>
                         <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date') }}" required>
                         @error('due_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -222,15 +217,25 @@
         const singleSection = document.getElementById('single_client_section');
         const groupSection = document.getElementById('group_section');
         const clientSelect = document.getElementById('client_id');
+        const subtotalSection = document.getElementById('subtotal_section');
+        const subtotalInput = document.getElementById('subtotal');
         
         if (mode === 'group') {
             singleSection.style.display = 'none';
             groupSection.style.display = 'block';
             clientSelect.required = false;
+            
+            // Hide subtotal for group mode (calculated automatically)
+            subtotalSection.style.display = 'none';
+            subtotalInput.required = false;
         } else {
             singleSection.style.display = 'block';
             groupSection.style.display = 'none';
             clientSelect.required = true;
+            
+            // Show subtotal for single mode
+            subtotalSection.style.display = 'block';
+            subtotalInput.required = true;
         }
     }
 

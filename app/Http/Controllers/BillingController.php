@@ -90,7 +90,6 @@ class BillingController extends Controller
             'mode' => 'required|in:single,group',
             'service_type' => 'required|string',
             'description' => 'required|string',
-            'tax_rate' => 'nullable|numeric|min:0|max:100',
             'due_date' => 'required|date|after:today',
             'notes' => 'nullable|string'
         ];
@@ -138,7 +137,7 @@ class BillingController extends Controller
                 $invoice->subtotal = $validated['subtotal'];
             }
 
-            $invoice->tax_rate = $validated['tax_rate'] ?? 0;
+            $invoice->tax_rate = 0; // Tax rate removed
             $invoice->service_type = $validated['service_type'];
             $invoice->description = $validated['description'];
             $invoice->notes = $validated['notes'];
