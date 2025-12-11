@@ -318,9 +318,54 @@
                             <label for="category" class="form-label required">Category/Type</label>
                             <select class="form-select @error('category') is-invalid @enderror" id="category" name="category" required>
                                 <option value="">Select Category</option>
-                                <option value="residential" {{ old('category', $client->category) == 'residential' ? 'selected' : '' }}>Residential</option>
-                                <option value="commercial" {{ old('category', $client->category) == 'commercial' ? 'selected' : '' }}>Commercial</option>
-                                <option value="industrial" {{ old('category', $client->category) == 'industrial' ? 'selected' : '' }}>Industrial</option>
+                                <option value="Residential (Unplanned)" {{ old('category', $client->category) == 'Residential (Unplanned)' ? 'selected' : '' }}>Residential (Unplanned) - 10,000 TZS</option>
+                                <option value="Residential (Planned/Modern)" {{ old('category', $client->category) == 'Residential (Planned/Modern)' ? 'selected' : '' }}>Residential (Planned/Modern) - 20,000 TZS</option>
+                                <option value="Commercial Residential (Apartment)" {{ old('category', $client->category) == 'Commercial Residential (Apartment)' ? 'selected' : '' }}>Commercial Residential (Apartment) - 30,000 TZS</option>
+                                <option value="Commercial Residential Storey" {{ old('category', $client->category) == 'Commercial Residential Storey' ? 'selected' : '' }}>Commercial Residential Storey - 80,000 TZS</option>
+                                <option value="Commercial Residential above 2 storey" {{ old('category', $client->category) == 'Commercial Residential above 2 storey' ? 'selected' : '' }}>Commercial Residential above 2 storey - 100,000 TZS</option>
+                                <option value="Commercial Industrial & Institutions" {{ old('category', $client->category) == 'Commercial Industrial & Institutions' ? 'selected' : '' }}>Commercial Industrial & Institutions - 150,000 TZS</option>
+                                <option value="Tea Room" {{ old('category', $client->category) == 'Tea Room' ? 'selected' : '' }}>Tea Room - 10,000 TZS</option>
+                                <option value="Café" {{ old('category', $client->category) == 'Café' ? 'selected' : '' }}>Café - 10,000 TZS</option>
+                                <option value="Ice Par Lour" {{ old('category', $client->category) == 'Ice Par Lour' ? 'selected' : '' }}>Ice Par Lour - 10,000 TZS</option>
+                                <option value="Restaurant" {{ old('category', $client->category) == 'Restaurant' ? 'selected' : '' }}>Restaurant - 15,000 TZS</option>
+                                <option value="Guest House" {{ old('category', $client->category) == 'Guest House' ? 'selected' : '' }}>Guest House - 10,000 TZS</option>
+                                <option value="Dispensary (domestic waste)" {{ old('category', $client->category) == 'Dispensary (domestic waste)' ? 'selected' : '' }}>Dispensary (domestic waste) - 15,000 TZS</option>
+                                <option value="Health Centre (Domestic waste)" {{ old('category', $client->category) == 'Health Centre (Domestic waste)' ? 'selected' : '' }}>Health Centre (Domestic waste) - 20,000 TZS</option>
+                                <option value="Hospital (Domestic waste)" {{ old('category', $client->category) == 'Hospital (Domestic waste)' ? 'selected' : '' }}>Hospital (Domestic waste) - 35,000 TZS</option>
+                                <option value="Sawing mills" {{ old('category', $client->category) == 'Sawing mills' ? 'selected' : '' }}>Sawing mills - 35,000 TZS</option>
+                                <option value="Furniture making" {{ old('category', $client->category) == 'Furniture making' ? 'selected' : '' }}>Furniture making - 22,000 TZS</option>
+                                <option value="Metal workshops" {{ old('category', $client->category) == 'Metal workshops' ? 'selected' : '' }}>Metal workshops - 22,000 TZS</option>
+                                <option value="Industries (Light waste)" {{ old('category', $client->category) == 'Industries (Light waste)' ? 'selected' : '' }}>Industries (Light waste) - 35,000 TZS</option>
+                                <option value="Industries (Heavy Industries)" {{ old('category', $client->category) == 'Industries (Heavy Industries)' ? 'selected' : '' }}>Industries (Heavy Industries) - 40,000 TZS</option>
+                                <option value="Wholesale shops (general)" {{ old('category', $client->category) == 'Wholesale shops (general)' ? 'selected' : '' }}>Wholesale shops (general) - 15,000 TZS</option>
+                                <option value="Retail shops (food and other items)" {{ old('category', $client->category) == 'Retail shops (food and other items)' ? 'selected' : '' }}>Retail shops (food and other items) - 10,000 TZS</option>
+                                <option value="Retail shops (other commodities)" {{ old('category', $client->category) == 'Retail shops (other commodities)' ? 'selected' : '' }}>Retail shops (other commodities) - 10,000 TZS</option>
+                                <option value="Private Day Primary School" {{ old('category', $client->category) == 'Private Day Primary School' ? 'selected' : '' }}>Private Day Primary School - 10,000 TZS</option>
+                                <option value="Private Boarding Secondary schools" {{ old('category', $client->category) == 'Private Boarding Secondary schools' ? 'selected' : '' }}>Private Boarding Secondary schools - 15,000 TZS</option>
+                                <option value="Private Day Secondary schools" {{ old('category', $client->category) == 'Private Day Secondary schools' ? 'selected' : '' }}>Private Day Secondary schools - 10,000 TZS</option>
+                                <option value="Private Boarding Secondary schools (Large)" {{ old('category', $client->category) == 'Private Boarding Secondary schools (Large)' ? 'selected' : '' }}>Private Boarding Secondary schools (Large) - 25,000 TZS</option>
+                                <option value="Institution per month" {{ old('category', $client->category) == 'Institution per month' ? 'selected' : '' }}>Institution per month - 25,000 TZS</option>
+                                <option value="Groceries" {{ old('category', $client->category) == 'Groceries' ? 'selected' : '' }}>Groceries - 10,000 TZS</option>
+                                <option value="Bar" {{ old('category', $client->category) == 'Bar' ? 'selected' : '' }}>Bar - 15,000 TZS</option>
+                                <option value="Butcher" {{ old('category', $client->category) == 'Butcher' ? 'selected' : '' }}>Butcher - 10,000 TZS</option>
+                                <option value="Pharmacy" {{ old('category', $client->category) == 'Pharmacy' ? 'selected' : '' }}>Pharmacy - 15,000 TZS</option>
+                                <option value="Markets" {{ old('category', $client->category) == 'Markets' ? 'selected' : '' }}>Markets - 50,000 TZS</option>
+                                <option value="Street Market (Magenge) per table" {{ old('category', $client->category) == 'Street Market (Magenge) per table' ? 'selected' : '' }}>Street Market (Magenge) per table - 2,000 TZS</option>
+                                <option value="Food vendors (Mama ntilie)" {{ old('category', $client->category) == 'Food vendors (Mama ntilie)' ? 'selected' : '' }}>Food vendors (Mama ntilie) - 5,000 TZS</option>
+                                <option value="Bus stations (per bus per day)" {{ old('category', $client->category) == 'Bus stations (per bus per day)' ? 'selected' : '' }}>Bus stations (per bus per day) - 5,000 TZS</option>
+                                <option value="Mosque/ church" {{ old('category', $client->category) == 'Mosque/ church' ? 'selected' : '' }}>Mosque/ church - 20,000 TZS</option>
+                                <option value="Informal dry cleaners, tailors" {{ old('category', $client->category) == 'Informal dry cleaners, tailors' ? 'selected' : '' }}>Informal dry cleaners, tailors - 10,000 TZS</option>
+                                <option value="Informal Carpenter" {{ old('category', $client->category) == 'Informal Carpenter' ? 'selected' : '' }}>Informal Carpenter - 10,000 TZS</option>
+                                <option value="Shoe makers" {{ old('category', $client->category) == 'Shoe makers' ? 'selected' : '' }}>Shoe makers - 5,000 TZS</option>
+                                <option value="Electronic gadgets repair" {{ old('category', $client->category) == 'Electronic gadgets repair' ? 'selected' : '' }}>Electronic gadgets repair - 10,000 TZS</option>
+                                <option value="Street Barbers" {{ old('category', $client->category) == 'Street Barbers' ? 'selected' : '' }}>Street Barbers - 10,000 TZS</option>
+                                <option value="Female Saloons" {{ old('category', $client->category) == 'Female Saloons' ? 'selected' : '' }}>Female Saloons - 15,000 TZS</option>
+                                <option value="Petrol Stations" {{ old('category', $client->category) == 'Petrol Stations' ? 'selected' : '' }}>Petrol Stations - 30,000 TZS</option>
+                                <option value="Warehouses" {{ old('category', $client->category) == 'Warehouses' ? 'selected' : '' }}>Warehouses - 30,000 TZS</option>
+                                <option value="Hotels" {{ old('category', $client->category) == 'Hotels' ? 'selected' : '' }}>Hotels - 150,000 TZS</option>
+                                <option value="Offices" {{ old('category', $client->category) == 'Offices' ? 'selected' : '' }}>Offices - 100,000 TZS</option>
+                                <option value="Construction waste per trip" {{ old('category', $client->category) == 'Construction waste per trip' ? 'selected' : '' }}>Construction waste per trip - 25,000 TZS</option>
+                                <option value="Garage" {{ old('category', $client->category) == 'Garage' ? 'selected' : '' }}>Garage - 10,000 TZS</option>
                             </select>
                             @error('category')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>

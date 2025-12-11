@@ -42,7 +42,7 @@ class ClientController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact_name' => 'required|string|max:255',
-            'category' => 'required|in:residential,commercial,industrial',
+            'category' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
@@ -167,7 +167,7 @@ class ClientController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact_name' => 'required|string|max:255',
-            'category' => 'required|in:residential,commercial,industrial',
+            'category' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
