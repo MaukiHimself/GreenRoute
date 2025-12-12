@@ -390,8 +390,12 @@
         <div class="main-content">
             <!-- Header -->
             <div class="header">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('dashboard.admin') }}" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2" style="border-color: #e0e0e0; background: #f8f9fa;">
+                        <i class="bi bi-house-door-fill text-teal" style="color: var(--primary-teal);"></i> <span style="color: #333;">Home</span>
+                    </a>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('dashboard.admin') }}">Administrator</a></li>
                         <li class="breadcrumb-item">Dashboard</li>

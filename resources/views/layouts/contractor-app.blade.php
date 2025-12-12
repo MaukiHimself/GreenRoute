@@ -295,6 +295,9 @@
             <!-- Header -->
             <header class="content-header">
                 <div class="header-left">
+                    <a href="{{ route('dashboard.contractor') }}" class="btn-back me-2">
+                        <i class="bi bi-house-door-fill"></i> Home
+                    </a>
                     @if(isset($backUrl))
                         <a href="{{ $backUrl }}" class="btn-back">
                             <i class="bi bi-arrow-left"></i>Back
