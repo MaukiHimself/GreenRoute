@@ -174,11 +174,14 @@ class BillingController extends Controller
             'amount_paid' => 'required|numeric|min:0'
         ]);
 
+        // Accumulate payment amount
+        $newAmountPaid = $invoice->amount_paid + $validated['amount_paid'];
+
         $invoice->update([
-            'amount_paid' => $validated['amount_paid'],
+            'amount_paid' => $newAmountPaid,
             'payment_method' => $validated['payment_method'],
             'paid_at' => now(),
-            'status' => $validated['amount_paid'] >= $invoice->total_amount ? 'paid' : 'partial'
+            'status' => $newAmountPaid >= $invoice->total_amount ? 'paid' : 'partial'
         ]);
 
         return redirect()->back()->with('success', 'Payment recorded successfully');

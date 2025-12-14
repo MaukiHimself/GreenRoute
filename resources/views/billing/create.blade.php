@@ -88,9 +88,14 @@
         <!-- Header Section -->
         <div class="d-flex justify-content-between align-items-center mb-4 p-3 primary-light rounded">
             <h4 class="primary-dark mb-0">Create Invoice</h4>
-            <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-custom btn-sm d-flex align-items-center gap-2" target="_parent">
-                <i class="bi bi-house-door-fill"></i> Home
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-custom btn-sm d-flex align-items-center gap-2" target="_parent">
+                    <i class="bi bi-house-door-fill"></i> Home
+                </a>
+                <button onclick="window.history.back()" class="btn btn-outline-custom btn-sm d-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+            </div>
         </div>
 
         <!-- Invoice Form -->

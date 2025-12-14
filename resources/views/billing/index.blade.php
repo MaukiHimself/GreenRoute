@@ -399,6 +399,9 @@
                 <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-dark d-flex align-items-center gap-2" style="border-color: #cbd5e1;" target="_parent">
                     <i class="bi bi-house-door-fill" style="color: var(--primary-color);"></i> Home
                 </a>
+                <button onclick="window.history.back()" class="btn btn-outline-dark d-flex align-items-center gap-2" style="border-color: #cbd5e1;">
+                    Back
+                </button>
                 <a href="{{ route('billing.create') }}" class="btn btn-success">
                     <i class="bi bi-plus-circle"></i> Create Invoice
                 </a>
@@ -465,7 +468,7 @@
                                 <div class="btn-group btn-group-sm">
                                     <a href="{{ route('billing.show', $invoice) }}" class="btn btn-outline-primary">View</a>
                                     @if($invoice->status !== 'paid')
-                                        <button class="btn btn-outline-success" onclick="markPaid({{ $invoice->id }})">Mark Paid</button>
+                                        <button class="btn btn-outline-success" onclick="markPaid({{ $invoice->id }}, {{ $invoice->balance_due }})">Mark Paid</button>
                                         @if($invoice->client)
                                             <button class="btn btn-outline-info" onclick="sendInvoice({{ $invoice->id }})">Send</button>
                                             @if($invoice->is_overdue)
@@ -510,8 +513,15 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount Paid</label>
-                    <input type="number" name="amount_paid" class="form-control" step="0.01" required>
+                    <input type="number" id="paymentAmountInput" name="amount_paid" class="form-control" step="0.01" required oninput="calculateBalance()">
                 </div>
+                
+                <!-- Dynamic Calculation Display -->
+                <div class="alert alert-light border d-flex justify-content-between align-items-center p-3 mb-3 rounded" id="calculationResult" style="background-color: #f8f9fa;">
+                    <span>Remaining Balance:</span>
+                    <strong id="balanceDisplay">TZS 0.00</strong>
+                </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-success">Record Payment</button>
@@ -524,9 +534,40 @@
         // CSRF Token for AJAX requests
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
-        function markPaid(invoiceId) {
+        let currentBalanceDue = 0;
+
+        function calculateBalance() {
+            const inputAmount = parseFloat(document.getElementById('paymentAmountInput').value) || 0;
+            const difference = currentBalanceDue - inputAmount;
+            
+            const displayElement = document.getElementById('balanceDisplay');
+            const resultContainer = document.getElementById('calculationResult');
+            const labelElement = resultContainer.querySelector('span');
+
+            if (difference < 0) {
+                // Surplus
+                labelElement.textContent = "Credit Surplus:";
+                displayElement.textContent = "TZS " + Math.abs(difference).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                displayElement.className = "text-success fw-bold";
+                displayElement.style.color = "#198754"; // Bootstrap success color
+            } else {
+                // Remaining Balance
+                labelElement.textContent = "Remaining Balance:";
+                displayElement.textContent = "TZS " + difference.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                displayElement.className = "text-danger fw-bold";
+                displayElement.style.color = "#dc3545"; // Bootstrap danger color
+            }
+        }
+
+        function markPaid(invoiceId, balanceDue) {
+            currentBalanceDue = parseFloat(balanceDue);
             const form = document.getElementById('paymentForm');
             form.action = `/billing/${invoiceId}/mark-paid`;
+            
+            // Set initial value and calculate
+            document.getElementById('paymentAmountInput').value = currentBalanceDue;
+            calculateBalance();
+
             const modal = document.getElementById('markPaidModal');
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';

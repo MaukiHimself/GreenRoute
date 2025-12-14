@@ -74,7 +74,7 @@
                 <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-custom btn-sm d-inline-flex align-items-center gap-1" target="_parent">
                     <i class="bi bi-house-door-fill"></i> Home
                 </a>
-                <a href="{{ route('billing.index') }}" class="btn btn-outline-custom btn-sm">Back</a>
+                <button onclick="window.history.back()" class="btn btn-outline-custom btn-sm">Back</button>
             </div>
         </div>
 
@@ -161,6 +161,12 @@
                             <td><strong class="primary-dark">Amount Paid:</strong></td>
                             <td class="text-end">TZS {{ number_format($invoice->amount_paid, 2) }}</td>
                         </tr>
+                        @if($invoice->surplus > 0)
+                        <tr class="border-top">
+                            <td><strong class="primary-dark">Credit Surplus:</strong></td>
+                            <td class="text-end"><strong class="text-success">TZS {{ number_format($invoice->surplus, 2) }}</strong></td>
+                        </tr>
+                        @endif
                         <tr class="border-top">
                             <td><strong class="primary-dark">Balance Due:</strong></td>
                             <td class="text-end"><strong>TZS {{ number_format($invoice->balance_due, 2) }}</strong></td>
@@ -194,7 +200,13 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label primary-dark">Amount Paid</label>
-                            <input type="number" name="amount_paid" class="form-control" step="0.01" value="{{ $invoice->balance_due }}" required>
+                            <input type="number" id="paymentAmountInput" name="amount_paid" class="form-control" step="0.01" value="{{ $invoice->balance_due }}" required oninput="calculateBalance()">
+                        </div>
+                        
+                        <!-- Dynamic Calculation Display -->
+                        <div class="alert alert-light border d-flex justify-content-between align-items-center" id="calculationResult">
+                            <span>Remaining Balance:</span>
+                            <strong id="balanceDisplay">TZS 0.00</strong>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -207,6 +219,32 @@
     </div>
 
     <script>
+        const currentBalanceDue = {{ $invoice->balance_due }};
+
+        function calculateBalance() {
+            const inputAmount = parseFloat(document.getElementById('paymentAmountInput').value) || 0;
+            const difference = currentBalanceDue - inputAmount;
+            
+            const displayElement = document.getElementById('balanceDisplay');
+            const resultContainer = document.getElementById('calculationResult');
+            const labelElement = resultContainer.querySelector('span');
+
+            if (difference < 0) {
+                // Surplus
+                labelElement.textContent = "Credit Surplus:";
+                displayElement.textContent = "TZS " + Math.abs(difference).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                displayElement.className = "text-success fw-bold";
+            } else {
+                // Remaining Balance
+                labelElement.textContent = "Remaining Balance:";
+                displayElement.textContent = "TZS " + difference.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                displayElement.className = "text-danger fw-bold";
+            }
+        }
+
+        // Initialize calculation on load
+        document.addEventListener('DOMContentLoaded', calculateBalance);
+
         function markPaid(invoiceId) {
             const form = document.getElementById('paymentForm');
             form.action = `/billing/${invoiceId}/mark-paid`;
@@ -217,6 +255,9 @@
                 modal.style.display = 'block';
                 modal.classList.add('show');
             }
+            // Reset to default balance due when opening modal
+            document.getElementById('paymentAmountInput').value = currentBalanceDue;
+            calculateBalance();
         }
 
         function sendInvoice(invoiceId) {
