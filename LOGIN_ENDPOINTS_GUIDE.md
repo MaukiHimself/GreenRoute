@@ -70,7 +70,7 @@ Password: [their password]
 
 **Example:**
 ```
-Email: admin@afia-orbit.com
+Email: admin@greenroute-orbit.com
 Password: [admin password]
 ```
 

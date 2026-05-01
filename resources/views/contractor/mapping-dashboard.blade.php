@@ -14,12 +14,12 @@
             --light-teal: #e6f2f2;
             --light-red: #f9eaea;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
         }
-        
+
         /* Sidebar Styling */
         .sidebar {
             min-height: 100vh;
@@ -29,7 +29,7 @@
             width: 250px;
             z-index: 100;
         }
-        
+
         .sidebar .brand {
             background-color: white;
             color: var(--primary-teal);
@@ -39,7 +39,7 @@
             text-align: center;
             border-bottom: 2px solid var(--primary-teal);
         }
-        
+
         .sidebar .nav-link {
             color: #333;
             padding: 12px 20px;
@@ -48,31 +48,31 @@
             display: flex;
             align-items: center;
         }
-        
+
         .sidebar .nav-link:hover {
             background-color: var(--light-teal);
             color: var(--primary-teal);
         }
-        
+
         .sidebar .nav-link.active {
             background-color: var(--primary-teal);
             color: white;
             border-left: 4px solid var(--primary-red);
         }
-        
+
         .sidebar .nav-link i {
             width: 24px;
             text-align: center;
             margin-right: 10px;
         }
-        
+
         /* Main Content Styling */
         .main-content {
             margin-left: 250px;
             padding: 20px;
             min-height: 100vh;
         }
-        
+
         /* Header Styling */
         .header {
             background-color: white;
@@ -81,16 +81,16 @@
             padding: 15px 20px;
             margin-bottom: 25px;
         }
-        
+
         .breadcrumb {
             margin-bottom: 0;
         }
-        
+
         .breadcrumb-item.active {
             color: var(--primary-teal);
             font-weight: 600;
         }
-        
+
         .user-badge {
             background-color: var(--primary-teal);
             color: white;
@@ -98,7 +98,7 @@
             border-radius: 20px;
             font-size: 0.9rem;
         }
-        
+
         /* Card Styling */
         .card {
             border: none;
@@ -107,12 +107,12 @@
             margin-bottom: 25px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
-        
+
         .card-header {
             background-color: white;
             border-bottom: 1px solid #eee;
@@ -121,7 +121,7 @@
             font-weight: 600;
             color: var(--primary-teal);
         }
-        
+
         /* Stat Cards */
         .stat-card {
             text-align: center;
@@ -129,78 +129,78 @@
             border-radius: 10px;
             color: white;
         }
-        
+
         .stat-card.clients {
             background: linear-gradient(135deg, var(--primary-teal), #088484);
         }
-        
+
         .stat-card.invoices {
             background: linear-gradient(135deg, #0a7c7c, #0b9b9b);
         }
-        
+
         .stat-card.payments {
             background: linear-gradient(135deg, var(--primary-red), #8a1a1a);
         }
-        
+
         .stat-card.routes {
             background: linear-gradient(135deg, #0a7c7c, var(--primary-teal));
         }
-        
+
         .stat-card h3 {
             font-size: 2.2rem;
             margin-bottom: 5px;
             font-weight: 700;
         }
-        
+
         .stat-card p {
             margin-bottom: 0;
             opacity: 0.9;
         }
-        
+
         /* Button Styling */
         .btn-teal {
             background-color: var(--primary-teal);
             color: white;
             border: none;
         }
-        
+
         .btn-teal:hover {
             background-color: #044a4a;
             color: white;
         }
-        
+
         .btn-outline-teal {
             border: 1px solid var(--primary-teal);
             color: var(--primary-teal);
         }
-        
+
         .btn-outline-teal:hover {
             background-color: var(--primary-teal);
             color: white;
         }
-        
+
         .btn-red {
             background-color: var(--primary-red);
             color: white;
             border: none;
         }
-        
+
         .btn-red:hover {
             background-color: #530303;
             color: white;
         }
-        
+
         /* Badge Styling */
         .badge-teal {
             background-color: var(--light-teal);
             color: var(--primary-teal);
         }
-        
+
         .badge-red {
             background-color: var(--light-red);
             color: var(--primary-red);
         }
-        
+
         /* Quick Actions */
         .quick-action {
             text-align: center;
@@ -210,18 +210,18 @@
             transition: all 0.3s;
             border: 1px solid #eee;
         }
-        
+
         .quick-action:hover {
             background-color: var(--light-teal);
             transform: translateY(-5px);
         }
-        
+
         .quick-action i {
             font-size: 1.8rem;
             margin-bottom: 10px;
             color: var(--primary-teal);
         }
-        
+
         /* Table Styling */
         .table th {
             background-color: var(--light-teal);
@@ -229,49 +229,49 @@
             font-weight: 600;
             border-top: none;
         }
-        
+
         /* Map Container */
         .map-container {
             height: 400px;
             border-radius: 10px;
             overflow: hidden;
         }
-        
+
         /* Responsive Adjustments */
         @media (max-width: 992px) {
             .sidebar {
                 width: 70px;
                 overflow: hidden;
             }
-            
+
             .sidebar .brand span {
                 display: none;
             }
-            
+
             .sidebar .nav-link span {
                 display: none;
             }
-            
+
             .sidebar .nav-link i {
                 margin-right: 0;
             }
-            
+
             .main-content {
                 margin-left: 70px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
                 height: auto;
                 position: relative;
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
-            
+
             .sidebar .nav-link span {
                 display: inline;
             }
@@ -284,7 +284,7 @@
             <!-- Sidebar -->
             <div class="col-lg-2 sidebar">
                 <div class="brand">
-                    <img src="/your-logo2.png" alt="Logo" style="max-height: 60px; width: 90%; background-color: white; object-fit: contain;">
+                    <img src="{{ asset('result.png') }}" alt="Logo" style="max-height: 60px; width: 90%; background-color: white; object-fit: contain;">
                 </div>
                 <nav class="nav flex-column mt-3">
                     <a class="nav-link active" href="#" data-tab="dashboard">
@@ -329,7 +329,7 @@
                     </a>
                 </nav>
             </div>
-            
+
             <!-- Main Content -->
             <div class="col-lg-10 main-content">
                 <!-- Header -->
@@ -594,19 +594,19 @@
         document.querySelectorAll('[data-tab]').forEach(tab => {
             tab.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 // Remove active class from all tabs
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
                 this.classList.add('active');
-                
+
                 // Hide all tab content
                 document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
-                
+
                 // Show selected tab content
                 const tabId = this.getAttribute('data-tab') + '-tab';
                 const selectedTab = this.getAttribute('data-tab');
                 document.getElementById(tabId).style.display = 'block';
-                
+
                 // Refresh disposal iframe when tab is clicked to show latest completed schedules
                 if (selectedTab === 'disposal') {
                     const disposalIframe = document.getElementById('disposal-iframe');
@@ -614,7 +614,7 @@
                         disposalIframe.src = disposalIframe.src; // Force refresh
                     }
                 }
-                
+
                 // Load specific content for tabs
                 if (selectedTab === 'clients') {
                     loadClientsTable();
@@ -623,7 +623,7 @@
                 }
             });
         });
-        
+
         // Initialize dashboard data
         function loadDashboardData() {
             // Load dashboard statistics
@@ -638,7 +638,7 @@
                 .catch(() => {
                     console.log('Dashboard stats not available');
                 });
-                
+
             // Load recent invoices
             fetch('/contractor/recent-invoices')
                 .then(response => response.json())
@@ -667,7 +667,7 @@
                 .catch(() => {
                     document.getElementById('recentInvoices').innerHTML = '<p class="text-muted">Unable to load invoices</p>';
                 });
-                
+
             // Load upcoming schedules
             fetch('/contractor/upcoming-schedules')
                 .then(response => response.json())
@@ -692,25 +692,25 @@
                     document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
                 });
         }
-        
+
         // Load dashboard data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
         });
-        
+
         // Client search functions
         function searchClients() {
             const name = document.getElementById('searchName').value;
             const category = document.getElementById('searchCategory').value;
             const location = document.getElementById('searchLocation').value;
             const regNumber = document.getElementById('searchRegNumber').value;
-            
+
             const params = new URLSearchParams();
             if (name) params.append('name', name);
             if (category) params.append('category', category);
             if (location) params.append('location', location);
             if (regNumber) params.append('registration_number', regNumber);
-            
+
             fetch(`/contractor/clients/locations?${params.toString()}`)
                 .then(response => response.json())
                 .then(clients => {
@@ -742,7 +742,7 @@
                     document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">Error searching clients</td></tr>';
                 });
         }
-        
+
         function clearSearch() {
             document.getElementById('searchName').value = '';
             document.getElementById('searchCategory').value = '';
@@ -750,7 +750,7 @@
             document.getElementById('searchRegNumber').value = '';
             loadClientsTable();
         }
-        
+
         // Load clients table
         function loadClientsTable() {
             fetch('/contractor/clients/locations')
@@ -780,14 +780,14 @@
                     document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">No clients found</td></tr>';
                 });
         }
-        
+
         // Map functions
         function initMap() {
             const map = new google.maps.Map(document.getElementById('dashboardMap'), {
                 zoom: 12,
                 center: { lat: -6.7924, lng: 39.2083 }
             });
-            
+
             // Add a sample marker
             new google.maps.Marker({
                 position: { lat: -6.7924, lng: 39.2083 },
@@ -795,11 +795,11 @@
                 title: 'Current Location'
             });
         }
-        
+
         function initGPSMap() {
             // GPS map initialization would go here
         }
-        
+
         // Initialize the map on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();

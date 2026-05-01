@@ -30,8 +30,8 @@ MAIL_PORT=2525
 MAIL_USERNAME=paste_your_mailtrap_username_here
 MAIL_PASSWORD=paste_your_mailtrap_password_here
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@afiaorbit.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_ADDRESS=noreply@greenrouteorbit.com
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 3. **Clear cache**
@@ -67,7 +67,7 @@ MAIL_USERNAME=your-gmail@gmail.com
 MAIL_PASSWORD=your-16-char-app-password-here
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=your-gmail@gmail.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 3. **Clear cache**
@@ -84,7 +84,7 @@ php artisan config:clear
 
 When admin approves/rejects a contractor:
 - ✉️ Email automatically sent
-- 📧 Professional AFIA ORBIT branding
+- 📧 Professional GreenRoute ORBIT branding
 - 🎨 Beautiful HTML design
 - 📱 Mobile responsive
 
@@ -113,4 +113,4 @@ http://localhost:8000/admin/verification
 
 Check the detailed guide: `EMAIL_NOTIFICATIONS_SETUP.md`
 
-Or contact: support@afiaorbit.com
+Or contact: support@greenrouteorbit.com

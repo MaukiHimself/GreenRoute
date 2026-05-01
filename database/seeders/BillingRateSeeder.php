@@ -9,8 +9,8 @@ class BillingRateSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * Pricing structure based on AFIA ORBIT by-laws
+     *
+     * Pricing structure based on GreenRoute ORBIT by-laws
      * All prices in Tanzanian Shillings (TZS)
      */
     public function run(): void
@@ -33,7 +33,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Planned or modern residential properties',
                 'is_active' => true
             ],
-            
+
             // COMMERCIAL RESIDENTIAL
             [
                 'category' => 'Commercial Residential (Apartment)',
@@ -67,7 +67,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Commercial industrial and institutional properties',
                 'is_active' => true
             ],
-            
+
             // FOOD & BEVERAGE
             [
                 'category' => 'Tea Room',
@@ -117,7 +117,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Butcher shops',
                 'is_active' => true
             ],
-            
+
             // ACCOMMODATION
             [
                 'category' => 'Guest House',
@@ -135,7 +135,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Hotel establishments',
                 'is_active' => true
             ],
-            
+
             // HEALTHCARE
             [
                 'category' => 'Dispensary (domestic waste)',
@@ -161,7 +161,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Hospital facilities - domestic waste only',
                 'is_active' => true
             ],
-            
+
             // MANUFACTURING & WORKSHOPS
             [
                 'category' => 'Sawing mills',
@@ -187,7 +187,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Metal workshop operations',
                 'is_active' => true
             ],
-            
+
             // INDUSTRIES
             [
                 'category' => 'Industries (Light waste)',
@@ -205,7 +205,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Heavy industrial operations',
                 'is_active' => true
             ],
-            
+
             // RETAIL & SHOPS
             [
                 'category' => 'Wholesale shops (general)',
@@ -247,7 +247,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Pharmacy establishments',
                 'is_active' => true
             ],
-            
+
             // EDUCATION
             [
                 'category' => 'Private Day Primary School',
@@ -289,7 +289,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'General institutional facilities',
                 'is_active' => true
             ],
-            
+
             // MARKETS & VENDORS
             [
                 'category' => 'Markets',
@@ -315,7 +315,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Food vendors (Mama ntilie)',
                 'is_active' => true
             ],
-            
+
             // TRANSPORT
             [
                 'category' => 'Bus stations (per bus per day)',
@@ -341,7 +341,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Garage facilities',
                 'is_active' => true
             ],
-            
+
             // RELIGIOUS & PUBLIC
             [
                 'category' => 'Mosque/church',
@@ -359,7 +359,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Office buildings',
                 'is_active' => true
             ],
-            
+
             // INFORMAL SECTOR
             [
                 'category' => 'Informal dry cleaners, tailors',
@@ -409,7 +409,7 @@ class BillingRateSeeder extends Seeder
                 'description' => 'Female saloon businesses',
                 'is_active' => true
             ],
-            
+
             // STORAGE & CONSTRUCTION
             [
                 'category' => 'Warehouses',
@@ -431,12 +431,12 @@ class BillingRateSeeder extends Seeder
 
         // Delete existing rates to avoid duplicates
         BillingRate::truncate();
-        
+
         // Insert all billing rates
         foreach ($billingRates as $rate) {
             BillingRate::create($rate);
         }
-        
+
         $this->command->info('✅ Successfully seeded ' . count($billingRates) . ' billing rate categories');
     }
 }

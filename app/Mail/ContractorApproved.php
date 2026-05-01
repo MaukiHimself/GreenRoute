@@ -31,7 +31,7 @@ class ContractorApproved extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Contractor Account Has Been Approved - AFIA ORBIT',
+            subject: 'Your Contractor Account Has Been Approved - GreenRoute',
         );
     }
 

@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Make result.png slightly larger system-wide (small, non-breaking increase) */
+img[src$="result.png"] {
+	max-height: 80px !important;
+	width: auto !important;
+	object-fit: contain !important;
+	display: inline-block;
+}

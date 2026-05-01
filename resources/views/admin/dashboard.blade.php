@@ -6,7 +6,7 @@
     <title>Administrator Dashboard - AFIA ORBIT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <style>
         :root {
             --primary-teal: #055c5c;
@@ -15,19 +15,19 @@
             --light-bg: #f8f9fa;
             --border-color: #e0e0e0;
         }
-        
+
         body {
             background-color: var(--light-bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
         }
-        
+
         .admin-layout {
             display: flex;
             min-height: 100vh;
         }
-        
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -37,24 +37,24 @@
             height: 100vh;
             overflow-y: auto;
         }
-        
+
         .logo-section {
             padding: 1.5rem;
             border-bottom: 2px solid var(--primary-teal);
             text-align: center;
             background: var(--white);
         }
-        
+
         .logo-section img {
             max-height: 60px;
             width: 90%;
             object-fit: contain;
         }
-        
+
         .menu-section {
             padding: 1rem 0;
         }
-        
+
         .menu-header {
             padding: 0.75rem 1rem;
             font-weight: 600;
@@ -63,7 +63,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .menu-item {
             display: flex;
             align-items: center;
@@ -74,33 +74,33 @@
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.3s ease;
         }
-        
+
         .menu-item:hover {
             background: #e6f2f2;
             color: var(--primary-teal);
         }
-        
+
         .menu-item.active {
             background: var(--primary-teal);
             color: var(--white);
             border-left: 4px solid var(--primary-red);
         }
-        
+
         .menu-item i {
             margin-right: 10px;
         }
-        
+
         .menu-item .bi-chevron-right {
             margin-right: 0;
             margin-left: auto;
         }
-        
+
         /* Main Content */
         .main-content {
             margin-left: 250px;
             flex: 1;
         }
-        
+
         /* Header */
         .header {
             background: var(--white);
@@ -110,39 +110,39 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .breadcrumb {
             margin: 0;
             background: none;
             padding: 0;
             font-size: 0.9rem;
         }
-        
+
         .breadcrumb-item {
             color: #666;
         }
-        
+
         .breadcrumb-item.active {
             color: var(--primary-teal);
             font-weight: 600;
         }
-        
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
+
         .notification-badge {
             position: relative;
             cursor: pointer;
         }
-        
+
         .notification-badge i {
             font-size: 1.5rem;
             color: var(--primary-teal);
         }
-        
+
         .notification-count {
             position: absolute;
             top: -5px;
@@ -158,14 +158,14 @@
             font-size: 0.7rem;
             font-weight: bold;
         }
-        
+
         .user-profile {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
         }
-        
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -177,12 +177,12 @@
             justify-content: center;
             font-weight: bold;
         }
-        
+
         /* Content Area */
         .content-area {
             padding: 2rem;
         }
-        
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -190,7 +190,7 @@
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
-        
+
         .stat-card {
             background: var(--white);
             border-radius: 12px;
@@ -199,42 +199,42 @@
             border-left: 4px solid var(--primary-teal);
             transition: all 0.3s;
         }
-        
+
         .stat-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
         }
-        
+
         .stat-card.contractors {
             border-left-color: var(--primary-teal);
         }
-        
+
         .stat-card.clients {
             border-left-color: #10b981;
         }
-        
+
         .stat-card.routes {
             border-left-color: #f59e0b;
         }
-        
+
         .stat-title {
             font-size: 0.9rem;
             color: #666;
             margin-bottom: 0.5rem;
         }
-        
+
         .stat-value {
             font-size: 2rem;
             font-weight: bold;
             color: #1e293b;
         }
-        
+
         .stat-icon {
             font-size: 2rem;
             opacity: 0.2;
             float: right;
         }
-        
+
         /* Tasks Section */
         .tasks-section {
             background: var(--white);
@@ -242,7 +242,7 @@
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .section-title {
             font-size: 1.25rem;
             font-weight: 600;
@@ -251,7 +251,7 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--primary-teal);
         }
-        
+
         .task-item {
             display: flex;
             justify-content: space-between;
@@ -260,21 +260,21 @@
             border-bottom: 1px solid #f0f0f0;
             transition: background 0.2s;
         }
-        
+
         .task-item:hover {
             background: #f8f9fa;
         }
-        
+
         .task-item:last-child {
             border-bottom: none;
         }
-        
+
         .task-info {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
+
         .task-icon {
             width: 40px;
             height: 40px;
@@ -285,24 +285,24 @@
             background: #e6f2f2;
             color: var(--primary-teal);
         }
-        
+
         .task-details h5 {
             margin: 0;
             font-size: 1rem;
             color: #1e293b;
         }
-        
+
         .task-details p {
             margin: 0;
             font-size: 0.85rem;
             color: #666;
         }
-        
+
         .task-action {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .btn-view {
             background: var(--primary-teal);
             color: var(--white);
@@ -312,11 +312,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-view:hover {
             background: #044a4a;
         }
-        
+
         .badge-count {
             background: var(--primary-red);
             color: var(--white);
@@ -325,13 +325,13 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 3rem;
             color: #999;
         }
-        
+
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
@@ -343,9 +343,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-section">
-                <img src="/your-logo2.png" alt="AFIA ORBIT Logo">
+                <img src="{{ asset('result.png') }}" alt="Logo">
             </div>
-            
+
             <div class="menu-section">
                 <div class="menu-header">MENU</div>
                 <a href="{{ route('dashboard.admin') }}" class="menu-item active">
@@ -375,7 +375,7 @@
                     <span><i class="bi bi-person-gear"></i>Users</span>
                     <i class="bi bi-chevron-right"></i>
                 </a>
-                
+
                 <div class="menu-header" style="margin-top: 1rem;">ACCOUNT</div>
                 <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0;">
                     @csrf
@@ -433,7 +433,7 @@
             <!-- Content Area -->
             <div class="content-area">
                 <h2 class="mb-4">System Parameters</h2>
-                
+
                 <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card contractors">
@@ -456,7 +456,7 @@
                 <!-- Pending Tasks -->
                 <div class="tasks-section">
                     <h3 class="section-title">Pending Tasks</h3>
-                    
+
                     @if(isset($pendingTasks) && count($pendingTasks) > 0)
                         @foreach($pendingTasks as $task)
                             <div class="task-item">

@@ -116,7 +116,7 @@ Registration → pending → [Admin Reviews] → approved ✓ or rejected ✗
 if ($user->status === 'rejected') {
     // Show rejection message with support contact
     Auth::logout();
-    return error: 'Account rejected. Contact support@afiaorbit.com'
+    return error: 'Account rejected. Contact support@greenrouteorbit.com'
 }
 
 if ($user->status === 'pending') {
@@ -241,7 +241,7 @@ This was already added in migration:
 ## 📞 Support Information
 
 Contractors waiting for approval can contact:
-- **Email**: support@afiaorbit.com
+- **Email**: support@greenrouteorbit.com
 - **Phone**: +255 123 456 789
 
 *(Update these in `pending.blade.php` when real contact info is available)*

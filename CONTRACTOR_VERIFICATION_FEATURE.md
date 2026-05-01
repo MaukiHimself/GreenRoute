@@ -349,8 +349,8 @@ MAIL_PORT=587
 MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@afiaorbit.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_ADDRESS=noreply@greenrouteorbit.com
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 ### Testing Email Locally

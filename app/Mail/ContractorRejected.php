@@ -29,7 +29,7 @@ class ContractorRejected extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Contractor Account Application Status - AFIA ORBIT',
+            subject: 'Contractor Account Application Status - GreenRoute',
         );
     }
 

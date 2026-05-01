@@ -20,7 +20,7 @@ Emails are being **logged** instead of sent. This is why users don't receive ema
 ### **Step 2: Update Render Environment Variables**
 
 1. Go to: https://dashboard.render.com
-2. Click on your **afia-orbit** service
+2. Click on your **greenroute-orbit** service
 3. Go to **Environment** tab
 4. Click **Add Environment Variable**
 
@@ -35,7 +35,7 @@ Emails are being **logged** instead of sent. This is why users don't receive ema
 | `MAIL_PASSWORD` | `your-16-char-app-password` |
 | `MAIL_ENCRYPTION` | `tls` |
 | `MAIL_FROM_ADDRESS` | `your-email@gmail.com` |
-| `MAIL_FROM_NAME` | `AFIA ORBIT` |
+| `MAIL_FROM_NAME` | `GreenRoute ORBIT` |
 
 5. Click **Save Changes**
 6. Render will automatically redeploy (~5 minutes)

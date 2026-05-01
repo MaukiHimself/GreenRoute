@@ -6,7 +6,7 @@
     <title>Contractor Verification - AFIA ORBIT Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <style>
         :root {
             --primary-teal: #055c5c;
@@ -15,19 +15,19 @@
             --light-bg: #f8f9fa;
             --border-color: #e0e0e0;
         }
-        
+
         body {
             background-color: var(--light-bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
         }
-        
+
         .admin-layout {
             display: flex;
             min-height: 100vh;
         }
-        
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -37,24 +37,24 @@
             height: 100vh;
             overflow-y: auto;
         }
-        
+
         .logo-section {
             padding: 1.5rem;
             border-bottom: 2px solid var(--primary-teal);
             text-align: center;
             background: var(--white);
         }
-        
+
         .logo-section img {
             max-height: 60px;
             width: 90%;
             object-fit: contain;
         }
-        
+
         .menu-section {
             padding: 1rem 0;
         }
-        
+
         .menu-header {
             padding: 0.75rem 1rem;
             font-weight: 600;
@@ -63,7 +63,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .menu-item {
             display: flex;
             align-items: center;
@@ -74,33 +74,33 @@
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.3s ease;
         }
-        
+
         .menu-item:hover {
             background: #e6f2f2;
             color: var(--primary-teal);
         }
-        
+
         .menu-item.active {
             background: var(--primary-teal);
             color: var(--white);
             border-left: 4px solid var(--primary-red);
         }
-        
+
         .menu-item i {
             margin-right: 10px;
         }
-        
+
         .menu-item .bi-chevron-right {
             margin-right: 0;
             margin-left: auto;
         }
-        
+
         /* Main Content */
         .main-content {
             margin-left: 250px;
             flex: 1;
         }
-        
+
         /* Header */
         .header {
             background: var(--white);
@@ -110,37 +110,37 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .breadcrumb {
             margin: 0;
             background: none;
             padding: 0;
             font-size: 0.9rem;
         }
-        
+
         .breadcrumb-item a {
             color: #666;
             text-decoration: none;
         }
-        
+
         .breadcrumb-item.active {
             color: var(--primary-teal);
             font-weight: 600;
         }
-        
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
+
         .user-profile {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
         }
-        
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -152,24 +152,24 @@
             justify-content: center;
             font-weight: bold;
         }
-        
+
         /* Content Area */
         .content-area {
             padding: 2rem;
         }
-        
+
         .page-title {
             font-size: 1.75rem;
             font-weight: 600;
             color: var(--primary-teal);
             margin-bottom: 0.5rem;
         }
-        
+
         .page-description {
             color: #666;
             margin-bottom: 2rem;
         }
-        
+
         /* Contractor Cards */
         .contractor-card {
             background: var(--white);
@@ -179,57 +179,57 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border-left: 4px solid var(--primary-teal);
         }
-        
+
         .contractor-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
             margin-bottom: 1rem;
         }
-        
+
         .contractor-info h4 {
             margin: 0 0 0.5rem;
             color: #1e293b;
         }
-        
+
         .contractor-meta {
             font-size: 0.9rem;
             color: #666;
         }
-        
+
         .contractor-meta i {
             color: var(--primary-teal);
             margin-right: 0.25rem;
         }
-        
+
         .contractor-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin: 1rem 0;
         }
-        
+
         .detail-item {
             display: flex;
             flex-direction: column;
         }
-        
+
         .detail-label {
             font-size: 0.85rem;
             color: #666;
             margin-bottom: 0.25rem;
         }
-        
+
         .detail-value {
             font-weight: 600;
             color: #1e293b;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .btn-approve {
             background: #10b981;
             color: var(--white);
@@ -239,11 +239,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-approve:hover {
             background: #059669;
         }
-        
+
         .btn-reject {
             background: var(--primary-red);
             color: var(--white);
@@ -253,11 +253,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-reject:hover {
             background: #7c0505;
         }
-        
+
         .btn-view {
             background: var(--primary-teal);
             color: var(--white);
@@ -267,11 +267,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-view:hover {
             background: #044a4a;
         }
-        
+
         .empty-state {
             background: var(--white);
             border-radius: 12px;
@@ -279,22 +279,22 @@
             text-align: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .empty-state i {
             font-size: 4rem;
             color: #d1d5db;
             margin-bottom: 1rem;
         }
-        
+
         .empty-state h3 {
             color: #6b7280;
             margin-bottom: 0.5rem;
         }
-        
+
         .empty-state p {
             color: #9ca3af;
         }
-        
+
         .stats-card {
             background: white;
             border-radius: 12px;
@@ -303,41 +303,41 @@
             border-left: 4px solid var(--primary-teal);
             transition: transform 0.3s;
         }
-        
+
         .stats-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .stats-number {
             font-size: 2.5rem;
             font-weight: 700;
             color: var(--primary-teal);
             margin-bottom: 0.5rem;
         }
-        
+
         .stats-label {
             font-size: 0.9rem;
             color: #666;
             font-weight: 500;
         }
-        
+
         .status-badge {
             padding: 0.35rem 0.75rem;
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: 600;
         }
-        
+
         .status-pending {
             background: #fef3c7;
             color: #92400e;
         }
-        
+
         .status-approved {
             background: #d1fae5;
             color: #065f46;
         }
-        
+
         .status-rejected {
             background: #fee2e2;
             color: #991b1b;
@@ -349,9 +349,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-section">
-                <img src="/your-logo2.png" alt="AFIA ORBIT Logo">
+                <img src="{{ asset('result.png') }}" alt="Logo">
             </div>
-            
+
             <div class="menu-section">
                 <div class="menu-header">MENU</div>
                 <a href="{{ route('dashboard.admin') }}" class="menu-item">

@@ -47,6 +47,11 @@ Route::get('/test-subscription', function () {
     return view('test-subscription');
 });
 
+// Test route for Location API
+Route::get('/test-locations', function () {
+    return view('location-test');
+});
+
 // Test route for Google Maps API
 Route::get('/test-maps', function () {
     return view('test-maps');

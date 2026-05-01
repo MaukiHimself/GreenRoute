@@ -100,7 +100,7 @@ MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@yourcompany.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 ### 2. Test It
@@ -158,7 +158,7 @@ public function store(Request $request, ClientInvitationService $service)
 
 ## 📧 What the Email Looks Like
 
-**Subject:** Welcome to AFIA ORBIT - Client Portal Access
+**Subject:** Welcome to GreenRoute ORBIT - Client Portal Access
 
 **Body:**
 ```

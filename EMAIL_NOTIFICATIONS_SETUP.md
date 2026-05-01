@@ -4,7 +4,7 @@
 
 Your system already includes:
 - ✅ **Mail Classes**: `ContractorApproved.php` and `ContractorRejected.php`
-- ✅ **Email Templates**: Beautiful HTML emails with AFIA ORBIT branding
+- ✅ **Email Templates**: Beautiful HTML emails with GreenRoute ORBIT branding
 - ✅ **Controller Integration**: Email code already in `AdminController.php`
 - ✅ **Error Handling**: Graceful failure if email doesn't send
 
@@ -22,11 +22,11 @@ Choose ONE of these options:
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-afiaorbit-email@gmail.com
+MAIL_USERNAME=your-greenroute-email@gmail.com
 MAIL_PASSWORD=your-16-char-app-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=your-afiaorbit-email@gmail.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_ADDRESS=your-greenroute-email@gmail.com
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 **How to Get Gmail App Password:**
@@ -47,8 +47,8 @@ MAIL_PORT=2525
 MAIL_USERNAME=your-mailtrap-username
 MAIL_PASSWORD=your-mailtrap-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@afiaorbit.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_ADDRESS=noreply@greenrouteorbit.com
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 **How to Get Mailtrap Credentials:**
@@ -73,8 +73,8 @@ MAIL_PORT=587
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=your-sendgrid-api-key
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@afiaorbit.com
-MAIL_FROM_NAME="AFIA ORBIT"
+MAIL_FROM_ADDRESS=noreply@greenrouteorbit.com
+MAIL_FROM_NAME="GreenRoute ORBIT"
 ```
 
 **How to Get SendGrid API Key:**
@@ -121,20 +121,20 @@ This ensures Laravel loads your new email settings.
 
 **Triggered when:** Admin clicks "Approve" button
 
-**Subject:** "Your Contractor Account Has Been Approved - AFIA ORBIT"
+**Subject:** "Your Contractor Account Has Been Approved - GreenRoute ORBIT"
 
 **Content:**
 - ✅ Congratulations message
 - 📋 Account details (name, email, company)
 - 🔗 Login button/link
 - 📞 Support contact information
-- 🎨 Professional AFIA ORBIT branding
+- 🎨 Professional GreenRoute ORBIT branding
 
 **What contractor receives:**
 ```
 🎉 Congratulations, [Contractor Name]!
 
-Your contractor account has been approved and you can now access the AFIA ORBIT platform.
+Your contractor account has been approved and you can now access the GreenRoute ORBIT platform.
 
 Your Account Details:
 - Name: John Doe
@@ -150,7 +150,7 @@ You can now:
 
 [Login to Dashboard Button]
 
-Need help? Contact support@afiaorbit.com
+Need help? Contact support@greenrouteorbit.com
 ```
 
 ---
@@ -159,7 +159,7 @@ Need help? Contact support@afiaorbit.com
 
 **Triggered when:** Admin clicks "Reject" button
 
-**Subject:** "Contractor Account Application Status - AFIA ORBIT"
+**Subject:** "Contractor Account Application Status - GreenRoute ORBIT"
 
 **Content:**
 - ℹ️ Professional rejection notice
@@ -174,7 +174,7 @@ Application Status Update
 
 Dear [Contractor Name],
 
-Thank you for your interest in becoming an AFIA ORBIT contractor.
+Thank you for your interest in becoming a GreenRoute ORBIT contractor.
 
 After careful review, we are unable to approve your application at this time.
 
@@ -187,10 +187,10 @@ You can:
 • Reapply after addressing the concerns
 
 Contact Us:
-Email: support@afiaorbit.com
+Email: support@greenrouteorbit.com
 Phone: +255 123 456 789
 
-We appreciate your interest in AFIA ORBIT.
+We appreciate your interest in GreenRoute ORBIT.
 ```
 
 ---
@@ -350,7 +350,7 @@ php artisan tinker
    - ✅ NOT Gmail (rate limits)
 
 2. **Set Up Email Domain**
-   - ✅ Use `noreply@afiaorbit.com`
+   - ✅ Use `noreply@greenrouteorbit.com`
    - ✅ NOT personal Gmail address
 
 3. **Configure SPF/DKIM Records**

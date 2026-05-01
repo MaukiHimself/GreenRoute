@@ -21,7 +21,7 @@ class UserTypeController extends Controller
     {
         return view('auth.register-client-simple');
     }
-    
+
     /**
      * Display the client login view.
      */
@@ -29,7 +29,7 @@ class UserTypeController extends Controller
     {
         return view('auth.login-client');
     }
-    
+
 
 
     /**
@@ -47,7 +47,7 @@ class UserTypeController extends Controller
     {
         return view('auth.register-admin');
     }
-    
+
     /**
      * Display the admin login view.
      */
@@ -55,7 +55,7 @@ class UserTypeController extends Controller
     {
         return view('auth.login-admin');
     }
-    
+
     /**
      * Display the contractor login view.
      */
@@ -63,7 +63,7 @@ class UserTypeController extends Controller
     {
         return view('auth.login-contractor');
     }
-    
+
 
 
     /**
@@ -96,11 +96,11 @@ class UserTypeController extends Controller
             'user_email' => $request->email,
             'timestamp' => now()
         ]);
-        
+
         // Additional validation for Tanzania coordinates (rough bounds)
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
-        
+
         if ($lat < -11.7 || $lat > -0.95 || $lng < 29.3 || $lng > 40.5) {
             Log::warning('Client registration with coordinates outside Tanzania', [
                 'latitude' => $lat,
@@ -108,12 +108,12 @@ class UserTypeController extends Controller
                 'address' => $request->address,
                 'user_email' => $request->email
             ]);
-            
+
             return back()->withErrors([
                 'location' => 'The detected location does not appear to be in Tanzania. Please ensure location services are enabled and try again.'
             ])->withInput();
         }
-        
+
         // Check if coordinates are in Moshi area for additional validation
         $inMoshi = ($lat >= -3.5 && $lat <= -3.2 && $lng >= 37.2 && $lng <= 37.4);
         if ($inMoshi) {
@@ -290,7 +290,7 @@ class UserTypeController extends Controller
         ]);
 
         $remember = $request->boolean('remember');
-        
+
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
@@ -321,7 +321,7 @@ class UserTypeController extends Controller
         ]);
 
         $remember = $request->boolean('remember');
-        
+
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
@@ -339,7 +339,7 @@ class UserTypeController extends Controller
             if ($user->status === 'rejected') {
                 Auth::logout();
                 return back()->withErrors([
-                    'email' => 'Your contractor account has been rejected. Please contact support at support@afiaorbit.com for more information.',
+                    'email' => 'Your contractor account has been rejected. Please contact support at support@greenrouteorbit.com for more information.',
                 ])->withInput();
             }
 
@@ -377,7 +377,7 @@ class UserTypeController extends Controller
         ]);
 
         $remember = $request->boolean('remember');
-        
+
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 

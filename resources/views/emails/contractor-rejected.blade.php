@@ -198,21 +198,21 @@
                 </ul>
             </div>
 
-            <a href="mailto:support@afiaorbit.com" class="cta-button">
+            <a href="mailto:support@greenrouteorbit.com" class="cta-button">
                 Contact Support
             </a>
 
             <p style="margin-top: 30px; font-size: 14px; color: #999;">
-                We appreciate your understanding and interest in AFIA ORBIT. If you have any questions about this decision or need clarification, please don't hesitate to reach out to our support team.
+                We appreciate your understanding and interest in GreenRoute ORBIT. If you have any questions about this decision or need clarification, please don't hesitate to reach out to our support team.
             </p>
         </div>
 
         <div class="email-footer">
-            <p><strong>AFIA ORBIT</strong> - Waste Management System</p>
+            <p><strong>GreenRoute ORBIT</strong> - Waste Management System</p>
             <p>This is an automated message. Please do not reply to this email.</p>
             <p>
-                <a href="{{ url('/') }}">Visit Website</a> | 
-                <a href="mailto:support@afiaorbit.com">Support</a>
+                <a href="{{ url('/') }}">Visit Website</a> |
+                <a href="mailto:support@greenrouteorbit.com">Support</a>
             </p>
         </div>
     </div>

@@ -14,20 +14,20 @@ class SmsController extends Controller
     public function index()
     {
         $contractorId = Auth::id();
-        
+
         // Get all clients
         $clients = Client::where('contractor_id', $contractorId)
             ->orderBy('name')
             ->get();
-        
+
         // Group clients by route
         $clientsByRoute = $clients->groupBy('route')->sortKeys();
-        
+
         // Get all unique routes
         $routes = $clients->pluck('route')->unique()->filter()->sort()->values();
-        
+
         $templates = $this->getMessageTemplates();
-        
+
         return view('sms.index', compact('clients', 'clientsByRoute', 'routes', 'templates'));
     }
 
@@ -72,7 +72,7 @@ class SmsController extends Controller
     public function inbox()
     {
         $contractorId = Auth::id();
-        
+
         // Get all clients with their latest message
         $conversations = Client::where('contractor_id', $contractorId)
             ->with(['messages' => function($query) {
@@ -181,7 +181,7 @@ class SmsController extends Controller
     {
         $type = $request->get('type');
         $templates = $this->getMessageTemplates();
-        
+
         return response()->json([
             'template' => $templates[$type] ?? ''
         ]);
@@ -190,12 +190,12 @@ class SmsController extends Controller
     private function getMessageTemplates()
     {
         return [
-            'pickup_schedule' => 'Hello {client_name}, your waste collection is scheduled for {date} at {time}. Please have your bins ready. - AFIA ORBIT',
-            'trash_reminder' => 'Reminder: Please put out your trash bins for collection tomorrow at {time}. Thank you! - AFIA ORBIT',
-            'invoice_notification' => 'New invoice #{invoice_number} for ${amount} has been generated. Due date: {due_date}. - AFIA ORBIT',
-            'receipt_notification' => 'Payment received! Receipt #{receipt_number} for ${amount} has been sent to your email. Thank you! - AFIA ORBIT',
-            'payment_reminder' => 'Payment reminder: Invoice #{invoice_number} for ${amount} is due on {due_date}. Please make payment to avoid late fees. - AFIA ORBIT',
-            'sustainability_tip' => 'Sustainability Tip: {tip}. Together we can make a difference for our environment! - AFIA ORBIT',
+            'pickup_schedule' => 'Hello {client_name}, your waste collection is scheduled for {date} at {time}. Please have your bins ready. - GreenRoute ORBIT',
+            'trash_reminder' => 'Reminder: Please put out your trash bins for collection tomorrow at {time}. Thank you! - GreenRoute ORBIT',
+            'invoice_notification' => 'New invoice #{invoice_number} for ${amount} has been generated. Due date: {due_date}. - GreenRoute ORBIT',
+            'receipt_notification' => 'Payment received! Receipt #{receipt_number} for ${amount} has been sent to your email. Thank you! - GreenRoute ORBIT',
+            'payment_reminder' => 'Payment reminder: Invoice #{invoice_number} for ${amount} is due on {due_date}. Please make payment to avoid late fees. - GreenRoute ORBIT',
+            'sustainability_tip' => 'Sustainability Tip: {tip}. Together we can make a difference for our environment! - GreenRoute ORBIT',
             'custom' => ''
         ];
     }

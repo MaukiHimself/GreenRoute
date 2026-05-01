@@ -182,11 +182,11 @@
         </div>
 
         <div class="email-footer">
-            <p><strong>AFIA ORBIT</strong> - Waste Management System</p>
+            <p><strong>GreenRoute ORBIT</strong> - Waste Management System</p>
             <p>This is an automated message. Please do not reply to this email.</p>
             <p>
-                <a href="{{ url('/') }}">Visit Website</a> | 
-                <a href="mailto:support@afiaorbit.com">Support</a>
+                <a href="{{ url('/') }}">Visit Website</a> |
+                <a href="mailto:support@greenrouteorbit.com">Support</a>
             </p>
         </div>
     </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Contractor Dashboard' }} | Afia Orbit</title>
+    <title>{{ $title ?? 'Contractor Dashboard' }} | GreenRoute</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -14,14 +14,14 @@
             --light-teal: #e6f2f2;
             --light-red: #f9eaea;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
-        
+
         /* Sidebar Styling */
         .sidebar {
             min-height: 100vh;
@@ -31,7 +31,7 @@
             width: 250px;
             z-index: 100;
         }
-        
+
         .sidebar .brand {
             background-color: white;
             color: var(--primary-teal);
@@ -41,7 +41,7 @@
             text-align: center;
             border-bottom: 2px solid var(--primary-teal);
         }
-        
+
         .sidebar .nav-link {
             color: #333;
             padding: 12px 20px;
@@ -51,31 +51,31 @@
             align-items: center;
             text-decoration: none;
         }
-        
+
         .sidebar .nav-link:hover {
             background-color: var(--light-teal);
             color: var(--primary-teal);
         }
-        
+
         .sidebar .nav-link.active {
             background-color: var(--primary-teal);
             color: white;
             border-left: 4px solid var(--primary-red);
         }
-        
+
         .sidebar .nav-link i {
             width: 24px;
             text-align: center;
             margin-right: 10px;
         }
-        
+
         /* Main Content Styling */
         .main-content {
             margin-left: 250px;
             padding: 20px;
             min-height: 100vh;
         }
-        
+
         /* Header Styling */
         .header {
             background-color: white;
@@ -84,16 +84,16 @@
             padding: 15px 20px;
             margin-bottom: 25px;
         }
-        
+
         .breadcrumb {
             margin-bottom: 0;
         }
-        
+
         .breadcrumb-item.active {
             color: var(--primary-teal);
             font-weight: 600;
         }
-        
+
         .user-badge {
             background-color: var(--primary-teal);
             color: white;
@@ -101,7 +101,7 @@
             border-radius: 20px;
             font-size: 0.9rem;
         }
-        
+
         .btn-back {
             background: var(--light-teal);
             color: var(--primary-teal);
@@ -115,12 +115,12 @@
             font-weight: 500;
             transition: all 0.3s;
         }
-        
+
         .btn-back:hover {
             background: var(--primary-teal);
             color: white;
         }
-        
+
         @yield('styles')
     </style>
     @stack('head-scripts')
@@ -131,7 +131,7 @@
         <div class="col-lg-2">
             <div class="sidebar">
                 <div class="brand">
-                    <i class="bi bi-recycle"></i> Afia Orbit
+                    <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 40px; width: auto;">
                 </div>
                 <nav class="nav flex-column">
                     <a class="nav-link {{ request()->routeIs('dashboard.contractor') ? 'active' : '' }}" href="{{ route('dashboard.contractor') }}">
@@ -173,7 +173,7 @@
                 </nav>
             </div>
         </div>
-        
+
         <!-- Main Content -->
         <div class="col-lg-10 main-content">
             <!-- Header -->
@@ -226,19 +226,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
-                
+
                 @if(session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
-                
+
                 {{ $slot }}
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
 </body>

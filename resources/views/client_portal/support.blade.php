@@ -65,7 +65,7 @@
                         <h6 class="mb-0"><i class="bi bi-telephone me-2 text-success"></i>Contact</h6>
                     </div>
                     <div class="card-body">
-                        <p class="mb-1 text-muted">Email: support@afiaorbit.com</p>
+                        <p class="mb-1 text-muted">Email: support@greenrouteorbit.com</p>
                         <p class="mb-1 text-muted">Phone: +233 00 000 0000</p>
                         <p class="mb-0 text-muted">Hours: Mon–Fri, 9:00–17:00</p>
                     </div>
