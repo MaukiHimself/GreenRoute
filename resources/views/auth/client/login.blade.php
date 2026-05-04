@@ -13,24 +13,24 @@
             --light-teal: rgba(5, 92, 92, 0.1);
             --dark-teal: #044a4a;
         }
-        
+
         body {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .login-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
         }
-        
+
         .login-header {
             text-align: center;
             margin-bottom: 3rem;
         }
-        
+
         .header-icon {
             width: 100px;
             height: 100px;
@@ -44,20 +44,20 @@
             color: var(--primary-teal);
             border: 3px solid var(--primary-teal);
         }
-        
+
         .login-title {
             font-size: 2.5rem;
             font-weight: 700;
             color: var(--primary-teal);
             margin-bottom: 0.5rem;
         }
-        
+
         .login-subtitle {
             font-size: 1.1rem;
             color: #6c757d;
             font-weight: 400;
         }
-        
+
         .login-form-container {
             background: white;
             border-radius: 20px;
@@ -65,14 +65,14 @@
             box-shadow: 0 15px 35px rgba(5, 92, 92, 0.1);
             border: 1px solid rgba(5, 92, 92, 0.1);
         }
-        
+
         .form-label {
             font-weight: 600;
             color: var(--primary-teal);
             margin-bottom: 0.75rem;
             font-size: 1rem;
         }
-        
+
         .form-control {
             border: 2px solid #e9ecef;
             border-radius: 12px;
@@ -80,12 +80,12 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-        
+
         .form-control:focus {
             border-color: var(--primary-teal);
             box-shadow: 0 0 0 0.3rem rgba(5, 92, 92, 0.1);
         }
-        
+
         .btn-login {
             background: linear-gradient(135deg, var(--primary-teal) 0%, var(--dark-teal) 100%);
             border: none;
@@ -97,54 +97,54 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(5, 92, 92, 0.3);
         }
-        
+
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(5, 92, 92, 0.4);
             color: white;
         }
-        
+
         .support-section {
             border-top: 1px solid #e9ecef;
             padding-top: 1.5rem;
             text-align: center;
         }
-        
+
         .support-text {
             color: #6c757d;
             margin-bottom: 0;
         }
-        
+
         .support-link {
             color: var(--primary-teal);
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
         }
-        
+
         .support-link:hover {
             color: var(--dark-teal);
             text-decoration: underline;
         }
-        
+
         .alert-custom {
             border-radius: 12px;
             border: 2px solid;
             padding: 1.25rem;
         }
-        
+
         .alert-success-custom {
             background-color: rgba(5, 92, 92, 0.05);
             border-color: var(--primary-teal);
             color: var(--primary-teal);
         }
-        
+
         .alert-danger-custom {
             background-color: rgba(100, 4, 4, 0.05);
             border-color: var(--primary-red);
             color: var(--primary-red);
         }
-        
+
         .features-sidebar {
             background: linear-gradient(135deg, var(--primary-teal) 0%, var(--dark-teal) 100%);
             color: white;
@@ -152,13 +152,13 @@
             border-radius: 20px;
             height: fit-content;
         }
-        
+
         .feature-item {
             display: flex;
             align-items: center;
             margin-bottom: 1.5rem;
         }
-        
+
         .feature-icon {
             width: 50px;
             height: 50px;
@@ -170,21 +170,21 @@
             margin-right: 1rem;
             font-size: 1.25rem;
         }
-        
+
         .feature-text {
             flex: 1;
         }
-        
+
         .feature-title {
             font-weight: 600;
             margin-bottom: 0.25rem;
         }
-        
+
         .feature-desc {
             font-size: 0.9rem;
             opacity: 0.9;
         }
-        
+
         .security-notice {
             background: var(--light-teal);
             border-radius: 12px;
@@ -192,28 +192,28 @@
             margin-bottom: 2rem;
             border-left: 4px solid var(--primary-teal);
         }
-        
+
         .security-title {
             font-weight: 600;
             color: var(--primary-teal);
             margin-bottom: 0.5rem;
         }
-        
+
         .security-text {
             color: var(--primary-teal);
             font-size: 0.9rem;
             margin-bottom: 0;
         }
-        
+
         @media (max-width: 768px) {
             .login-container {
                 padding: 2rem 0;
             }
-            
+
             .login-form-container {
                 padding: 2rem;
             }
-            
+
             .login-title {
                 font-size: 2rem;
             }
@@ -229,6 +229,11 @@
                         <!-- Login Form Column -->
                         <div class="col-lg-7">
                             <div class="login-form-container">
+                                <!-- Logo -->
+                                <div class="text-center mb-4">
+                                    <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 80px; width: auto;">
+                                </div>
+
                                 <!-- Header -->
                                 <div class="login-header">
                                     <div class="header-icon">
@@ -271,15 +276,15 @@
                                 <!-- Login Form -->
                                 <form method="POST" action="{{ route('client.login.submit') }}">
                                     @csrf
-                                    
+
                                     <div class="mb-4">
                                         <label for="email" class="form-label">
                                             <i class="bi bi-envelope me-2"></i>Email Address
                                         </label>
-                                        <input id="email" type="email" name="email" 
-                                               value="{{ old('email') }}" 
+                                        <input id="email" type="email" name="email"
+                                               value="{{ old('email') }}"
                                                required autofocus
-                                               class="form-control @error('email') is-invalid @enderror" 
+                                               class="form-control @error('email') is-invalid @enderror"
                                                placeholder="Enter your email address">
                                         @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -288,14 +293,14 @@
                                             Use the email address provided in your invitation
                                         </small>
                                     </div>
-                                    
+
                                     <div class="mb-4">
                                         <label for="password" class="form-label">
                                             <i class="bi bi-lock me-2"></i>Password
                                         </label>
-                                        <input id="password" type="password" name="password" 
+                                        <input id="password" type="password" name="password"
                                                required
-                                               class="form-control @error('password') is-invalid @enderror" 
+                                               class="form-control @error('password') is-invalid @enderror"
                                                placeholder="Enter your password">
                                         @error('password')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -304,14 +309,14 @@
                                             Use the temporary password from your invitation email or your updated password
                                         </small>
                                     </div>
-                                    
+
                                     <div class="mb-4 form-check">
                                         <input type="checkbox" class="form-check-input" id="remember" name="remember">
                                         <label class="form-check-label" for="remember">
                                             Remember me for 30 days
                                         </label>
                                     </div>
-                                    
+
                                     <!-- Submit Button -->
                                     <div class="d-grid">
                                         <button type="submit" class="btn btn-login">
@@ -322,7 +327,7 @@
 
                                 <!-- Support Link -->
                                 <div class="support-section">
-                                    <p class="support-text">Need help accessing your account? 
+                                    <p class="support-text">Need help accessing your account?
                                         <a href="#" class="support-link">Contact Support</a>
                                     </p>
                                 </div>
@@ -333,7 +338,7 @@
                         <div class="col-lg-5 d-none d-lg-block">
                             <div class="features-sidebar">
                                 <h3 class="mb-4">Welcome to Your Client Portal</h3>
-                                
+
                                 <div class="feature-item">
                                     <div class="feature-icon">
                                         <i class="bi bi-calendar-check"></i>
@@ -343,7 +348,7 @@
                                         <div class="feature-desc">View and manage your waste collection schedules</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="feature-item">
                                     <div class="feature-icon">
                                         <i class="bi bi-receipt"></i>
@@ -353,7 +358,7 @@
                                         <div class="feature-desc">Access and manage your service invoices</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="feature-item">
                                     <div class="feature-icon">
                                         <i class="bi bi-truck"></i>
@@ -363,7 +368,7 @@
                                         <div class="feature-desc">Monitor your waste collection services in real-time</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="feature-item">
                                     <div class="feature-icon">
                                         <i class="bi bi-graph-up"></i>

@@ -261,8 +261,9 @@
         <div class="main-content">
             <!-- Header -->
             <div class="header">
-                <div class="d-flex align-items-center gap-3">
-                    <a href="{{ route('client.dashboard') }}" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2" style="border-color: #e0e0e0; background: #f8f9fa;">
+                <div class="d-flex align-items-center gap-3">                    <!-- Logo -->
+                    <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 50px; width: auto;">
+                                        <a href="{{ route('client.dashboard') }}" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2" style="border-color: #e0e0e0; background: #f8f9fa;">
                         <i class="bi bi-house-door-fill" style="color: var(--primary-color);"></i> <span style="color: #333;">Home</span>
                     </a>
                     <nav aria-label="breadcrumb">

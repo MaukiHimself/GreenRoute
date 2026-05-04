@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <style>
         :root {
@@ -23,18 +23,18 @@
             --afia-gray: #6b7280;
             --afia-light: #f8fafc;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--afia-light);
         }
-        
+
         .sidebar {
             background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
             border-right: 1px solid #e2e8f0;
             min-height: 100vh;
         }
-        
+
         .sidebar .nav-link {
             color: var(--afia-gray);
             padding: 0.75rem 1rem;
@@ -42,46 +42,46 @@
             margin: 0.25rem 0;
             transition: all 0.3s ease;
         }
-        
+
         .sidebar .nav-link:hover {
             background-color: #e0f2fe;
             color: var(--afia-teal);
             transform: translateX(4px);
         }
-        
+
         .sidebar .nav-link.active {
             background: linear-gradient(135deg, var(--afia-teal) 0%, var(--afia-cyan) 100%);
             color: white;
             box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
         }
-        
+
         .main-content {
             background-color: var(--afia-light);
         }
-        
+
         .top-navbar {
             background: white;
             border-bottom: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card {
             border: none;
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
-        
+
         .card:hover {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
-        
+
         .stat-card {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border-left: 4px solid var(--afia-teal);
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, var(--afia-teal) 0%, var(--afia-cyan) 100%);
             border: none;
@@ -90,18 +90,18 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
         }
-        
+
         .badge {
             border-radius: 0.5rem;
             padding: 0.5rem 0.75rem;
             font-weight: 500;
         }
-        
+
         .notification-badge {
             position: absolute;
             top: -8px;
@@ -116,7 +116,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -128,17 +128,17 @@
             justify-content: center;
             font-weight: 600;
         }
-        
+
         .breadcrumb {
             background: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .breadcrumb-item {
             color: var(--afia-gray);
         }
-        
+
         .breadcrumb-item.active {
             color: var(--afia-teal);
             font-weight: 500;
@@ -157,7 +157,7 @@
                             <x-afia-orbit-logo class="h-10" />
                         </a>
                     </div>
-                    
+
                     <!-- User Info -->
                     <div class="p-4 border-bottom">
                         <div class="d-flex align-items-center">
@@ -170,28 +170,31 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Navigation Menu -->
                     <nav class="p-3">
                         {{ $sidebar }}
                     </nav>
                 </div>
             </div>
-            
+
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 px-0">
                 <div class="main-content">
                     <!-- Top Navigation Bar -->
                     <div class="top-navbar p-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Logo -->
+                                <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 40px; width: auto;">
+
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         {{ $breadcrumb }}
                                     </ol>
                                 </nav>
                             </div>
-                            
+
                             <div class="d-flex align-items-center gap-3">
                                 <!-- Notifications -->
                                 <div class="position-relative">
@@ -202,7 +205,7 @@
                                         @endif
                                     </button>
                                 </div>
-                                
+
                                 <!-- User Menu -->
                                 <div class="dropdown">
                                     <button class="btn btn-link text-muted p-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -227,12 +230,12 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Page Content -->
                     <div class="p-4">
                         {{ $slot }}
                     </div>
-                    
+
                     <!-- Footer -->
                     <x-footer />
                 </div>
