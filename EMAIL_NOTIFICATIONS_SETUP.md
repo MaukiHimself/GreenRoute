@@ -14,6 +14,8 @@ Your system already includes:
 
 ### **Step 1: Configure Email in `.env` File**
 
+> ⚠️ Important: Laravel defaults to the `log` mailer when `MAIL_MAILER` is not set. That means emails will be written to the application log instead of being delivered to real inboxes.
+
 Choose ONE of these options:
 
 #### **Option A: Gmail (Recommended for Production)**

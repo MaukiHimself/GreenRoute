@@ -18,6 +18,8 @@ The email invitation system automatically sends welcome emails to clients when t
 
 ### Step 1: Configure Email Settings
 
+> ⚠️ Note: Laravel defaults to the `log` mailer when `MAIL_MAILER` is not set. That means emails will be written to application logs instead of being delivered.
+
 Edit your `.env` file with email configuration:
 
 ```env

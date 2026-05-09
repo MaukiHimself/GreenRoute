@@ -240,16 +240,16 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>City <span class="required">*</span></label>
-                            <input type="text" name="city" class="form-control" value="{{ old('city') }}" required>
+                            <label>City</label>
+                            <input type="text" name="city" class="form-control" value="{{ old('city') }}">
                             @error('city')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="form-group">
-                            <label>State <span class="required">*</span></label>
-                            <input type="text" name="state" class="form-control" value="{{ old('state') }}" required>
+                            <label>State</label>
+                            <input type="text" name="state" class="form-control" value="{{ old('state') }}">
                             @error('state')
                                 <div class="error-message">{{ $message }}</div>
                             @enderror

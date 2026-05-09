@@ -183,8 +183,11 @@ Route::post('/register/admin', [UserTypeController::class, 'storeAdmin'])->name(
 // Admin login routes (separate from main login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', function () {
-        // If logged in as non-admin, logout first
-        if (Auth::check() && Auth::user()->user_type !== 'admin') {
+        if (Auth::check()) {
+            if (Auth::user()->user_type === 'admin') {
+                return redirect()->route('dashboard.admin');
+            }
+
             Auth::logout();
         }
 
@@ -196,12 +199,11 @@ Route::prefix('admin')->group(function () {
             ->header('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT');
-    })->name('admin.login')->middleware('guest');
+    })->name('admin.login');
 
 
-    Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store'])
-        ->name('admin.login.submit')
-        ->middleware('guest');
+    Route::post('/login', [App\Http\Controllers\Auth\AdminAuthController::class, 'store'])
+        ->name('admin.login.submit');
 
 
     Route::post('/logout', function () {

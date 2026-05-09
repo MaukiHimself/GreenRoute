@@ -8,6 +8,7 @@ use App\Models\ContractorRoute;
 use App\Models\ContractorLocation;
 use App\Models\BillingRate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -348,21 +349,25 @@ class AdminController extends Controller
 
     public function approveContractor(User $user)
     {
-        // Generate temporary password
         $tempPassword = \Illuminate\Support\Str::random(10);
 
-        // Update user status to approved and set new password
-        $user->update([
-            'status' => 'approved',
-            'password' => \Illuminate\Support\Facades\Hash::make($tempPassword)
-        ]);
-
-        // Send approval email notification with credentials
         try {
-            \Mail::to($user->email)->send(new \App\Mail\ContractorApproved($user, $tempPassword));
+            DB::transaction(function () use ($user, $tempPassword) {
+                $user->update([
+                    'status' => 'approved',
+                    'password' => \Illuminate\Support\Facades\Hash::make($tempPassword),
+                ]);
+
+                \Mail::to($user->email)->send(new \App\Mail\ContractorApproved($user, $tempPassword));
+            });
         } catch (\Exception $e) {
-            // Log the error but don't fail the approval
-            \Log::error('Failed to send approval email: ' . $e->getMessage());
+            \Log::error('Failed to approve contractor and send credential email: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
+            return redirect()->route('admin.verification')
+                ->with('error', "Unable to send approval email to {$user->email}. Contractor remains pending until email can be delivered.");
         }
 
         return redirect()->route('admin.verification')
@@ -406,9 +411,9 @@ class AdminController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:20',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
             'category' => 'required|in:residential,commercial',
             'contractor_id' => 'nullable|exists:users,id',
             'latitude' => 'required|numeric|between:-90,90',
@@ -462,9 +467,9 @@ class AdminController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:20',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
             'category' => 'required|in:residential,commercial',
             'status' => 'required|in:active,inactive',
             'contractor_id' => 'nullable|exists:users,id',

@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Contractor;
 use App\Models\User;
 use App\Notifications\ClientInvitation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -21,43 +22,47 @@ class ClientInvitationService
      */
     public function createClientWithInvitation(array $clientData, Contractor $contractor, bool $createUserAccount = true)
     {
-        // Create the client
+        // Create the client first so we always preserve the contractor's client record.
         $client = Client::create($clientData);
-        
         $user = null;
         $temporaryPassword = null;
 
-        // Create user account if requested
         if ($createUserAccount && isset($clientData['email'])) {
             $temporaryPassword = Str::random(12); // Generate random password
-            
-            $user = User::create([
-                'name' => $client->name,
-                'email' => $client->email,
-                'password' => Hash::make($temporaryPassword),
-                'user_type' => 'client',
-                'email_verified_at' => now(), // Auto-verify invited clients
-            ]);
 
-            // Link user to client
-            $client->user_id = $user->id;
-            $client->save();
-        }
-
-        // Send invitation email
-        if (isset($clientData['email'])) {
             try {
-                // You can send to the user if exists, or directly to email
-                if ($user) {
+                DB::transaction(function () use ($client, $contractor, $clientData, &$user, $temporaryPassword) {
+                    $user = User::create([
+                        'name' => $client->name,
+                        'email' => $client->email,
+                        'password' => Hash::make($temporaryPassword),
+                        'user_type' => 'client',
+                        'email_verified_at' => now(), // Auto-verify invited clients
+                    ]);
+
+                    $client->user_id = $user->id;
+                    $client->save();
+
                     $user->notify(new ClientInvitation($client, $contractor, $temporaryPassword));
-                } else {
-                    // Send to email address directly without user account
-                    \Notification::route('mail', $client->email)
-                        ->notify(new ClientInvitation($client, $contractor, null));
-                }
+                });
             } catch (\Exception $e) {
-                // Log error but don't fail the client creation
-                \Log::error('Failed to send client invitation email: ' . $e->getMessage());
+                \Log::error('Failed to create client invitation account or send email: ' . $e->getMessage(), [
+                    'client_id' => $client->id,
+                    'client_email' => $client->email,
+                ]);
+
+                $user = null;
+                $temporaryPassword = null;
+            }
+        } elseif (isset($clientData['email'])) {
+            try {
+                \Notification::route('mail', $client->email)
+                    ->notify(new ClientInvitation($client, $contractor, null));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send client invitation email: ' . $e->getMessage(), [
+                    'client_id' => $client->id,
+                    'client_email' => $client->email,
+                ]);
             }
         }
 
