@@ -211,8 +211,8 @@ class UserTypeController extends Controller
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'email' => strtolower(trim($request->email)),
+            'password' => $request->password,
             'user_type' => 'contractor',
             'status' => 'pending', // Contractor must be approved by admin
         ]);
@@ -353,7 +353,9 @@ class UserTypeController extends Controller
         ]);
 
         $remember = $request->boolean('remember');
+        $email = strtolower(trim($credentials['email']));
 
+<<<<<<< HEAD
         $user = User::where('email', $credentials['email'])->first();
 
         Log::info('Contractor login attempt', [
@@ -415,6 +417,53 @@ class UserTypeController extends Controller
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ]);
+=======
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+        if (! $user) {
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->withInput($request->only('email'));
+        }
+
+        if ($user->user_type !== 'contractor') {
+            return back()->withErrors([
+                'email' => 'These credentials do not match our records for a contractor account. Please use the contractor login page.',
+            ])->withInput($request->only('email'));
+        }
+
+        if (! Hash::check($credentials['password'], $user->password)) {
+            return back()->withErrors([
+                'email' => 'The password you entered is incorrect. If your account was approved before March 2026, check your approval email for a temporary password or contact support.',
+            ])->withInput($request->only('email'));
+        }
+
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+
+        if ($user->status === 'rejected') {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Your contractor account has been rejected. Please contact support at support@greenrouteorbit.com for more information.',
+            ])->withInput($request->only('email'));
+        }
+
+        if ($user->status === 'pending' || ! $user->status) {
+            Auth::logout();
+            return redirect()->route('contractor.pending')
+                ->with('email', $user->email)
+                ->with('name', $user->name);
+        }
+
+        if ($user->status !== 'approved') {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Your account status is under review. Please contact support for more information.',
+            ])->withInput($request->only('email'));
+        }
+
+        return redirect()->route('dashboard.contractor');
+>>>>>>> 880844a (Update contractor email, reports, and map setup)
     }
 
     /**

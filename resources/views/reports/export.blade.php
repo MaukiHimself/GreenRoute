@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AFIA ORBIT - Summary Report</title>
+    <title>GreenRoute - Summary Report</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -16,8 +16,11 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>AFIA ORBIT</h1>
+    <div class="header no-print">
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+            <a href="{{ route('reports.index') }}" style="display: inline-block; padding: 10px 18px; background: #6c757d; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">← Back</a>
+        </div>
+        <h1>GreenRoute</h1>
         <h2>Comprehensive Business Report</h2>
         <p>Generated on: {{ now()->format('F d, Y H:i') }}</p>
         <p>Contractor: {{ auth()->user()->name }}</p>
@@ -31,7 +34,7 @@
                 <div>Total Clients</div>
             </div>
         </div>
-        
+
         <h4>Clients by Category</h4>
         <table>
             <thead>
@@ -94,7 +97,7 @@
                 <div>Completed Collections</div>
             </div>
         </div>
-        
+
         <h4>Volumes by Route</h4>
         <table>
             <thead>
@@ -123,7 +126,7 @@
                 <div>Volume Recycled</div>
             </div>
         </div>
-        
+
         <h4>Volumes by Disposal Type</h4>
         <table>
             <thead>

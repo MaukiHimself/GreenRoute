@@ -46,6 +46,20 @@ class ContractorApproved extends Mailable
     }
 
     /**
+     * Bind data explicitly to the view (for Laravel mailables).
+     */
+    public function build()
+    {
+        return $this->view('emails.contractor-approved')
+            ->with([
+                'contractor' => $this->contractor,
+                'password' => $this->password,
+            ]);
+    }
+
+
+
+    /**
      * Get the attachments for the message.
      *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>

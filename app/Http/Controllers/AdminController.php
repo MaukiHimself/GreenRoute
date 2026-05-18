@@ -7,6 +7,9 @@ use App\Models\Client;
 use App\Models\ContractorRoute;
 use App\Models\ContractorLocation;
 use App\Models\BillingRate;
+use App\Mail\ContractorApproved;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,15 +21,15 @@ class AdminController extends Controller
         $contractorsCount = User::where('user_type', 'contractor')->count();
         $clientsCount = Client::count();
         $activeRoutesCount = ContractorRoute::where('is_active', true)->count();
-        
+
         // Get pending verifications count (contractors without approved status)
         $pendingVerifications = User::where('user_type', 'contractor')
             ->where('status', '!=', 'approved')
             ->count();
-        
+
         // Pending tasks
         $pendingTasks = [];
-        
+
         // Check for contractors pending verification
         if ($pendingVerifications > 0) {
             $pendingTasks[] = [
@@ -37,7 +40,7 @@ class AdminController extends Controller
                 'link' => route('admin.verification')
             ];
         }
-        
+
         // Check for inactive routes that need attention
         $inactiveRoutes = ContractorRoute::where('is_active', false)->count();
         if ($inactiveRoutes > 0) {
@@ -49,7 +52,7 @@ class AdminController extends Controller
                 'link' => route('admin.schedules')
             ];
         }
-        
+
         return view('admin.dashboard', [
             'contractorsCount' => $contractorsCount,
             'clientsCount' => $clientsCount,
@@ -67,7 +70,7 @@ class AdminController extends Controller
             ->with('contractor')
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         // Get recently approved contractors
         $approvedContractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
@@ -75,7 +78,7 @@ class AdminController extends Controller
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get();
-            
+
         // Get rejected contractors
         $rejectedContractors = User::where('user_type', 'contractor')
             ->where('status', 'rejected')
@@ -83,7 +86,7 @@ class AdminController extends Controller
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get();
-            
+
         // Statistics
         $stats = [
             'pending' => User::where('user_type', 'contractor')->where('status', 'pending')->count(),
@@ -92,7 +95,7 @@ class AdminController extends Controller
             'suspended' => User::where('user_type', 'contractor')->where('status', 'suspended')->count(),
             'total' => User::where('user_type', 'contractor')->count(),
         ];
-        
+
         return view('admin.verification', compact('pendingContractors', 'approvedContractors', 'rejectedContractors', 'stats'));
     }
 
@@ -102,13 +105,13 @@ class AdminController extends Controller
         $clients = Client::with('contractor')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
-        
+
         // Get statistics
         $totalClients = Client::count();
         $residentialCount = Client::where('category', 'residential')->count();
         $commercialCount = Client::where('category', 'commercial')->count();
         $activeCount = Client::where('status', 'active')->count();
-        
+
         return view('admin.clients', [
             'clients' => $clients,
             'totalClients' => $totalClients,
@@ -124,13 +127,13 @@ class AdminController extends Controller
         $invoices = \App\Models\Invoice::with(['client', 'contractor'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
-        
+
         // Calculate statistics
         $totalRevenue = \App\Models\Invoice::where('status', 'paid')->sum('total_amount');
         $pendingAmount = \App\Models\Invoice::where('status', 'pending')->sum('total_amount');
         $overdueAmount = \App\Models\Invoice::where('status', 'overdue')->sum('total_amount');
         $totalInvoices = \App\Models\Invoice::count();
-        
+
         return view('admin.billing', [
             'invoices' => $invoices,
             'totalRevenue' => $totalRevenue,
@@ -144,17 +147,17 @@ class AdminController extends Controller
     {
         // Build query with filters
         $query = \App\Models\Schedule::with(['client', 'contractor']);
-        
+
         // Filter by contractor
         if ($request->filled('contractor_id')) {
             $query->where('contractor_id', $request->contractor_id);
         }
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Filter by date range
         if ($request->filled('date_from')) {
             $query->whereDate('scheduled_date', '>=', $request->date_from);
@@ -162,21 +165,21 @@ class AdminController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('scheduled_date', '<=', $request->date_to);
         }
-        
+
         // Filter by organic waste
         if ($request->filled('organic_waste')) {
             $query->where('includes_organic_waste', $request->organic_waste === 'yes');
         }
-        
+
         // Filter by frequency
         if ($request->filled('frequency')) {
             $query->where('frequency', $request->frequency);
         }
-        
+
         $schedules = $query->orderBy('scheduled_date', 'desc')
             ->orderBy('scheduled_time', 'asc')
             ->paginate(20);
-        
+
         // Calculate statistics
         $totalSchedules = \App\Models\Schedule::count();
         $completedSchedules = \App\Models\Schedule::where('status', 'completed')->count();
@@ -184,13 +187,13 @@ class AdminController extends Controller
         $todaySchedules = \App\Models\Schedule::whereDate('scheduled_date', today())->count();
         $organicWasteSchedules = \App\Models\Schedule::where('includes_organic_waste', true)->count();
         $upcomingSchedules = \App\Models\Schedule::where('scheduled_date', '>=', today())->where('status', '!=', 'completed')->count();
-        
+
         // Get contractors for filter dropdown
         $contractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
             ->orderBy('name')
             ->get();
-        
+
         return view('admin.schedules-management', [
             'schedules' => $schedules,
             'totalSchedules' => $totalSchedules,
@@ -210,9 +213,9 @@ class AdminController extends Controller
             ->where('status', 'approved')
             ->orderBy('name')
             ->get();
-        
+
         $clients = Client::orderBy('name')->get();
-        
+
         return view('admin.schedules-edit', compact('schedule', 'contractors', 'clients'));
     }
 
@@ -232,9 +235,9 @@ class AdminController extends Controller
         ]);
 
         $validated['includes_organic_waste'] = $request->has('includes_organic_waste');
-        
+
         $schedule->update($validated);
-        
+
         return redirect()->route('admin.schedules')
             ->with('success', 'Schedule updated successfully.');
     }
@@ -243,17 +246,17 @@ class AdminController extends Controller
     {
         // Build query with filters
         $query = User::query();
-        
+
         // Filter by user type
         if ($request->filled('user_type')) {
             $query->where('user_type', $request->user_type);
         }
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Search by name or email
         if ($request->filled('search')) {
             $search = $request->search;
@@ -263,9 +266,9 @@ class AdminController extends Controller
                   ->orWhere('username', 'like', "%{$search}%");
             });
         }
-        
+
         $users = $query->orderBy('created_at', 'desc')->paginate(20);
-        
+
         // Calculate statistics
         $totalUsers = User::count();
         $adminCount = User::where('user_type', 'admin')->count();
@@ -273,7 +276,7 @@ class AdminController extends Controller
         $clientCount = User::where('user_type', 'client')->count();
         $approvedCount = User::where('status', 'approved')->count();
         $pendingCount = User::where('status', 'pending')->orWhereNull('status')->count();
-        
+
         return view('admin.users-management', [
             'users' => $users,
             'totalUsers' => $totalUsers,
@@ -293,6 +296,8 @@ class AdminController extends Controller
 
     public function updateUser(Request $request, User $user)
     {
+        $wasApprovedContractor = $user->user_type === 'contractor' && $user->status === 'approved';
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -303,7 +308,12 @@ class AdminController extends Controller
         ]);
 
         $user->update($validated);
-        
+
+        $isNowApprovedContractor = $user->user_type === 'contractor' && $user->status === 'approved';
+        if (! $wasApprovedContractor && $isNowApprovedContractor) {
+            $this->sendContractorApprovalEmail($user);
+        }
+
         return redirect()->route('admin.users')
             ->with('success', "User {$user->name} has been updated successfully.");
     }
@@ -315,10 +325,10 @@ class AdminController extends Controller
             return redirect()->route('admin.users')
                 ->with('error', 'You cannot delete your own account.');
         }
-        
+
         $userName = $user->name;
         $user->delete();
-        
+
         return redirect()->route('admin.users')
             ->with('success', "User {$userName} has been deleted successfully.");
     }
@@ -349,29 +359,25 @@ class AdminController extends Controller
 
     public function approveContractor(User $user)
     {
-        $tempPassword = \Illuminate\Support\Str::random(10);
+        // Approve without changing the password they chose at registration
+        $user->update(['status' => 'approved']);
 
-        try {
-            DB::transaction(function () use ($user, $tempPassword) {
-                $user->update([
-                    'status' => 'approved',
-                    'password' => \Illuminate\Support\Facades\Hash::make($tempPassword),
-                ]);
-
-                \Mail::to($user->email)->send(new \App\Mail\ContractorApproved($user, $tempPassword));
-            });
-        } catch (\Exception $e) {
-            \Log::error('Failed to approve contractor and send credential email: ' . $e->getMessage(), [
-                'user_id' => $user->id,
-                'email' => $user->email,
-            ]);
-
-            return redirect()->route('admin.verification')
-                ->with('error', "Unable to send approval email to {$user->email}. Contractor remains pending until email can be delivered.");
-        }
+        // Send approval email notification (contractor keeps their registration password)
+        $this->sendContractorApprovalEmail($user);
 
         return redirect()->route('admin.verification')
-            ->with('success', "Contractor {$user->name} has been approved successfully. Login credentials have been sent to their email.");
+            ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
+    }
+=======
+        // Approve without changing the password they chose at registration
+        $user->update(['status' => 'approved']);
+
+        // Send approval email notification (contractor keeps their registration password)
+        $this->sendContractorApprovalEmail($user);
+>>>>>>> 880844a (Update contractor email, reports, and map setup)
+
+        return redirect()->route('admin.verification')
+            ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
     }
 
     public function rejectContractor(User $user)
@@ -391,6 +397,22 @@ class AdminController extends Controller
             ->with('success', "Contractor {$user->name} has been rejected. A notification email has been sent.");
     }
 
+    /**
+     * Send contractor approval email without interrupting admin workflow on mail failure.
+     */
+    private function sendContractorApprovalEmail(User $contractor, ?string $temporaryPassword = null): void
+    {
+        try {
+            Mail::to($contractor->email)->send(new ContractorApproved($contractor, $temporaryPassword));
+        } catch (\Exception $e) {
+            Log::error('Failed to send approval email', [
+                'contractor_id' => $contractor->id,
+                'contractor_email' => $contractor->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     // Client Management Methods
 
     public function createClient()
@@ -400,7 +422,7 @@ class AdminController extends Controller
             ->where('status', 'approved')
             ->orderBy('name')
             ->get();
-        
+
         return view('admin.clients-create', compact('contractors'));
     }
 
@@ -432,7 +454,7 @@ class AdminController extends Controller
         // Validate Tanzania bounds
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
-        
+
         if ($lat < -11.7 || $lat > -0.95 || $lng < 29.3 || $lng > 40.5) {
             return back()->withErrors([
                 'location' => 'The detected location does not appear to be in Tanzania. Please ensure location services are enabled and try again.'
@@ -456,7 +478,7 @@ class AdminController extends Controller
             ->where('status', 'approved')
             ->orderBy('name')
             ->get();
-        
+
         return view('admin.clients-edit', compact('client', 'contractors'));
     }
 
@@ -489,7 +511,7 @@ class AdminController extends Controller
         // Validate Tanzania bounds
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
-        
+
         if ($lat < -11.7 || $lat > -0.95 || $lng < 29.3 || $lng > 40.5) {
             return back()->withErrors([
                 'location' => 'The location does not appear to be in Tanzania. Please verify the coordinates.'
@@ -519,7 +541,7 @@ class AdminController extends Controller
         $clients = Client::whereNotNull('phone')
             ->orderBy('name')
             ->get();
-        
+
         // Group by contractor for filtering
         $contractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
@@ -527,7 +549,7 @@ class AdminController extends Controller
             ->withCount('clients')
             ->orderBy('name')
             ->get();
-        
+
         return view('admin.sms-campaign', compact('clients', 'contractors'));
     }
 
@@ -589,7 +611,7 @@ class AdminController extends Controller
     {
         // Placeholder for SMS integration
         // TODO: Integrate with SMS service provider (Twilio, Africa's Talking, etc.)
-        
+
         // Example for Africa's Talking (popular in Africa):
         /*
         $gateway = new \AfricasTalking\SMS\SMS(config('services.africastalking.username'), config('services.africastalking.api_key'));
@@ -599,10 +621,10 @@ class AdminController extends Controller
             'from' => config('services.africastalking.shortcode')
         ]);
         */
-        
+
         // For now, just log it
         \Log::info("SMS to {$phone}: {$message}");
-        
+
         return true;
     }
 
@@ -615,24 +637,24 @@ class AdminController extends Controller
             ->orderBy('location')
             ->orderBy('frequency')
             ->get();
-        
+
         // Get unique categories and locations for filtering
         $categories = BillingRate::select('category')
             ->distinct()
             ->orderBy('category')
             ->pluck('category');
-            
+
         $locations = BillingRate::select('location')
             ->distinct()
             ->orderBy('location')
             ->pluck('location');
-        
+
         // Statistics
         $totalRates = BillingRate::count();
         $activeRates = BillingRate::where('is_active', true)->count();
         $residentialRates = BillingRate::where('category', 'LIKE', 'Residential%')->count();
         $commercialRates = BillingRate::where('category', 'LIKE', 'Commercial%')->count();
-        
+
         return view('admin.billing-rates', compact('rates', 'categories', 'locations', 'totalRates', 'activeRates', 'residentialRates', 'commercialRates'));
     }
 
@@ -656,7 +678,7 @@ class AdminController extends Controller
 
         try {
             BillingRate::create($validated);
-            
+
             return redirect()->route('admin.billing.rates')
                 ->with('success', 'Billing rate created successfully.');
         } catch (\Exception $e) {
@@ -686,7 +708,7 @@ class AdminController extends Controller
 
         try {
             $rate->update($validated);
-            
+
             return redirect()->route('admin.billing.rates')
                 ->with('success', 'Billing rate updated successfully.');
         } catch (\Exception $e) {
@@ -699,7 +721,7 @@ class AdminController extends Controller
     public function deleteBillingRate(BillingRate $rate)
     {
         $rate->delete();
-        
+
         return redirect()->route('admin.billing.rates')
             ->with('success', 'Billing rate deleted successfully.');
     }
@@ -715,9 +737,9 @@ class AdminController extends Controller
         if ($user->user_type !== 'contractor') {
             abort(404);
         }
-        
+
         $user->load('contractor');
-            
+
         return view('admin.contractor-details', compact('user'));
     }
 
@@ -730,7 +752,7 @@ class AdminController extends Controller
         if ($user->user_type !== 'contractor') {
             abort(404);
         }
-        
+
         if ($user->status === 'approved') {
             $user->update(['status' => 'suspended']);
             $message = "Contractor {$user->name} has been suspended.";
@@ -740,7 +762,7 @@ class AdminController extends Controller
         } else {
             return back()->with('error', 'Cannot change status of pending or rejected contractors.');
         }
-        
+
         return redirect()->route('admin.verification')
             ->with('success', $message);
     }

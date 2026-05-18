@@ -141,21 +141,23 @@
                 ✓
             </div>
 
-            <h2>Welcome to AFIA ORBIT!</h2>
+            <h2>Welcome to GreenRoute!</h2>
 
             <p>Dear {{ $contractor->name }},</p>
 
-            <p>We're excited to inform you that your contractor account has been successfully approved by our administrator. You can now access all contractor features on the AFIA ORBIT platform.</p>
+            <p>We're excited to inform you that your contractor account has been successfully approved by our administrator. You can now access all contractor features on the GreenRoute platform.</p>
 
             <div class="contractor-details">
                 <p><strong>Account Details:</strong></p>
                 <p><strong>Name:</strong> {{ $contractor->name }}</p>
                 <p><strong>Email:</strong> {{ $contractor->email }}</p>
-                @if(isset($password))
+                @if(!empty($password))
                 <p><strong>Temporary Password:</strong> {{ $password }}</p>
                 <p style="font-size: 13px; color: #dc2626; margin-top: 5px;">
                     <em>Please change this password immediately after logging in.</em>
                 </p>
+                @else
+                <p><strong>Password:</strong> Use the password you created when you registered.</p>
                 @endif
                 <p><strong>Status:</strong> <span style="color: #10b981;">✓ Approved</span></p>
                 <p><strong>Account Type:</strong> Waste Contractor</p>
