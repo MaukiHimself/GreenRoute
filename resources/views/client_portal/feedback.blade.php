@@ -1,1 +1,264 @@
-<x-dashboard-layout>\n    <x-slot name=\"title\">Feedback & Comments</x-slot>\n    \n    <x-slot name=\"breadcrumb\">\n        <li class=\"breadcrumb-item\"><a href=\"{{ route('client.dashboard') }}\">Dashboard</a></li>\n        <li class=\"breadcrumb-item active\">Feedback</li>\n    </x-slot>\n    \n    <x-slot name=\"sidebar\">\n        <ul class=\"nav flex-column\">\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.dashboard') }}\">\n                    <i class=\"bi bi-house me-2\"></i>Dashboard\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.profile') }}\">\n                    <i class=\"bi bi-person me-2\"></i>Profile\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.schedules') }}\">\n                    <i class=\"bi bi-calendar me-2\"></i>Schedules\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.request.service') }}\">\n                    <i class=\"bi bi-plus-circle me-2\"></i>Request Service\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.equipment') }}\">\n                    <i class=\"bi bi-tools me-2\"></i>Equipment\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.contractor.info') }}\">\n                    <i class=\"bi bi-building me-2\"></i>Contractor Info\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.invoices') }}\">\n                    <i class=\"bi bi-receipt me-2\"></i>Invoices\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link\" href=\"{{ route('client.payments') }}\">\n                    <i class=\"bi bi-credit-card me-2\"></i>Payments\n                </a>\n            </li>\n            <li class=\"nav-item\">\n                <a class=\"nav-link active\" href=\"{{ route('client.feedback') }}\">\n                    <i class=\"bi bi-chat-dots me-2\"></i>Feedback\n                </a>\n            </li>\n        </ul>\n    </x-slot>\n\n    <div class=\"row\">\n        <div class=\"col-md-8\">\n            <div class=\"card\">\n                <div class=\"card-header\">\n                    <h5 class=\"mb-0\">Submit Feedback</h5>\n                </div>\n                <div class=\"card-body\">\n                    @if(session('success'))\n                        <div class=\"alert alert-success\">\n                            <i class=\"bi bi-check-circle me-2\"></i>{{ session('success') }}\n                        </div>\n                    @endif\n                    \n                    <form method=\"POST\" action=\"{{ route('client.feedback.store') }}\">\n                        @csrf\n                        \n                        <div class=\"mb-3\">\n                            <label class=\"form-label\">Subject</label>\n                            <select class=\"form-select\" name=\"subject\" required>\n                                <option value=\"\">Select feedback type</option>\n                                <option value=\"Service Quality\">Service Quality</option>\n                                <option value=\"Pickup Schedule\">Pickup Schedule</option>\n                                <option value=\"Billing Inquiry\">Billing Inquiry</option>\n                                <option value=\"Equipment Request\">Equipment Request</option>\n                                <option value=\"Complaint\">Complaint</option>\n                                <option value=\"Suggestion\">Suggestion</option>\n                                <option value=\"Compliment\">Compliment</option>\n                                <option value=\"General Inquiry\">General Inquiry</option>\n                                <option value=\"Other\">Other</option>\n                            </select>\n                        </div>\n                        \n                        <div class=\"mb-3\">\n                            <label class=\"form-label\">Message</label>\n                            <textarea class=\"form-control\" name=\"message\" rows=\"6\" placeholder=\"Please provide detailed feedback or comments...\" required></textarea>\n                            <div class=\"form-text\">Maximum 5000 characters</div>\n                        </div>\n                        \n                        <div class=\"mb-3\">\n                            <div class=\"form-check\">\n                                <input class=\"form-check-input\" type=\"checkbox\" id=\"urgent\">\n                                <label class=\"form-check-label\" for=\"urgent\">\n                                    This is urgent and requires immediate attention\n                                </label>\n                            </div>\n                        </div>\n                        \n                        <button type=\"submit\" class=\"btn btn-primary\">\n                            <i class=\"bi bi-send me-2\"></i>Submit Feedback\n                        </button>\n                        <button type=\"reset\" class=\"btn btn-secondary ms-2\">Clear Form</button>\n                    </form>\n                </div>\n            </div>\n        </div>\n        \n        <div class=\"col-md-4\">\n            <div class=\"card\">\n                <div class=\"card-header\">\n                    <h5 class=\"mb-0\">Contact Information</h5>\n                </div>\n                <div class=\"card-body\">\n                    <div class=\"mb-3\">\n                        <h6 class=\"text-muted\">Emergency Contact</h6>\n                        <p class=\"mb-1\"><i class=\"bi bi-telephone me-2\"></i>+1 (555) 123-4567</p>\n                        <small class=\"text-muted\">Available 24/7 for emergencies</small>\n                    </div>\n                    \n                    <div class=\"mb-3\">\n                        <h6 class=\"text-muted\">Customer Support</h6>\n                        <p class=\"mb-1\"><i class=\"bi bi-envelope me-2\"></i>support@afiaorbit.com</p>\n                        <p class=\"mb-1\"><i class=\"bi bi-telephone me-2\"></i>+1 (555) 987-6543</p>\n                        <small class=\"text-muted\">Mon-Fri: 8:00 AM - 6:00 PM</small>\n                    </div>\n                    \n                    <div class=\"alert alert-info\">\n                        <small>\n                            <i class=\"bi bi-info-circle me-2\"></i>\n                            We typically respond to feedback within 24 hours during business days.\n                        </small>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    \n    <div class=\"row mt-4\">\n        <div class=\"col-12\">\n            <div class=\"card\">\n                <div class=\"card-header\">\n                    <h5 class=\"mb-0\">Your Feedback History</h5>\n                </div>\n                <div class=\"card-body\">\n                    @if($feedbacks->count() > 0)\n                        <div class=\"table-responsive\">\n                            <table class=\"table table-hover\">\n                                <thead>\n                                    <tr>\n                                        <th>Date</th>\n                                        <th>Subject</th>\n                                        <th>Status</th>\n                                        <th>Actions</th>\n                                    </tr>\n                                </thead>\n                                <tbody>\n                                    @foreach($feedbacks as $feedback)\n                                        <tr>\n                                            <td>{{ $feedback->created_at->format('M d, Y') }}</td>\n                                            <td>{{ $feedback->subject }}</td>\n                                            <td>\n                                                @switch($feedback->status)\n                                                    @case('open')\n                                                        <span class=\"badge bg-warning\">Open</span>\n                                                        @break\n                                                    @case('in_progress')\n                                                        <span class=\"badge bg-info\">In Progress</span>\n                                                        @break\n                                                    @case('resolved')\n                                                        <span class=\"badge bg-success\">Resolved</span>\n                                                        @break\n                                                    @case('closed')\n                                                        <span class=\"badge bg-secondary\">Closed</span>\n                                                        @break\n                                                    @default\n                                                        <span class=\"badge bg-light text-dark\">{{ ucfirst($feedback->status) }}</span>\n                                                @endswitch\n                                            </td>\n                                            <td>\n                                                <button class=\"btn btn-sm btn-outline-primary\" onclick=\"viewFeedback({{ $feedback->id }})\">\n                                                    <i class=\"bi bi-eye\"></i> View\n                                                </button>\n                                            </td>\n                                        </tr>\n                                    @endforeach\n                                </tbody>\n                            </table>\n                        </div>\n                        \n                        <div class=\"d-flex justify-content-center mt-4\">\n                            {{ $feedbacks->links() }}\n                        </div>\n                    @else\n                        <div class=\"text-center py-4\">\n                            <i class=\"bi bi-chat-dots display-4 text-muted\"></i>\n                            <h6 class=\"mt-3 text-muted\">No feedback submitted yet</h6>\n                            <p class=\"text-muted\">Your feedback history will appear here once you submit feedback.</p>\n                        </div>\n                    @endif\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <!-- Feedback Details Modal -->\n    <div class=\"modal fade\" id=\"feedbackModal\" tabindex=\"-1\">\n        <div class=\"modal-dialog modal-lg\">\n            <div class=\"modal-content\">\n                <div class=\"modal-header\">\n                    <h5 class=\"modal-title\">Feedback Details</h5>\n                    <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n                </div>\n                <div class=\"modal-body\" id=\"feedbackContent\">\n                    <!-- Feedback details will be loaded here -->\n                </div>\n                <div class=\"modal-footer\">\n                    <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <script>\n        function viewFeedback(feedbackId) {\n            const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));\n            \n            // Find the feedback data from the table\n            const feedbacks = @json($feedbacks->items());\n            const feedback = feedbacks.find(f => f.id === feedbackId);\n            \n            if (feedback) {\n                document.getElementById('feedbackContent').innerHTML = `\n                    <div class=\"row mb-3\">\n                        <div class=\"col-md-6\">\n                            <strong>Subject:</strong> ${feedback.subject}\n                        </div>\n                        <div class=\"col-md-6\">\n                            <strong>Date:</strong> ${new Date(feedback.created_at).toLocaleDateString()}\n                        </div>\n                    </div>\n                    <div class=\"row mb-3\">\n                        <div class=\"col-md-6\">\n                            <strong>Status:</strong> <span class=\"badge bg-info\">${feedback.status}</span>\n                        </div>\n                    </div>\n                    <div class=\"mb-3\">\n                        <strong>Message:</strong>\n                        <div class=\"mt-2 p-3 bg-light rounded\">\n                            ${feedback.message}\n                        </div>\n                    </div>\n                `;\n            }\n            \n            modal.show();\n        }\n    </script>\n</x-dashboard-layout>
+<x-dashboard-layout title="Feedback & Comments">
+    <x-slot name="nav">
+        <ul class="nav nav-pills flex-row">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.dashboard') }}">
+                    <i class="bi bi-house me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.profile') }}">
+                    <i class="bi bi-person me-2"></i>Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.schedules') }}">
+                    <i class="bi bi-calendar3 me-2"></i>Schedules
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.request.service') }}">
+                    <i class="bi bi-plus-circle me-2"></i>Request Service
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.equipment') }}">
+                    <i class="bi bi-tools me-2"></i>Equipment
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.contractor.info') }}">
+                    <i class="bi bi-building me-2"></i>Contractor Info
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.invoices') }}">
+                    <i class="bi bi-receipt me-2"></i>Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.payments') }}">
+                    <i class="bi bi-credit-card me-2"></i>Payments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('client.feedback') }}">
+                    <i class="bi bi-chat-dots me-2"></i>Feedback
+                </a>
+            </li>
+        </ul>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('client.dashboard') }}">Client</a></li>
+        <li class="breadcrumb-item active">Feedback</li>
+    </x-slot>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Submit Feedback</h5>
+                </div>
+                <div class="card-body">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                        </div>
+                    @endif
+                    
+                    <form method="POST" action="{{ route('client.feedback.store') }}">
+                        @csrf
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <select class="form-select" name="subject" required>
+                                <option value="">Select feedback type</option>
+                                <option value="Service Quality">Service Quality</option>
+                                <option value="Pickup Schedule">Pickup Schedule</option>
+                                <option value="Billing Inquiry">Billing Inquiry</option>
+                                <option value="Equipment Request">Equipment Request</option>
+                                <option value="Complaint">Complaint</option>
+                                <option value="Suggestion">Suggestion</option>
+                                <option value="Compliment">Compliment</option>
+                                <option value="General Inquiry">General Inquiry</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" name="message" rows="6" placeholder="Please provide detailed feedback or comments..." required></textarea>
+                            <div class="form-text">Maximum 5000 characters</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="urgent">
+                                <label class="form-check-label" for="urgent">
+                                    This is urgent and requires immediate attention
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Submit Feedback
+                        </button>
+                        <button type="reset" class="btn btn-secondary ms-2">Clear Form</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Emergency Contact</h6>
+                        <p class="mb-1"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</p>
+                        <small class="text-muted">Available 24/7 for emergencies</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Customer Support</h6>
+                        <p class="mb-1"><i class="bi bi-envelope me-2"></i>support@afiaorbit.com</p>
+                        <p class="mb-1"><i class="bi bi-telephone me-2"></i>+1 (555) 987-6543</p>
+                        <small class="text-muted">Mon-Fri: 8:00 AM - 6:00 PM</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="bi bi-info-circle me-2"></i>
+                            We typically respond to feedback within 24 hours during business days.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Feedback History</h5>
+                </div>
+                <div class="card-body">
+                    @if($feedbacks->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($feedbacks as $feedback)
+                                        <tr>
+                                            <td>{{ $feedback->created_at->format('M d, Y') }}</td>
+                                            <td>{{ $feedback->subject }}</td>
+                                            <td>
+                                                @switch($feedback->status)
+                                                    @case('open')
+                                                        <span class="badge bg-warning">Open</span>
+                                                        @break
+                                                    @case('in_progress')
+                                                        <span class="badge bg-info">In Progress</span>
+                                                        @break
+                                                    @case('resolved')
+                                                        <span class="badge bg-success">Resolved</span>
+                                                        @break
+                                                    @case('closed')
+                                                        <span class="badge bg-secondary">Closed</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge bg-light text-dark">{{ ucfirst($feedback->status) }}</span>
+                                                @endswitch
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewFeedback({{ $feedback->id }})">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $feedbacks->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="bi bi-chat-dots display-4 text-muted"></i>
+                            <h6 class="mt-3 text-muted">No feedback submitted yet</h6>
+                            <p class="text-muted">Your feedback history will appear here once you submit feedback.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Details Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Feedback Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="feedbackContent">
+                    <!-- Feedback details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewFeedback(feedbackId) {
+            const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+            
+            // Find the feedback data from the table
+            const feedbacks = @json($feedbacks->items());
+            const feedback = feedbacks.find(f => f.id === feedbackId);
+            
+            if (feedback) {
+                document.getElementById('feedbackContent').innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Subject:</strong> ${feedback.subject}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date:</strong> ${new Date(feedback.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Status:</strong> <span class="badge bg-info">${feedback.status}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Message:</strong>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            ${feedback.message}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            modal.show();
+        }
+    </script>
+</x-dashboard-layout>

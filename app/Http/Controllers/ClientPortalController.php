@@ -9,6 +9,8 @@ use App\Models\Feedback;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Message;
+use App\Support\Portal;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -68,6 +70,11 @@ class ClientPortalController extends Controller
                 ->get();
             $missedPickups = $allSchedules->where('status', 'cancelled')->count();
             $completedPickups = $allSchedules->where('status', 'completed')->count();
+            $upcomingSchedulesCount = Schedule::where('client_id', $client->id)
+                ->where('contractor_id', $contractorId)
+                ->where('pickup_date', '>=', now()->startOfDay())
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->count();
 
             // Invoice data from contractor only
             $allInvoices = Invoice::where('client_id', $client->id)
@@ -113,6 +120,7 @@ class ClientPortalController extends Controller
             // Payment statistics from contractor
             $totalPaid = $paidInvoices->sum('total_amount');
             $totalPending = $pendingInvoices->sum('total_amount');
+            $recentActivities = $this->buildRecentActivities($client, $contractorId);
         } else {
             // No contractor assigned or no client data
             $upcomingSchedules = collect();
@@ -127,21 +135,83 @@ class ClientPortalController extends Controller
             $recentFeedback = collect();
             $totalPaid = 0;
             $totalPending = 0;
+            $upcomingSchedulesCount = 0;
+            $recentActivities = collect();
         }
 
-        return view('dashboards.client', compact(
-            'client',
-            'upcomingSchedules',
-            'recentInvoices',
-            'allSchedules',
-            'completedPickups',
-            'pendingInvoices',
-            'paidInvoices',
-            'monthlyPayments',
-            'recentFeedback',
-            'totalPaid',
-            'totalPending'
-        ));
+        return view('dashboards.client', [
+            'client' => $client,
+            'authUser' => Auth::user(),
+            'upcomingSchedules' => $upcomingSchedules,
+            'upcomingSchedulesCount' => $upcomingSchedulesCount ?? 0,
+            'recentInvoices' => $recentInvoices,
+            'allSchedules' => $allSchedules,
+            'completedPickups' => $completedPickups,
+            'pendingInvoices' => $pendingInvoices,
+            'paidInvoices' => $paidInvoices,
+            'monthlyPayments' => $monthlyPayments,
+            'recentFeedback' => $recentFeedback,
+            'totalPaid' => $totalPaid,
+            'totalPending' => $totalPending,
+            'recentActivities' => $recentActivities,
+        ]);
+    }
+
+    protected function buildRecentActivities(Client $client, ?int $contractorId): Collection
+    {
+        $activities = collect();
+
+        $scheduleQuery = Schedule::where('client_id', $client->id);
+        if ($contractorId) {
+            $scheduleQuery->where('contractor_id', $contractorId);
+        }
+
+        foreach ($scheduleQuery->orderByDesc('updated_at')->limit(5)->get() as $schedule) {
+            $activities->push([
+                'icon' => $schedule->status === 'completed' ? 'check-circle' : 'calendar-event',
+                'color' => $schedule->status === 'completed' ? 'success' : 'primary',
+                'title' => $schedule->status === 'completed' ? 'Pickup Completed' : 'Schedule ' . ucfirst(str_replace('_', ' ', $schedule->status)),
+                'description' => ucfirst($schedule->service_type ?? 'collection') . ' · ' . ($schedule->pickup_location ?? 'Your location'),
+                'time' => $schedule->updated_at,
+            ]);
+        }
+
+        $invoiceQuery = Invoice::where('client_id', $client->id);
+        if ($contractorId) {
+            $invoiceQuery->where('contractor_id', $contractorId);
+        }
+
+        foreach ($invoiceQuery->orderByDesc('created_at')->limit(5)->get() as $invoice) {
+            $activities->push([
+                'icon' => $invoice->status === 'paid' ? 'cash-coin' : 'receipt',
+                'color' => $invoice->status === 'paid' ? 'success' : 'warning',
+                'title' => $invoice->status === 'paid' ? 'Payment Recorded' : 'Invoice Issued',
+                'description' => ($invoice->invoice_number ?? 'Invoice') . ' · TZS ' . number_format($invoice->total_amount, 0),
+                'time' => $invoice->paid_at ?? $invoice->created_at,
+            ]);
+        }
+
+        if ($contractorId) {
+            foreach (Message::where('client_id', $client->id)
+                ->where('contractor_id', $contractorId)
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get() as $message) {
+                $activities->push([
+                    'icon' => 'chat-dots',
+                    'color' => 'info',
+                    'title' => $message->sender_type === 'contractor' ? 'Message from Contractor' : 'Message Sent',
+                    'description' => \Illuminate\Support\Str::limit($message->message ?? $message->content ?? 'New message', 60),
+                    'time' => $message->created_at,
+                ]);
+            }
+        }
+
+        return $activities
+            ->filter(fn ($item) => $item['time'])
+            ->sortByDesc('time')
+            ->take(6)
+            ->values();
     }
 
     public function profile()
@@ -205,6 +275,11 @@ class ClientPortalController extends Controller
         $client = $this->resolveClient();
         abort_unless($client, 404);
 
+        if (!$client->contractor_id) {
+            return redirect()->route('client.request.service')
+                ->with('error', 'No contractor is assigned to your account. Please contact support.');
+        }
+
         $validated = $request->validate([
             'service_type' => 'required|string',
             'pickup_date' => 'required|date|after:today',
@@ -214,15 +289,45 @@ class ClientPortalController extends Controller
             'special_instructions' => 'nullable|string|max:1000',
         ]);
 
+        $pickupTime = preg_match('/^(\d{2}:\d{2})/', $validated['pickup_time'], $matches)
+            ? $matches[1]
+            : '08:00';
+
+        $dbServiceType = $validated['service_type'] === 'hazardous_waste' ? 'disposal' : 'collection';
+
+        $notes = collect([
+            'Requested service: ' . str_replace('_', ' ', $validated['service_type']),
+            'Waste type: ' . str_replace('_', ' ', $validated['waste_type']),
+            'Estimated volume: ' . str_replace('_', ' ', $validated['estimated_volume']),
+            'Preferred time slot: ' . $validated['pickup_time'],
+            $validated['special_instructions'] ? 'Instructions: ' . $validated['special_instructions'] : null,
+        ])->filter()->implode("\n");
+
+        $pickupLocation = $client->site_location
+            ?: trim(collect([$client->ward, $client->district, $client->region])->filter()->join(', '))
+            ?: ($client->city ?: 'Client site');
+
+        $contractor = User::with('contractor')->find($client->contractor_id);
+
         Schedule::create([
             'client_id' => $client->id,
             'contractor_id' => $client->contractor_id,
+            'client_registration_number' => $client->registration_number,
+            'contractor_registration_number' => $contractor?->contractor?->registration_number,
+            'route' => $client->route ?? 'Not Assigned',
             'pickup_date' => $validated['pickup_date'],
-            'pickup_time' => $validated['pickup_time'],
-            'waste_type' => $validated['waste_type'],
-            'estimated_volume' => $validated['estimated_volume'],
-            'special_instructions' => $validated['special_instructions'],
-            'status' => 'pending',
+            'pickup_time' => $pickupTime,
+            'scheduled_date' => $validated['pickup_date'],
+            'scheduled_time' => $pickupTime,
+            'pickup_location' => $pickupLocation,
+            'pickup_address' => $client->address ?? 'Not provided',
+            'city' => $client->city ?? 'N/A',
+            'state' => $client->state ?? 'N/A',
+            'zip_code' => $client->zip_code ?? '00000',
+            'service_type' => $dbServiceType,
+            'status' => 'scheduled',
+            'notes' => $notes,
+            'includes_organic_waste' => $validated['waste_type'] === 'organic',
         ]);
 
         return redirect()->route('client.schedules')->with('success', 'Service request submitted successfully.');
@@ -355,5 +460,31 @@ class ClientPortalController extends Controller
         abort_unless($client, 404);
 
         return view('client_portal.support', compact('client'));
+    }
+
+    public function storeSupport(Request $request)
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        if (!$client->contractor_id) {
+            return redirect()->route('client.support')
+                ->with('error', 'No contractor assigned. Please contact platform support.');
+        }
+
+        $data = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:5000',
+        ]);
+
+        Feedback::create([
+            'client_id' => $client->id,
+            'contractor_id' => $client->contractor_id,
+            'subject' => '[Support] ' . $data['subject'],
+            'message' => $data['message'],
+            'status' => 'open',
+        ]);
+
+        return redirect()->route('client.support')->with('success', 'Support ticket submitted successfully.');
     }
 }

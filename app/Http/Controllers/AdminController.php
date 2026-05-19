@@ -260,10 +260,10 @@ class AdminController extends Controller
         // Search by name or email
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%");
             });
         }
 
@@ -336,14 +336,14 @@ class AdminController extends Controller
     public function getContractorLocations()
     {
         $contractors = User::where('user_type', 'contractor')
-            ->with(['contractorLocations' => function($query) {
+            ->with(['contractorLocations' => function ($query) {
                 $query->latest()->limit(1);
             }])
             ->get()
-            ->filter(function($contractor) {
+            ->filter(function ($contractor) {
                 return $contractor->contractorLocations->isNotEmpty();
             })
-            ->map(function($contractor) {
+            ->map(function ($contractor) {
                 $location = $contractor->contractorLocations->first();
                 return [
                     'id' => $contractor->id,
@@ -364,17 +364,6 @@ class AdminController extends Controller
 
         // Send approval email notification (contractor keeps their registration password)
         $this->sendContractorApprovalEmail($user);
-
-        return redirect()->route('admin.verification')
-            ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
-    }
-=======
-        // Approve without changing the password they chose at registration
-        $user->update(['status' => 'approved']);
-
-        // Send approval email notification (contractor keeps their registration password)
-        $this->sendContractorApprovalEmail($user);
->>>>>>> 880844a (Update contractor email, reports, and map setup)
 
         return redirect()->route('admin.verification')
             ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
@@ -417,7 +406,6 @@ class AdminController extends Controller
 
     public function createClient()
     {
-        // Get all approved contractors for assignment
         $contractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
             ->orderBy('name')
@@ -444,14 +432,12 @@ class AdminController extends Controller
             'notes' => 'nullable|string'
         ]);
 
-        // CRITICAL: Validate location is captured properly
         if (empty($request->latitude) || empty($request->longitude)) {
             return back()->withErrors([
                 'location' => 'GPS location is required. Please click "Get My Location" to capture precise coordinates before creating the client.'
             ])->withInput();
         }
 
-        // Validate Tanzania bounds
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
 
@@ -461,7 +447,6 @@ class AdminController extends Controller
             ])->withInput();
         }
 
-        // Generate registration number
         $validated['registration_number'] = 'CL-' . strtoupper(substr(uniqid(), -8));
         $validated['status'] = 'active';
 
@@ -473,7 +458,6 @@ class AdminController extends Controller
 
     public function editClient(Client $client)
     {
-        // Get all approved contractors for assignment
         $contractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
             ->orderBy('name')
@@ -501,14 +485,12 @@ class AdminController extends Controller
             'notes' => 'nullable|string'
         ]);
 
-        // CRITICAL: Validate location is captured properly
         if (empty($request->latitude) || empty($request->longitude)) {
             return back()->withErrors([
                 'location' => 'GPS location is required. Please ensure valid coordinates are entered.'
             ])->withInput();
         }
 
-        // Validate Tanzania bounds
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
 
@@ -537,12 +519,10 @@ class AdminController extends Controller
 
     public function smsCampaign()
     {
-        // Get all clients with phone numbers
         $clients = Client::whereNotNull('phone')
             ->orderBy('name')
             ->get();
 
-        // Group by contractor for filtering
         $contractors = User::where('user_type', 'contractor')
             ->where('status', 'approved')
             ->has('clients')
@@ -564,16 +544,13 @@ class AdminController extends Controller
             'campaign_name' => 'required|string|max:255'
         ]);
 
-        // Get recipients based on selection
         $recipients = $this->getSmsCampaignRecipients($request);
 
-        // Send SMS to each recipient (integrate with SMS service)
         $successCount = 0;
         $failCount = 0;
 
         foreach ($recipients as $client) {
             try {
-                // This is a placeholder - integrate with your SMS service (Twilio, Africa's Talking, etc.)
                 $this->sendSms($client->phone, $validated['message']);
                 $successCount++;
             } catch (\Exception $e) {
@@ -582,7 +559,6 @@ class AdminController extends Controller
             }
         }
 
-        // Log campaign
         \Log::info("SMS Campaign '{$validated['campaign_name']}': {$successCount} sent, {$failCount} failed");
 
         return redirect()->route('admin.sms.campaign')
@@ -622,7 +598,6 @@ class AdminController extends Controller
         ]);
         */
 
-        // For now, just log it
         \Log::info("SMS to {$phone}: {$message}");
 
         return true;
@@ -632,13 +607,11 @@ class AdminController extends Controller
 
     public function billingRates()
     {
-        // Get all billing rates with grouping
         $rates = BillingRate::orderBy('category')
             ->orderBy('location')
             ->orderBy('frequency')
             ->get();
 
-        // Get unique categories and locations for filtering
         $categories = BillingRate::select('category')
             ->distinct()
             ->orderBy('category')
@@ -649,7 +622,6 @@ class AdminController extends Controller
             ->orderBy('location')
             ->pluck('location');
 
-        // Statistics
         $totalRates = BillingRate::count();
         $activeRates = BillingRate::where('is_active', true)->count();
         $residentialRates = BillingRate::where('category', 'LIKE', 'Residential%')->count();
@@ -728,12 +700,8 @@ class AdminController extends Controller
 
     // Contractor Verification & Management Methods
 
-    /**
-     * Show contractor details for verification
-     */
     public function showContractor(User $user)
     {
-        // Ensure it's a contractor
         if ($user->user_type !== 'contractor') {
             abort(404);
         }
@@ -743,12 +711,34 @@ class AdminController extends Controller
         return view('admin.contractor-details', compact('user'));
     }
 
-    /**
-     * Suspend/Unsuspend a contractor
-     */
+    public function approveContractor(User $user)
+    {
+        // Approve without changing the password they chose at registration
+        $user->update(['status' => 'approved']);
+
+        // Send approval email notification (contractor keeps their registration password)
+        $this->sendContractorApprovalEmail($user);
+
+        return redirect()->route('admin.verification')
+            ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
+    }
+
+    public function rejectContractor(User $user)
+    {
+        $user->update(['status' => 'rejected']);
+
+        try {
+            \Mail::to($user->email)->send(new \App\Mail\ContractorRejected($user));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send rejection email: ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.verification')
+            ->with('success', "Contractor {$user->name} has been rejected. A notification email has been sent.");
+    }
+
     public function toggleContractorStatus(User $user)
     {
-        // Ensure it's a contractor
         if ($user->user_type !== 'contractor') {
             abort(404);
         }
@@ -765,5 +755,21 @@ class AdminController extends Controller
 
         return redirect()->route('admin.verification')
             ->with('success', $message);
+    }
+
+    /**
+     * Send contractor approval email without interrupting admin workflow on mail failure.
+     */
+    private function sendContractorApprovalEmail(User $contractor, ?string $temporaryPassword = null): void
+    {
+        try {
+            Mail::to($contractor->email)->send(new ContractorApproved($contractor, $temporaryPassword));
+        } catch (\Exception $e) {
+            Log::error('Failed to send approval email', [
+                'contractor_id' => $contractor->id,
+                'contractor_email' => $contractor->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

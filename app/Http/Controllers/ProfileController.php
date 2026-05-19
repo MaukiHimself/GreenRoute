@@ -16,9 +16,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+
+        if (in_array($user->user_type, ['client', 'contractor'], true)) {
+            return view('profile.edit-portal', compact('user'));
+        }
+
+        return view('profile.edit', compact('user'));
     }
 
     /**

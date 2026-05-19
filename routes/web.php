@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('payments', [ClientPortalController::class, 'payments'])->name('client.payments');
         Route::get('chats', [ClientPortalController::class, 'chats'])->name('client.chats');
         Route::get('support', [ClientPortalController::class, 'support'])->name('client.support');
+        Route::post('support', [ClientPortalController::class, 'storeSupport'])->name('client.support.submit');
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
         Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
 

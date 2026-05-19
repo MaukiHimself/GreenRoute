@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'verified.contractor' => \App\Http\Middleware\EnsureContractorVerified::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\SetPortalContext::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {

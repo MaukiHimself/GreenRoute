@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContractorRegistrationRequest;
 use App\Models\User;
+use App\Support\Portal;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,8 +32,6 @@ class UserTypeController extends Controller
         return view('auth.login-client');
     }
 
-
-
     /**
      * Display the contractor registration view.
      */
@@ -57,8 +56,6 @@ class UserTypeController extends Controller
         return view('auth.login-contractor');
     }
 
-
-
     /**
      * Handle an incoming registration request for clients.
      */
@@ -74,14 +71,12 @@ class UserTypeController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Validate that coordinates are not default/placeholder values
         if (empty($request->latitude) || empty($request->longitude)) {
             return back()->withErrors([
                 'location' => 'Please click "Get My Precise Location" to capture your GPS coordinates before registering.'
             ])->withInput();
         }
 
-        // Log the received coordinates for debugging
         Log::info('Client registration location data', [
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
@@ -90,7 +85,6 @@ class UserTypeController extends Controller
             'timestamp' => now()
         ]);
 
-        // Additional validation for Tanzania coordinates (rough bounds)
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
 
@@ -107,7 +101,6 @@ class UserTypeController extends Controller
             ])->withInput();
         }
 
-        // Check if coordinates are in Moshi area for additional validation
         $inMoshi = ($lat >= -3.5 && $lat <= -3.2 && $lng >= 37.2 && $lng <= 37.4);
         if ($inMoshi) {
             Log::info('Client registered in Moshi area', [
@@ -124,10 +117,9 @@ class UserTypeController extends Controller
             'user_type' => 'client',
         ]);
 
-        // Create client record with precise location data
         \App\Models\Client::create([
             'user_id' => $user->id,
-            'contractor_id' => 1, // Default contractor, can be changed later
+            'contractor_id' => 1,
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
@@ -147,7 +139,6 @@ class UserTypeController extends Controller
                 'error' => $e->getMessage(),
                 'user_id' => $user->id
             ]);
-            // Continue even if event fails (email notification)
         }
 
         Auth::login($user);
@@ -161,7 +152,6 @@ class UserTypeController extends Controller
      */
     public function storeContractor(ContractorRegistrationRequest $request)
     {
-        // Check if email already exists and provide specific error
         $existingUser = User::where('email', $request->email)->first();
         if ($existingUser) {
             Log::warning('Contractor registration attempt with existing email', [
@@ -177,7 +167,6 @@ class UserTypeController extends Controller
             ])->withInput();
         }
 
-        // Check if license number already exists
         $existingLicense = \App\Models\Contractor::where('license_number', $request->license_number)->first();
         if ($existingLicense) {
             Log::warning('Contractor registration attempt with existing license number', [
@@ -196,15 +185,15 @@ class UserTypeController extends Controller
         $request->validate([
             'company_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'], // Removed unique here since we check manually
+            'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
-            'site_locations' => ['required', 'string', 'max:2000'], // Required - at least one location must be selected
-            'region' => ['nullable', 'string', 'max:255'], // Made nullable as site_locations contains full info
+            'site_locations' => ['required', 'string', 'max:2000'],
+            'region' => ['nullable', 'string', 'max:255'],
             'district' => ['nullable', 'string', 'max:255'],
             'ward' => ['nullable', 'string', 'max:255'],
             'street' => ['nullable', 'string', 'max:255'],
-            'license_number' => ['required', 'string', 'max:50'], // Removed unique here since we check manually
+            'license_number' => ['required', 'string', 'max:50'],
             'certificate' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -212,12 +201,11 @@ class UserTypeController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => strtolower(trim($request->email)),
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
             'user_type' => 'contractor',
-            'status' => 'pending', // Contractor must be approved by admin
+            'status' => 'pending',
         ]);
 
-        // Handle file upload
         $certificatePath = null;
         if ($request->hasFile('certificate')) {
             try {
@@ -227,12 +215,10 @@ class UserTypeController extends Controller
                     'error' => $e->getMessage(),
                     'user_email' => $request->email
                 ]);
-                // Continue registration even if file upload fails
                 $certificatePath = null;
             }
         }
 
-        // Create contractor record
         \App\Models\Contractor::create([
             'user_id' => $user->id,
             'company_name' => $request->company_name,
@@ -256,10 +242,8 @@ class UserTypeController extends Controller
                 'error' => $e->getMessage(),
                 'user_id' => $user->id
             ]);
-            // Continue even if event fails (email notification)
         }
 
-        // Don't auto-login, redirect to pending page instead
         return redirect()->route('contractor.pending')
             ->with('email', $user->email)
             ->with('name', $user->name)
@@ -294,15 +278,12 @@ class UserTypeController extends Controller
                 'error' => $e->getMessage(),
                 'user_id' => $user->id
             ]);
-            // Continue even if event fails (email notification)
         }
 
         Auth::login($user);
 
         return redirect()->route('dashboard.admin');
     }
-
-
 
     /**
      * Handle an incoming authentication request for clients.
@@ -326,15 +307,15 @@ class UserTypeController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Check if user is a client
             if (Auth::user()->user_type === 'client') {
                 return redirect()->intended(route('client.dashboard'));
-            } else {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'These credentials do not match our records for a client account.',
-                ]);
             }
+
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'These credentials do not match our records for a client account.',
+            ]);
         }
 
         return back()->withErrors([
@@ -355,69 +336,6 @@ class UserTypeController extends Controller
         $remember = $request->boolean('remember');
         $email = strtolower(trim($credentials['email']));
 
-<<<<<<< HEAD
-        $user = User::where('email', $credentials['email'])->first();
-
-        Log::info('Contractor login attempt', [
-            'email' => $credentials['email'],
-            'user_exists' => $user ? 'yes' : 'no',
-            'user_type' => $user ? $user->user_type : 'null',
-            'user_status' => $user ? $user->status : 'null',
-            'timestamp' => now()
-        ]);
-
-        if ($user && $user->user_type === 'contractor') {
-            if ($user->status === 'rejected') {
-                Log::info('Contractor login: rejected account', ['email' => $credentials['email']]);
-                return back()->withErrors([
-                    'email' => 'Your contractor account has been rejected. Please contact support at support@greenrouteorbit.com for more information.',
-                ])->withInput();
-            }
-
-            if ($user->status === 'pending' || ! $user->status) {
-                Log::info('Contractor login: pending account, redirecting', ['email' => $credentials['email']]);
-                return redirect()->route('contractor.pending')
-                    ->with('email', $user->email)
-                    ->with('name', $user->name);
-            }
-        }
-
-        Log::info('Contractor login: attempting Auth::attempt', ['email' => $credentials['email']]);
-
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            Log::info('Contractor login: Auth::attempt successful', [
-                'email' => $user->email,
-                'user_type' => $user->user_type,
-                'status' => $user->status
-            ]);
-
-            if ($user->user_type !== 'contractor') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'These credentials do not match our records for a contractor account.',
-                ]);
-            }
-
-            if ($user->status !== 'approved') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Your contractor account is under review. Please wait for approval before logging in.',
-                ]);
-            }
-
-            return redirect()->route('dashboard.contractor');
-        }
-
-        Log::info('Contractor login: Auth::attempt failed', ['email' => $credentials['email']]);
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
-=======
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if (! $user) {
@@ -440,6 +358,7 @@ class UserTypeController extends Controller
 
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        Portal::setContext('contractor');
 
         if ($user->status === 'rejected') {
             Auth::logout();
@@ -463,7 +382,6 @@ class UserTypeController extends Controller
         }
 
         return redirect()->route('dashboard.contractor');
->>>>>>> 880844a (Update contractor email, reports, and map setup)
     }
 
     /**
@@ -481,15 +399,15 @@ class UserTypeController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Check if user is an admin
             if (Auth::user()->user_type === 'admin') {
                 return redirect()->intended(route('dashboard.admin'));
-            } else {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'These credentials do not match our records for an admin account.',
-                ]);
             }
+
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'These credentials do not match our records for an admin account.',
+            ]);
         }
 
         return back()->withErrors([

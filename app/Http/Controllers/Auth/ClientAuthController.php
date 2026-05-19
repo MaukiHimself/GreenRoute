@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Client;
+use App\Support\Portal;
 use App\Models\PhoneVerification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -186,7 +187,8 @@ class ClientAuthController extends Controller
         // Attempt authentication
         if (Auth::attempt(['email' => $user->email, 'password' => $request->password, 'user_type' => 'client'], $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
+            Portal::setContext('client');
+
             \Log::info('Client logged in', [
                 'user_id' => $user->id,
                 'client_id' => $client->id,

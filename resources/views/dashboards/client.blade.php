@@ -1,7 +1,3 @@
-@php
-    $client = Auth::user();
-@endphp
-
 <x-dashboard-layout title="Client Dashboard">
     <x-slot name="nav">
         <ul class="nav nav-pills flex-row">
@@ -11,7 +7,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('profile.edit') }}">
+                <a class="nav-link" href="{{ route('client.profile') }}">
                     <i class="bi bi-person me-2"></i>Profile
                 </a>
             </li>
@@ -39,7 +35,7 @@
     </x-slot>
 
     <x-slot name="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ $portalHomeUrl }}">Home</a></li>
         <li class="breadcrumb-item"><a href="#">Client</a></li>
         <li class="breadcrumb-item active">Dashboard</li>
     </x-slot>
@@ -339,11 +335,18 @@
             color: white !important;
         }
 
-        /* Quick Actions from contractor */
+        /* Quick Actions */
         .quick-actions-grid {
             display: grid;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.75rem;
+        }
+
+        .quick-actions-panel {
+            background: var(--white-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            height: 100%;
         }
 
         .action-btn {
@@ -391,11 +394,25 @@
             color: var(--primary-color);
         }
 
-        /* Activity Feed from contractor */
+        /* Activity Feed */
         .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dashboard-top-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: 1fr 320px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-top-row {
+                grid-template-columns: 1fr;
+            }
         }
 
         .activity-item {
@@ -491,8 +508,8 @@
     </style>
         <!-- Welcome Section -->
         <div class="welcome-section">
-                <h1 class="welcome-title">Welcome back, {{ $client->name ?? 'Client' }}!</h1>
-                <p class="welcome-subtitle">Here's what's happening with your waste collection services today.</p>
+                <h1 class="welcome-title">Welcome back, {{ $client->name ?? $authUser->name ?? 'Client' }}!</h1>
+                <p class="welcome-subtitle">Track your pickups, invoices, and payments in one place.</p>
                 <div class="date-display" style="justify-content: flex-end">
                     <div class="date-item">
                         <div class="date-value">{{ date('d') }}</div>
@@ -512,7 +529,7 @@
                     <i class="bi bi-check-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $client->completed_pickups ?? 12 }}</div>
+                    <div class="stat-value">{{ $completedPickups ?? 0 }}</div>
                     <div class="stat-label">Completed Pickups</div>
                 </div>
             </div>
@@ -521,7 +538,7 @@
                     <i class="bi bi-calendar-check"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $client->upcoming_schedules ?? 3 }}</div>
+                    <div class="stat-value">{{ $upcomingSchedulesCount ?? 0 }}</div>
                     <div class="stat-label">Upcoming Schedules</div>
                 </div>
             </div>
@@ -530,7 +547,7 @@
                     <i class="bi bi-receipt"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">TZS {{ number_format($client->total_paid ?? 2450, 0) }}</div>
+                    <div class="stat-value">TZS {{ number_format($totalPaid ?? 0, 0) }}</div>
                     <div class="stat-label">Total Paid</div>
                 </div>
             </div>
@@ -539,12 +556,36 @@
                     <i class="bi bi-credit-card"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">TZS {{ number_format($client->pending_amount ?? 1500, 0) }}</div>
+                    <div class="stat-value">TZS {{ number_format($totalPending ?? 0, 0) }}</div>
                     <div class="stat-label">Pending Amount</div>
                 </div>
             </div>
         </div>
 
+        <div class="quick-actions-panel mb-4">
+            <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-lightning-charge me-1"></i> Quick Actions</h6>
+            <div class="quick-actions-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <a href="{{ route('client.request.service') }}" class="action-btn primary">
+                    <div class="d-flex align-items-center"><div class="action-icon"><i class="bi bi-plus-circle"></i></div><span>Request Pickup</span></div>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{{ route('client.invoices') }}" class="action-btn">
+                    <div class="d-flex align-items-center"><div class="action-icon"><i class="bi bi-receipt"></i></div><span>View Invoices</span></div>
+                    <i class="bi bi-arrow-right text-primary"></i>
+                </a>
+                <a href="{{ route('client.chats') }}" class="action-btn">
+                    <div class="d-flex align-items-center"><div class="action-icon"><i class="bi bi-chat-dots"></i></div><span>Message Contractor</span></div>
+                    <i class="bi bi-arrow-right text-primary"></i>
+                </a>
+                <a href="{{ route('client.profile') }}" class="action-btn">
+                    <div class="d-flex align-items-center"><div class="action-icon"><i class="bi bi-person"></i></div><span>Update Profile</span></div>
+                    <i class="bi bi-arrow-right text-primary"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+        <div class="col-lg-8">
         <!-- Tabs -->
         <div class="tab-buttons">
             <a href="{{ route('client.dashboard') }}" class="tab-btn active">
@@ -586,121 +627,57 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                                <i class="bi bi-truck text-primary fs-5"></i>
+                                @forelse($upcomingSchedules as $schedule)
+                                    @php
+                                        $st = $schedule->status;
+                                        $progress = match($st) {
+                                            'completed' => 100,
+                                            'in_progress' => 60,
+                                            'scheduled' => 30,
+                                            default => 15,
+                                        };
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="bi bi-truck text-primary fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">{{ ucfirst(str_replace('_', ' ', $schedule->service_type ?? 'collection')) }}</div>
+                                                    <small class="text-muted">{{ $schedule->pickup_location ?? 'Your location' }}</small>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div class="fw-semibold">Weekly Collection</div>
-                                                <small class="text-muted">Route - Downtown</small>
+                                        </td>
+                                        <td>{{ $schedule->pickup_date?->format('D, M j') ?? '—' }}</td>
+                                        <td><span class="badge {{ $st === 'completed' ? 'success' : ($st === 'cancelled' ? 'bg-secondary' : 'warning') }}">{{ ucfirst(str_replace('_', ' ', $st)) }}</span></td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar success" style="width: {{ $progress }}%"></div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>Wed, May 24</td>
-                                    <td><span class="badge success">Scheduled</span></td>
-                                    <td>
-                                        <div class="progress">
-                                            <div class="progress-bar success" style="width: 60%"></div>
-                                        </div>
-                                        <small class="text-muted">60% Complete</small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <a href="#" class="btn-outline-primary btn-sm" title="View Details">
+                                            <small class="text-muted">{{ $progress }}%</small>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('client.schedules') }}" class="btn-outline-primary btn-sm" title="View schedules">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="#" class="btn-outline-primary btn-sm" title="Reschedule">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
-                                                <i class="bi bi-calendar text-warning fs-5"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold">Special Pickup</div>
-                                                <small class="text-muted">Extra Volume</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Fri, May 26</td>
-                                    <td><span class="badge warning">Pending</span></td>
-                                    <td>
-                                        <div class="progress">
-                                            <div class="progress-bar warning" style="width: 20%"></div>
-                                        </div>
-                                        <small class="text-muted">20% Complete</small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <a href="#" class="btn-outline-primary btn-sm" title="Confirm">
-                                                <i class="bi bi-check-circle"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            No upcoming schedules. <a href="{{ route('client.request.service') }}">Request a pickup</a>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column Quick Actions & Performance -->
+            <!-- Sidebar -->
             <div class="col-lg-4">
-                <!-- Quick Actions -->
-                <div class="content-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="bi bi-lightning-charge"></i>Quick Actions
-                        </h2>
-                    </div>
-
-                    <div class="quick-actions-grid">
-                        <a href="{{ route('client.request.service') }}" class="action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon">
-                                    <i class="bi bi-plus-circle"></i>
-                                </div>
-                                <span>Request Pickup</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-primary"></i>
-                        </a>
-                        <a href="{{ route('client.invoices') }}" class="action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon">
-                                    <i class="bi bi-receipt"></i>
-                                </div>
-                                <span>View Invoices</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-primary"></i>
-                        </a>
-                        <a href="{{ route('client.chats') }}" class="action-btn primary">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon">
-                                    <i class="bi bi-chat-dots"></i>
-                                </div>
-                                <span>Message Contractor</span>
-                            </div>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                        <a href="{{ route('profile.edit') }}" class="action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                                <span>Update Profile</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-primary"></i>
-                        </a>
-                    </div>
-                </div>
-
                 <!-- Recent Activity from contractor -->
                 <div class="content-section">
                     <div class="section-header">
@@ -710,59 +687,27 @@
                     </div>
 
                     <div class="activity-feed">
-                        <div class="activity-item">
-                            <div class="activity-icon success">
-                                <i class="bi bi-check-circle"></i>
+                        @forelse($recentActivities as $activity)
+                            <div class="activity-item">
+                                <div class="activity-icon {{ $activity['color'] }}">
+                                    <i class="bi bi-{{ $activity['icon'] }}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">{{ $activity['title'] }}</div>
+                                    <small class="text-muted">{{ $activity['description'] }}</small>
+                                </div>
+                                <div>
+                                    <small class="text-muted">{{ $activity['time']->diffForHumans() }}</small>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-semibold">Pickup Completed</div>
-                                <small class="text-muted">Weekly collection - Route Downtown</small>
-                            </div>
-                            <div>
-                                <small>2 hours ago</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon primary">
-                                <i class="bi bi-chat-dots"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold">New Message</div>
-                                <small class="text-muted">Contractor replied to your inquiry</small>
-                            </div>
-                            <div>
-                                <small>4 hours ago</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon warning">
-                                <i class="bi bi-receipt"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold">Invoice Issued</div>
-                                <small class="text-muted">INV-023 - TZS 45,000</small>
-                            </div>
-                            <div>
-                                <small>1 day ago</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon info">
-                                <i class="bi bi-calendar"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold">Schedule Updated</div>
-                                <small class="text-muted">Added special pickup for Friday</small>
-                            </div>
-                            <div>
-                                <small>2 days ago</small>
-                            </div>
-                        </div>
+                        @empty
+                            <p class="text-muted text-center mb-0 py-3">No recent activity yet. Your pickups and invoices will appear here.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
 
     <script>
         // Animations from contractor

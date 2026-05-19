@@ -158,7 +158,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
                     <!-- Logo Section -->
-                    <a href="{{ route('dashboard') }}" class="text-decoration-none">
+                    <a href="{{ $portalHomeUrl ?? route('dashboard') }}" class="text-decoration-none">
                         <x-afia-orbit-logo class="h-10" />
                     </a>
 
@@ -172,7 +172,7 @@
 
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
-                            {{ $breadcrumb }}
+                            {{ $breadcrumb ?? '' }}
                         </ol>
                     </nav>
                 </div>
