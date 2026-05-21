@@ -319,42 +319,14 @@
         </div>
     </div>
 
+    @include('components.leaflet-assets')
+
     <script>
-        let map, markers = [], routePath;
+        let mapCtx;
         
-        function initMap() {
-            // Check if Google Maps API loaded successfully
-            if (typeof google === 'undefined' || !google.maps) {
-                console.error('Google Maps API failed to load');
-                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-warning"></i><p class="mt-3 text-muted">Google Maps failed to load</p><p class="small text-muted">Please check your internet connection and API key</p></div></div>';
-                return;
-            }
-            
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: { lat: -6.7924, lng: 39.2083 },
-                styles: [
-                    {
-                        "featureType": "administrative",
-                        "elementType": "geometry",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "poi",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "road",
-                        "elementType": "labels.icon",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "transit",
-                        "stylers": [{"visibility": "off"}]
-                    }
-                ]
-            });
-        }
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 12 });
+        });
         
         document.getElementById('optimizeForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -404,10 +376,10 @@
         });
         
         function displayRoute(route) {
-            // Clear existing markers and route
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-            if (routePath) routePath.setMap(null);
+            if (!mapCtx) return;
+
+            GreenRouteMap.clearMarkers(mapCtx);
+            GreenRouteMap.clearPolylines(mapCtx);
             
             const routeList = document.getElementById('routeList');
             routeList.innerHTML = '';
@@ -425,30 +397,15 @@
             }
             
             route.forEach((client, index) => {
-                const marker = new google.maps.Marker({
-                    position: { lat: parseFloat(client.latitude), lng: parseFloat(client.longitude) },
-                    map: map,
+                const lat = parseFloat(client.latitude);
+                const lng = parseFloat(client.longitude);
+
+                GreenRouteMap.addNumberedMarker(mapCtx, lat, lng, index + 1, {
                     title: client.name,
-                    label: {
-                        text: (index + 1).toString(),
-                        color: 'white',
-                        fontWeight: 'bold'
-                    },
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 12,
-                        fillColor: '#055c5c',
-                        fillOpacity: 1,
-                        strokeColor: 'white',
-                        strokeWeight: 2
-                    }
+                    popup: `<strong>${client.name}</strong><br>${client.address || ''}`,
                 });
-                markers.push(marker);
                 
-                routeCoordinates.push({ 
-                    lat: parseFloat(client.latitude), 
-                    lng: parseFloat(client.longitude) 
-                });
+                routeCoordinates.push({ lat, lng });
                 
                 const routeItem = document.createElement('div');
                 routeItem.className = 'route-item d-flex align-items-start';
@@ -464,30 +421,9 @@
                 routeList.appendChild(routeItem);
             });
             
-            // Draw route path
-            routePath = new google.maps.Polyline({
-                path: routeCoordinates,
-                geodesic: true,
-                strokeColor: '#055c5c',
-                strokeOpacity: 0.8,
-                strokeWeight: 4
-            });
-            routePath.setMap(map);
-            
-            // Fit map to show all markers
-            const bounds = new google.maps.LatLngBounds();
-            routeCoordinates.forEach(coord => bounds.extend(coord));
-            map.fitBounds(bounds);
+            GreenRouteMap.drawPolyline(mapCtx, routeCoordinates);
+            GreenRouteMap.fitBounds(mapCtx, routeCoordinates);
         }
     </script>
-    
-    <script>
-        // Global error handler for Google Maps API
-        window.gm_authFailure = function() {
-            console.error('Google Maps API authentication failed');
-            document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-danger"></i><p class="mt-3 text-muted">Google Maps API authentication failed</p><p class="small text-muted">Please check your API key configuration</p></div></div>';
-        };
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap"></script>
 </body>
 </html>

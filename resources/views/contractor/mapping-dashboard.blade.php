@@ -781,30 +781,21 @@
                 });
         }
 
-        // Map functions
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById('dashboardMap'), {
-                zoom: 12,
-                center: { lat: -6.7924, lng: 39.2083 }
-            });
-
-            // Add a sample marker
-            new google.maps.Marker({
-                position: { lat: -6.7924, lng: 39.2083 },
-                map: map,
-                title: 'Current Location'
-            });
-        }
-
-        function initGPSMap() {
-            // GPS map initialization would go here
-        }
-
-        // Initialize the map on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
         });
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap"></script>
+    @include('components.leaflet-assets')
+    <script>
+        GreenRouteMap.whenReady(function () {
+            const ctx = GreenRouteMap.createMap('dashboardMap', { lat: -6.7924, lng: 39.2083, zoom: 12 });
+            if (ctx) {
+                GreenRouteMap.addMarker(ctx, -6.7924, 39.2083, {
+                    title: 'Dar es Salaam',
+                    popup: '<strong>GPS Tracker</strong><br>Map ready — assign client coordinates to show stops.',
+                });
+            }
+        });
+    </script>
 </body>
 </html>

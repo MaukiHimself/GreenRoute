@@ -181,7 +181,7 @@
                                 <i class="bi bi-telephone"></i>
                             </a>
                             @if($client->latitude && $client->longitude)
-                                <a href="https://www.google.com/maps?q={{ $client->latitude }},{{ $client->longitude }}" 
+                                <a href="https://www.openstreetmap.org/?mlat={{ $client->latitude }}&mlon={{ $client->longitude }}#map=16/{{ $client->latitude }}/{{ $client->longitude }}" 
                                    target="_blank" class="btn btn-sm btn-outline-info" title="View on Map">
                                     <i class="bi bi-map"></i>
                                 </a>

@@ -128,29 +128,16 @@
         </p>
     </div>
 
-    <script>
-        let map, marker, geocoder;
-        
-        function initMap() {
-            if (typeof google !== 'undefined' && google.maps) {
-                // Initialize map centered on Tanzania
-                map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 13,
-                    center: { lat: -3.3731, lng: 36.8822 } // Moshi, Tanzania coordinates
-                });
-                
-                geocoder = new google.maps.Geocoder();
-                marker = new google.maps.Marker({ map: map });
-            } else {
-                // Fallback when Google Maps is not available
-                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light rounded"><div class="text-center"><i class="bi bi-geo-alt text-muted" style="font-size: 3rem;"></i><p class="text-muted mt-2">Map preview unavailable<br><small>GPS location capture still works</small></p></div></div>';
-            }
-            
+    @include('components.leaflet-assets')
 
+    <script>
+        let mapCtx, locationMarker;
+        
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -3.3731, lng: 36.8822, zoom: 13 });
             document.getElementById('watchLocation').addEventListener('click', watchPreciseLocation);
-            
             document.getElementById('locationStatus').innerHTML = '📍 Click "Get My Precise Location" to detect your exact GPS coordinates in Moshi, Tanzania';
-        }
+        });
         
         let watchId = null;
         let locationAttempts = 0;
@@ -276,13 +263,13 @@
         }
         
         function updateLocation(lat, lng, accuracy, source) {
-            const location = { lat: lat, lng: lng };
-            
-            // Update map view if available
-            if (map && marker) {
-                map.setCenter(location);
-                map.setZoom(18);
-                marker.setPosition(location);
+            if (mapCtx) {
+                if (locationMarker) {
+                    GreenRouteMap.setMarkerPosition(locationMarker, lat, lng);
+                } else {
+                    locationMarker = GreenRouteMap.addMarker(mapCtx, lat, lng, { title: 'Your location' });
+                }
+                GreenRouteMap.setView(mapCtx, lat, lng, 18);
             }
             
             // Store coordinates with high precision
@@ -397,15 +384,4 @@
             return true;
         }
     </script>
-    
-    @if(config('services.google_maps.api_key'))
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap&libraries=geometry"></script>
-    @else
-        <script>
-            function initMap() {
-                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light rounded"><div class="text-center"><i class="bi bi-geo-alt text-muted" style="font-size: 3rem;"></i><p class="text-muted mt-2">Map preview unavailable<br><small>GPS location capture still works</small></p></div></div>';
-            }
-            initMap();
-        </script>
-    @endif
 </x-guest-layout>

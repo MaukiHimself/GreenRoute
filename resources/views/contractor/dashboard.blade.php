@@ -268,52 +268,20 @@
         </div>
     </div>
 
+    @include('components.leaflet-assets')
+
     <script>
-        let map, markers = [], currentLocation, routePath;
+        let mapCtx;
+        let currentLocationMarker = null;
         
-        function initMap() {
-            // Check if Google Maps API loaded successfully
-            if (typeof google === 'undefined' || !google.maps) {
-                console.error('Google Maps API failed to load');
-                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-warning"></i><p class="mt-3 text-muted">Google Maps failed to load</p><p class="small text-muted">Please check your internet connection and API key</p></div></div>';
-                return;
-            }
-            
-            // Initialize the map
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: { lat: 40.7128, lng: -74.0060 },
-                styles: [
-                    {
-                        "featureType": "administrative",
-                        "elementType": "geometry",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "poi",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "road",
-                        "elementType": "labels.icon",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "transit",
-                        "stylers": [{"visibility": "off"}]
-                    }
-                ]
-            });
-            
-            // Load initial data
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 12 });
             loadClientLocations();
             getCurrentLocation();
-            
-            // Set up event listeners
             document.getElementById('updateLocation').addEventListener('click', updateMyLocation);
             document.getElementById('optimizeRoute').addEventListener('click', optimizeRoute);
             document.getElementById('clearRoute').addEventListener('click', clearRoute);
-        }
+        });
         
         function loadClientLocations() {
             fetch('/contractor/clients/locations')
@@ -324,59 +292,31 @@
                     return response.json();
                 })
                 .then(clients => {
-                    // Clear existing markers
-                    markers.forEach(marker => marker.setMap(null));
-                    markers = [];
+                    if (!mapCtx) return;
+
+                    GreenRouteMap.clearMarkers(mapCtx);
                     
-                    // Add client markers
+                    const points = [];
                     clients.forEach(client => {
-                        const marker = new google.maps.Marker({
-                            position: { 
-                                lat: parseFloat(client.latitude), 
-                                lng: parseFloat(client.longitude) 
-                            },
-                            map: map,
+                        const lat = parseFloat(client.latitude);
+                        const lng = parseFloat(client.longitude);
+                        points.push({ lat, lng });
+
+                        GreenRouteMap.addMarker(mapCtx, lat, lng, {
                             title: client.name,
-                            icon: {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                scale: 8,
-                                fillColor: '#055c5c',
-                                fillOpacity: 1,
-                                strokeColor: '#ffffff',
-                                strokeWeight: 2
-                            }
+                            popup: `
+                                <div style="min-width: 200px;">
+                                    <strong style="color: #055c5c;">${client.name}</strong>
+                                    <p class="mb-0 mt-1">${client.address || ''}</p>
+                                    <p class="mb-0">${client.phone || ''}</p>
+                                </div>`,
                         });
-                        
-                        // Add info window
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: `
-                                <div style="padding: 1rem; min-width: 200px;">
-                                    <h4 style="color: #055c5c; margin-bottom: 0.5rem; font-weight: 600;">${client.name}</h4>
-                                    <p style="margin: 0.25rem 0; color: #666;">${client.address || ''}</p>
-                                    <p style="margin: 0.25rem 0; color: #666;">${client.phone || ''}</p>
-                                </div>
-                            `
-                        });
-                        
-                        marker.addListener('click', () => {
-                            infoWindow.open(map, marker);
-                        });
-                        
-                        markers.push(marker);
                     });
                     
                     document.getElementById('clientCount').textContent = clients.length;
                     
-                    // Fit map to show all markers
-                    if (clients.length > 0) {
-                        const bounds = new google.maps.LatLngBounds();
-                        clients.forEach(client => {
-                            bounds.extend(new google.maps.LatLng(
-                                parseFloat(client.latitude), 
-                                parseFloat(client.longitude)
-                            ));
-                        });
-                        map.fitBounds(bounds);
+                    if (points.length > 0) {
+                        GreenRouteMap.fitBounds(mapCtx, points);
                     }
                 })
                 .catch(error => {
@@ -389,30 +329,21 @@
         function getCurrentLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
-                    currentLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    
-                    // Add current location marker
-                    new google.maps.Marker({
-                        position: currentLocation,
-                        map: map,
-                        title: 'My Current Location',
-                        icon: {
-                            url: 'data:image/svg+xml;base64,' + btoa(`
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="10" cy="10" r="8" fill="#640404"/>
-                                    <circle cx="10" cy="10" r="3" fill="white"/>
-                                </svg>
-                            `),
-                            scaledSize: new google.maps.Size(20, 20),
-                            anchor: new google.maps.Point(10, 10)
-                        }
-                    });
-                    
-                    // Center map on current location
-                    map.setCenter(currentLocation);
+                    if (!mapCtx) return;
+
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    if (currentLocationMarker) {
+                        GreenRouteMap.setMarkerPosition(currentLocationMarker, lat, lng);
+                    } else {
+                        currentLocationMarker = GreenRouteMap.addMarker(mapCtx, lat, lng, {
+                            title: 'My Current Location',
+                            popup: '<strong>Your location</strong>',
+                        });
+                    }
+
+                    GreenRouteMap.setView(mapCtx, lat, lng, 14);
                 }, error => {
                     console.warn('Error getting current location:', error);
                 });
@@ -500,30 +431,14 @@
             
             // Simulate route optimization
             setTimeout(() => {
-                // Create a sample route (in real implementation, this would come from your backend)
-                if (markers.length > 1) {
-                    const routeCoordinates = markers.map(marker => marker.getPosition());
-                    
-                    // Clear existing route
-                    if (routePath) {
-                        routePath.setMap(null);
-                    }
-                    
-                    // Draw new route
-                    routePath = new google.maps.Polyline({
-                        path: routeCoordinates,
-                        geodesic: true,
-                        strokeColor: '#055c5c',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 4
-                    });
-                    
-                    routePath.setMap(map);
-                    
-                    // Calculate approximate distance
+                if (!mapCtx) return;
+
+                if (mapCtx.markers.length > 1) {
+                    GreenRouteMap.clearPolylines(mapCtx);
+                    const routeCoordinates = mapCtx.markers.map(m => ({ lat: m.lat, lng: m.lng }));
+                    GreenRouteMap.drawPolyline(mapCtx, routeCoordinates);
                     const distance = calculateRouteDistance(routeCoordinates);
                     document.getElementById('routeDistance').textContent = distance + ' km';
-                    
                     showNotification('Route optimized successfully!', 'success');
                 } else {
                     showNotification('Need at least 2 clients to optimize route', 'warning');
@@ -536,31 +451,21 @@
         }
         
         function clearRoute() {
-            if (routePath) {
-                routePath.setMap(null);
-                routePath = null;
-                document.getElementById('routeDistance').textContent = '-- km';
-                showNotification('Route cleared', 'info');
-            }
+            if (!mapCtx) return;
+            GreenRouteMap.clearPolylines(mapCtx);
+            document.getElementById('routeDistance').textContent = '-- km';
+            showNotification('Route cleared', 'info');
         }
         
         function calculateRouteDistance(coordinates) {
-            // Simple distance calculation (in real implementation, use proper routing)
             let totalDistance = 0;
             for (let i = 1; i < coordinates.length; i++) {
-                const lat1 = coordinates[i-1].lat();
-                const lng1 = coordinates[i-1].lng();
-                const lat2 = coordinates[i].lat();
-                const lng2 = coordinates[i].lng();
-                
-                const R = 6371; // Earth's radius in km
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLng = (lng2 - lng1) * Math.PI / 180;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                          Math.sin(dLng/2) * Math.sin(dLng/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                totalDistance += R * c;
+                totalDistance += GreenRouteMap.haversineKm(
+                    coordinates[i - 1].lat,
+                    coordinates[i - 1].lng,
+                    coordinates[i].lat,
+                    coordinates[i].lng
+                );
             }
             return totalDistance.toFixed(1);
         }
@@ -638,14 +543,5 @@
         `;
         document.head.appendChild(style);
     </script>
-    
-    <script>
-        // Global error handler for Google Maps API
-        window.gm_authFailure = function() {
-            console.error('Google Maps API authentication failed');
-            document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-danger"></i><p class="mt-3 text-muted">Google Maps API authentication failed</p><p class="small text-muted">Please check your API key configuration</p></div></div>';
-        };
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap&libraries=geometry"></script>
 </body>
 </html>

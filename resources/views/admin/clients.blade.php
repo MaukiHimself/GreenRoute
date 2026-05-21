@@ -318,7 +318,7 @@
                                         <i class="bi bi-telephone"></i>
                                     </a>
                                     @if($client->latitude && $client->longitude)
-                                        <a href="https://www.google.com/maps?q={{ $client->latitude }},{{ $client->longitude }}" 
+                                        <a href="https://www.openstreetmap.org/?mlat={{ $client->latitude }}&mlon={{ $client->longitude }}#map=16/{{ $client->latitude }}/{{ $client->longitude }}" 
                                            target="_blank" class="action-btn" title="View on Map">
                                             <i class="bi bi-geo-alt"></i>
                                         </a>

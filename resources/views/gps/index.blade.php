@@ -402,45 +402,17 @@
         </div>
     </div>
 
+    @include('components.leaflet-assets')
+
     <script>
-        let map, truckMarkers = {};
+        let mapCtx;
+        const truckMarkers = {};
         
-        function initMap() {
-            // Check if Google Maps API loaded successfully
-            if (typeof google === 'undefined' || !google.maps) {
-                console.error('Google Maps API failed to load');
-                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-warning"></i><p class="mt-3 text-muted">Google Maps failed to load</p><p class="small text-muted">Please check your internet connection and API key</p></div></div>';
-                return;
-            }
-            
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: { lat: -6.7924, lng: 39.2083 },
-                styles: [
-                    {
-                        "featureType": "administrative",
-                        "elementType": "geometry",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "poi",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "road",
-                        "elementType": "labels.icon",
-                        "stylers": [{"visibility": "off"}]
-                    },
-                    {
-                        "featureType": "transit",
-                        "stylers": [{"visibility": "off"}]
-                    }
-                ]
-            });
-            
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 12 });
             loadTruckLocations();
-            setInterval(refreshLocations, 30000); // Refresh every 30 seconds
-        }
+            setInterval(refreshLocations, 30000);
+        });
         
         function loadTruckLocations() {
             fetch('/trucks/locations')
@@ -453,54 +425,33 @@
         }
         
         function updateTruckMarker(truck) {
+            if (!mapCtx) return;
+
             if (truckMarkers[truck.id]) {
-                truckMarkers[truck.id].setMap(null);
+                mapCtx.markerLayer.removeLayer(truckMarkers[truck.id].leaflet);
             }
-            
-            // Create custom truck icon
-            const truckIcon = {
-                path: 'M-20,0 L20,0 L20,40 L-20,40 Z M-15,40 L15,40 L15,60 L-15,60 Z',
-                fillColor: '#055c5c',
-                fillOpacity: 1,
-                strokeColor: '#ffffff',
-                strokeWeight: 2,
-                scale: 1,
-                anchor: new google.maps.Point(0, 30)
-            };
-            
-            const marker = new google.maps.Marker({
-                position: { 
-                    lat: parseFloat(truck.current_latitude), 
-                    lng: parseFloat(truck.current_longitude) 
-                },
-                map: map,
+
+            const lat = parseFloat(truck.current_latitude);
+            const lng = parseFloat(truck.current_longitude);
+            const popup = `
+                <div style="min-width: 200px;">
+                    <div style="font-weight: 700; color: #055c5c; margin-bottom: 0.5rem;">${truck.plate_number}</div>
+                    <div><strong>Driver:</strong> ${truck.driver_name}</div>
+                    <div><strong>Phone:</strong> ${truck.driver_phone}</div>
+                    <div><strong>Distance Today:</strong> ${parseFloat(truck.daily_distance).toFixed(2)} km</div>
+                    <div><strong>Last Updated:</strong> ${new Date(truck.last_updated).toLocaleTimeString()}</div>
+                </div>`;
+
+            truckMarkers[truck.id] = GreenRouteMap.addMarker(mapCtx, lat, lng, {
                 title: truck.plate_number,
-                icon: truckIcon
+                popup,
             });
-            
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="padding: 1rem; min-width: 200px;">
-                        <div style="font-weight: 700; color: #055c5c; margin-bottom: 0.5rem;">${truck.plate_number}</div>
-                        <div><strong>Driver:</strong> ${truck.driver_name}</div>
-                        <div><strong>Phone:</strong> ${truck.driver_phone}</div>
-                        <div><strong>Distance Today:</strong> ${parseFloat(truck.daily_distance).toFixed(2)} km</div>
-                        <div><strong>Last Updated:</strong> ${new Date(truck.last_updated).toLocaleTimeString()}</div>
-                    </div>
-                `
-            });
-            
-            marker.addListener('click', () => {
-                infoWindow.open(map, marker);
-            });
-            
-            truckMarkers[truck.id] = marker;
         }
         
         function trackTruck(truckId) {
-            if (truckMarkers[truckId]) {
-                map.setCenter(truckMarkers[truckId].getPosition());
-                map.setZoom(15);
+            const entry = truckMarkers[truckId];
+            if (entry && mapCtx) {
+                GreenRouteMap.setView(mapCtx, entry.lat, entry.lng, 15);
             }
         }
         
@@ -532,14 +483,5 @@
             });
         }
     </script>
-    
-    <script>
-        // Global error handler for Google Maps API
-        window.gm_authFailure = function() {
-            console.error('Google Maps API authentication failed');
-            document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light"><div class="text-center"><i class="bi bi-exclamation-triangle display-1 text-danger"></i><p class="mt-3 text-muted">Google Maps API authentication failed</p><p class="small text-muted">Please check your API key configuration</p></div></div>';
-        };
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap"></script>
 </body>
 </html>

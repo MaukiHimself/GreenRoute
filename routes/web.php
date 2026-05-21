@@ -52,7 +52,7 @@ Route::get('/test-locations', function () {
     return view('location-test');
 });
 
-// Test route for Google Maps API
+// Test route for OpenStreetMap / Leaflet
 Route::get('/test-maps', function () {
     return view('test-maps');
 });

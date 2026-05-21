@@ -1,72 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Maps API Test</title>
+    <title>OpenStreetMap Test — GreenRoute</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    @include('components.leaflet-assets')
     <style>
-        #map {
-            height: 400px;
-            width: 100%;
-        }
-        .status {
-            padding: 20px;
-            margin: 20px;
-            border-radius: 5px;
-        }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
+        #map { height: 400px; width: 100%; border-radius: 8px; }
     </style>
 </head>
-<body>
-    <h1>Google Maps API Test</h1>
-    <div id="status" class="status">Loading...</div>
+<body class="p-4">
+    <h1>OpenStreetMap Test</h1>
+    <p class="text-muted">No API key required — uses free OpenStreetMap tiles.</p>
+    <div id="status" class="alert alert-secondary">Loading map...</div>
     <div id="map"></div>
 
     <script>
-        function initMap() {
+        GreenRouteMap.whenReady(function () {
             const statusDiv = document.getElementById('status');
-            
-            try {
-                if (typeof google === 'undefined' || !google.maps) {
-                    throw new Error('Google Maps API not loaded');
-                }
-                
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 10,
-                    center: { lat: -6.7924, lng: 39.2083 }
-                });
-                
-                new google.maps.Marker({
-                    position: { lat: -6.7924, lng: 39.2083 },
-                    map: map,
-                    title: 'Test Location'
-                });
-                
-                statusDiv.className = 'status success';
-                statusDiv.innerHTML = '✓ Google Maps API is working correctly!';
-                
-            } catch (error) {
-                statusDiv.className = 'status error';
-                statusDiv.innerHTML = '✗ Error: ' + error.message;
+            const ctx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 10 });
+
+            if (!ctx) {
+                statusDiv.className = 'alert alert-danger';
+                statusDiv.textContent = 'Map failed to load.';
+                return;
             }
-        }
-        
-        window.gm_authFailure = function() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.className = 'status error';
-            statusDiv.innerHTML = '✗ Google Maps API authentication failed. Check your API key.';
-        };
-        
-        // Fallback if initMap is not called within 10 seconds
-        setTimeout(function() {
-            const statusDiv = document.getElementById('status');
-            if (statusDiv.innerHTML === 'Loading...') {
-                statusDiv.className = 'status error';
-                statusDiv.innerHTML = '✗ Google Maps API failed to load within 10 seconds.';
-            }
-        }, 10000);
+
+            GreenRouteMap.addMarker(ctx, -6.7924, 39.2083, {
+                title: 'Dar es Salaam',
+                popup: '<strong>Test location</strong><br>Dar es Salaam, Tanzania',
+            });
+
+            statusDiv.className = 'alert alert-success';
+            statusDiv.innerHTML = '✓ OpenStreetMap is working correctly (free, no API key).';
+        });
     </script>
-    
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap"></script>
 </body>
 </html>

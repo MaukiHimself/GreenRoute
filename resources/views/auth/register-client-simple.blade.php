@@ -90,18 +90,15 @@
         </button>
     </form>
 
+    @include('components.leaflet-assets')
+
     <script>
-        let map, marker;
+        let mapCtx, locationMarker;
         
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 6,
-                center: { lat: -6.369028, lng: 34.888822 }
-            });
-            
-            marker = new google.maps.Marker({ map: map });
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -6.369028, lng: 34.888822, zoom: 6 });
             document.getElementById('getLocation').addEventListener('click', getDeviceLocation);
-        }
+        });
         
         function getDeviceLocation() {
             document.getElementById('locationStatus').innerHTML = 'Getting your device location...';
@@ -114,9 +111,14 @@
                     document.getElementById('latitude').value = lat;
                     document.getElementById('longitude').value = lng;
                     
-                    map.setCenter({ lat: lat, lng: lng });
-                    map.setZoom(16);
-                    marker.setPosition({ lat: lat, lng: lng });
+                    if (mapCtx) {
+                        if (locationMarker) {
+                            GreenRouteMap.setMarkerPosition(locationMarker, lat, lng);
+                        } else {
+                            locationMarker = GreenRouteMap.addMarker(mapCtx, lat, lng, { title: 'Your location' });
+                        }
+                        GreenRouteMap.setView(mapCtx, lat, lng, 16);
+                    }
                     
                     document.getElementById('locationStatus').innerHTML = 'Location captured: ' + lat.toFixed(6) + ', ' + lng.toFixed(6);
                     console.log('Device Location:', lat, lng);
@@ -143,6 +145,4 @@
             return true;
         }
     </script>
-    
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap"></script>
 </x-guest-layout>

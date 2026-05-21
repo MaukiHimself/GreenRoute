@@ -39,6 +39,10 @@ return [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    'openstreetmap' => [
+        'nominatim_user_agent' => env('NOMINATIM_USER_AGENT', env('APP_NAME', 'GreenRoute') . '/1.0'),
+    ],
+
     'azampay' => [
         'client_id' => env('AZAMPAY_CLIENT_ID'),
         'client_secret' => env('AZAMPAY_CLIENT_SECRET'),

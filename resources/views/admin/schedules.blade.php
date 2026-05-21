@@ -295,7 +295,7 @@
                                         <i class="bi bi-eye"></i>
                                     </button>
                                     @if($schedule->client && $schedule->client->latitude && $schedule->client->longitude)
-                                        <a href="https://www.google.com/maps?q={{ $schedule->client->latitude }},{{ $schedule->client->longitude }}" 
+                                        <a href="https://www.openstreetmap.org/?mlat={{ $schedule->client->latitude }}&mlon={{ $schedule->client->longitude }}#map=16/{{ $schedule->client->latitude }}/{{ $schedule->client->longitude }}" 
                                            target="_blank" class="action-btn" title="View Location">
                                             <i class="bi bi-geo-alt"></i>
                                         </a>

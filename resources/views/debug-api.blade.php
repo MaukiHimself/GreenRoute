@@ -46,7 +46,7 @@
                         <h5>Environment Check</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Google Maps API Key:</strong> {{ env('GOOGLE_MAPS_API_KEY') ? 'Set' : 'Not Set' }}</p>
+                        <p><strong>Maps:</strong> OpenStreetMap + Leaflet (free, no API key required)</p>
                         <p><strong>App Environment:</strong> {{ env('APP_ENV') }}</p>
                         <p><strong>Database:</strong> {{ env('DB_CONNECTION') }}</p>
                         <p><strong>Current User:</strong> {{ auth()->check() ? auth()->user()->name . ' (' . auth()->user()->user_type . ')' : 'Not logged in' }}</p>

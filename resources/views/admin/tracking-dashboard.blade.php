@@ -102,40 +102,40 @@
         </div>
     </div>
 
+    @include('components.leaflet-assets')
+
     <script>
-        let map, markers = [];
+        let mapCtx;
         
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 10,
-                center: { lat: 40.7128, lng: -74.0060 }
-            });
-            
+        GreenRouteMap.whenReady(function () {
+            mapCtx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 10 });
             loadContractorLocations();
             setInterval(loadContractorLocations, 30000);
-        }
+        });
         
         function loadContractorLocations() {
             fetch('/admin/contractors/locations')
                 .then(response => response.json())
                 .then(data => {
-                    clearMarkers();
-                    
+                    if (!mapCtx) return;
+
+                    GreenRouteMap.clearMarkers(mapCtx);
+                    const points = [];
+
                     data.forEach(contractor => {
-                        const marker = new google.maps.Marker({
-                            position: { lat: parseFloat(contractor.latitude), lng: parseFloat(contractor.longitude) },
-                            map: map,
+                        const lat = parseFloat(contractor.latitude);
+                        const lng = parseFloat(contractor.longitude);
+                        points.push({ lat, lng });
+
+                        GreenRouteMap.addMarker(mapCtx, lat, lng, {
                             title: contractor.name,
-                            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                            popup: `<strong>${contractor.name}</strong><br>Last seen: ${new Date(contractor.updated_at).toLocaleString()}`,
                         });
-                        
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: `<div><h3>${contractor.name}</h3><p>Last seen: ${new Date(contractor.updated_at).toLocaleString()}</p></div>`
-                        });
-                        
-                        marker.addListener('click', () => infoWindow.open(map, marker));
-                        markers.push(marker);
                     });
+
+                    if (points.length > 0) {
+                        GreenRouteMap.fitBounds(mapCtx, points);
+                    }
                     
                     updateStats(data);
                     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
@@ -145,11 +145,6 @@
                     document.getElementById('activeContractors').textContent = '0';
                     document.getElementById('totalLocations').textContent = '0';
                 });
-        }
-        
-        function clearMarkers() {
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
         }
         
         function updateStats(data) {
@@ -165,6 +160,4 @@
             }
         }
     </script>
-    
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap"></script>
 </x-app-layout>

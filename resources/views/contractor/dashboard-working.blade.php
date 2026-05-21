@@ -309,15 +309,9 @@
                     </button>
                 </div>
                 
-                <!-- Map Container -->
+                <!-- Map Container (OpenStreetMap — free, no API key) -->
                 <div class="map-container">
-                    <p class="map-message">Map will load here once Google Maps APIs are properly configured</p>
-                    <div id="mapPlaceholder" class="map-placeholder">
-                        <div class="text-center">
-                            <i class="bi bi-map" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                            <div>Google Maps Loading...</div>
-                        </div>
-                    </div>
+                    <div id="map" style="height: 400px; width: 100%; border-radius: 12px;"></div>
                 </div>
                 
                 <!-- Stats Grid -->
@@ -532,6 +526,31 @@
                 }
             `;
             document.head.appendChild(style);
+        });
+    </script>
+    @include('components.leaflet-assets')
+    <script>
+        GreenRouteMap.whenReady(function () {
+            const ctx = GreenRouteMap.createMap('map', { lat: -6.7924, lng: 39.2083, zoom: 11 });
+            if (!ctx) return;
+
+            fetch('/contractor/clients/locations')
+                .then(r => r.json())
+                .then(clients => {
+                    const points = [];
+                    (clients || []).forEach(client => {
+                        const lat = parseFloat(client.latitude);
+                        const lng = parseFloat(client.longitude);
+                        if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+                        points.push({ lat, lng });
+                        GreenRouteMap.addMarker(ctx, lat, lng, {
+                            title: client.name,
+                            popup: `<strong>${client.name}</strong>`,
+                        });
+                    });
+                    if (points.length) GreenRouteMap.fitBounds(ctx, points);
+                })
+                .catch(() => {});
         });
     </script>
 </body>

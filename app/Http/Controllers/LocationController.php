@@ -38,44 +38,55 @@ class LocationController extends Controller
 
         $lat = $request->latitude;
         $lng = $request->longitude;
-        $apiKey = config('services.google_maps.api_key');
 
-        // Check if API key is configured
-        if (empty($apiKey) || $apiKey === 'your_google_maps_api_key_here') {
-            return $this->generateFallbackAddress($lat, $lng);
-        }
+        $cacheKey = 'reverse_geocode_' . round((float) $lat, 5) . '_' . round((float) $lng, 5);
 
         try {
-            $response = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/geocode/json', [
-                'latlng' => "{$lat},{$lng}",
-                'key' => $apiKey,
-                'language' => 'en'
-            ]);
+            $result = Cache::remember($cacheKey, 3600, function () use ($lat, $lng) {
+                $response = Http::timeout(10)
+                    ->withHeaders([
+                        'User-Agent' => config('services.openstreetmap.nominatim_user_agent'),
+                        'Accept' => 'application/json',
+                    ])
+                    ->get('https://nominatim.openstreetmap.org/reverse', [
+                        'format' => 'json',
+                        'lat' => $lat,
+                        'lon' => $lng,
+                        'accept-language' => 'en',
+                    ]);
 
-            $data = $response->json();
+                if (!$response->successful()) {
+                    return null;
+                }
 
-            if ($data['status'] === 'OK' && !empty($data['results'])) {
-                $result = $data['results'][0];
-                $formattedAddress = $result['formatted_address'];
+                $data = $response->json();
 
+                if (empty($data['display_name'])) {
+                    return null;
+                }
+
+                return [
+                    'address' => $data['display_name'],
+                    'components' => $data['address'] ?? [],
+                ];
+            });
+
+            if ($result) {
                 return response()->json([
                     'success' => true,
-                    'address' => $formattedAddress,
-                    'components' => $result['address_components'] ?? []
+                    'address' => $result['address'],
+                    'components' => $result['components'],
                 ]);
             }
-
-            return $this->generateFallbackAddress($lat, $lng);
-
         } catch (\Exception $e) {
             Log::error('Reverse geocoding failed', [
                 'latitude' => $lat,
                 'longitude' => $lng,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-
-            return $this->generateFallbackAddress($lat, $lng);
         }
+
+        return $this->generateFallbackAddress($lat, $lng);
     }
 
     /**
