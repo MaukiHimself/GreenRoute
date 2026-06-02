@@ -22,56 +22,7 @@
             padding: 0;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            min-height: 100vh;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-            position: fixed;
-            width: 250px;
-            z-index: 100;
-        }
-
-        .sidebar .brand {
-            background-color: white;
-            color: var(--primary-teal);
-            padding: 20px 15px;
-            font-weight: 700;
-            font-size: 1.3rem;
-            text-align: center;
-            border-bottom: 2px solid var(--primary-teal);
-        }
-
-        .sidebar .nav-link {
-            color: #333;
-            padding: 12px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-
-        .sidebar .nav-link:hover {
-            background-color: var(--light-teal);
-            color: var(--primary-teal);
-        }
-
-        .sidebar .nav-link.active {
-            background-color: var(--primary-teal);
-            color: white;
-            border-left: 4px solid var(--primary-red);
-        }
-
-        .sidebar .nav-link i {
-            width: 24px;
-            text-align: center;
-            margin-right: 10px;
-        }
-
-        /* Main Content Styling */
         .main-content {
-            margin-left: 250px;
             padding: 20px;
             min-height: 100vh;
         }
@@ -125,57 +76,10 @@
     </style>
     @stack('head-scripts')
 </head>
-<body>
-    <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-lg-2">
-            <div class="sidebar">
-                <div class="brand">
-                    <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 80px; width: auto;">
-                </div>
-                <nav class="nav flex-column">
-                    <a class="nav-link {{ request()->routeIs('dashboard.contractor') ? 'active' : '' }}" href="{{ route('dashboard.contractor') }}">
-                        <i class="bi bi-speedometer2"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('contractor.clients.*') ? 'active' : '' }}" href="{{ route('contractor.clients.index') }}">
-                        <i class="bi bi-people"></i>
-                        <span>Clients</span>
-                    </a>
-                    <a class="nav-link" href="/billing">
-                        <i class="bi bi-credit-card"></i>
-                        <span>Billing & Payments</span>
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}" href="{{ route('schedules.index') }}">
-                        <i class="bi bi-calendar3"></i>
-                        <span>Collection Schedules</span>
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('disposal.*') ? 'active' : '' }}" href="{{ route('disposal.index') }}">
-                        <i class="bi bi-trash"></i>
-                        <span>Disposal Schedules</span>
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('sms.*') ? 'active' : '' }}" href="{{ route('sms.inbox') }}">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>Chats</span>
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('routes.*') ? 'active' : '' }}" href="{{ route('routes.index') }}">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>Route Optimization</span>
-                    </a>
-                    <a class="nav-link" href="/gps">
-                        <i class="bi bi-pin-map"></i>
-                        <span>GPS Tracker</span>
-                    </a>
-                    <a class="nav-link" href="/reports">
-                        <i class="bi bi-graph-up"></i>
-                        <span>Reports & Analytics</span>
-                    </a>
-                </nav>
-            </div>
-        </div>
+<body class="has-portal-sidebar">
+    <x-portal-sidebar portal="contractor" />
 
-        <!-- Main Content -->
-        <div class="col-lg-10 main-content">
+    <div class="main-content portal-main">
             <!-- Header -->
             <div class="header">
                 <div class="d-flex justify-content-between align-items-center">
@@ -236,7 +140,6 @@
 
                 {{ $slot }}
             </div>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

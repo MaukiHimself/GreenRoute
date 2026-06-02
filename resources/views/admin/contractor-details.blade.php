@@ -26,38 +26,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: var(--white);
-            border-right: 1px solid var(--border-color);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .logo-section {
-            padding: 1.5rem;
-            border-bottom: 2px solid var(--primary-teal);
-            text-align: center;
-        }
-
-        .menu-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s ease;
-        }
-
-        .menu-item:hover {
-            background: #e6f2f2;
-            color: var(--primary-teal);
-        }
-
         .main-content {
-            margin-left: 250px;
             flex: 1;
             padding: 2rem;
         }
@@ -189,30 +158,11 @@
         }
     </style>
 </head>
-<body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo-section">
-                <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 90px; width: auto; margin-bottom: 10px;">
-                <small>Admin Panel</small>
-            </div>
-            <a href="{{ route('dashboard.admin') }}" class="menu-item">
-                <i class="bi bi-house"></i> Dashboard
-            </a>
-            <a href="{{ route('admin.verification') }}" class="menu-item">
-                <i class="bi bi-person-check"></i> Verify Contractors
-            </a>
-            <a href="{{ route('admin.clients') }}" class="menu-item">
-                <i class="bi bi-people"></i> Clients
-            </a>
-            <a href="{{ route('admin.schedules') }}" class="menu-item">
-                <i class="bi bi-calendar"></i> Schedules
-            </a>
-        </div>
+<body class="has-portal-sidebar">
+    <x-portal-sidebar portal="admin" />
 
-        <!-- Main Content -->
-        <div class="main-content">
+    <div class="admin-layout">
+        <div class="main-content portal-main">
             <!-- Back Button -->
             <div class="mb-3">
                 <a href="{{ route('admin.verification') }}" class="btn btn-outline-secondary">

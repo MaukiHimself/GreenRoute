@@ -711,32 +711,6 @@ class AdminController extends Controller
         return view('admin.contractor-details', compact('user'));
     }
 
-    public function approveContractor(User $user)
-    {
-        // Approve without changing the password they chose at registration
-        $user->update(['status' => 'approved']);
-
-        // Send approval email notification (contractor keeps their registration password)
-        $this->sendContractorApprovalEmail($user);
-
-        return redirect()->route('admin.verification')
-            ->with('success', "Contractor {$user->name} has been approved successfully. They can log in with the password they set during registration.");
-    }
-
-    public function rejectContractor(User $user)
-    {
-        $user->update(['status' => 'rejected']);
-
-        try {
-            \Mail::to($user->email)->send(new \App\Mail\ContractorRejected($user));
-        } catch (\Exception $e) {
-            \Log::error('Failed to send rejection email: ' . $e->getMessage());
-        }
-
-        return redirect()->route('admin.verification')
-            ->with('success', "Contractor {$user->name} has been rejected. A notification email has been sent.");
-    }
-
     public function toggleContractorStatus(User $user)
     {
         if ($user->user_type !== 'contractor') {
@@ -755,21 +729,5 @@ class AdminController extends Controller
 
         return redirect()->route('admin.verification')
             ->with('success', $message);
-    }
-
-    /**
-     * Send contractor approval email without interrupting admin workflow on mail failure.
-     */
-    private function sendContractorApprovalEmail(User $contractor, ?string $temporaryPassword = null): void
-    {
-        try {
-            Mail::to($contractor->email)->send(new ContractorApproved($contractor, $temporaryPassword));
-        } catch (\Exception $e) {
-            Log::error('Failed to send approval email', [
-                'contractor_id' => $contractor->id,
-                'contractor_email' => $contractor->email,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 }

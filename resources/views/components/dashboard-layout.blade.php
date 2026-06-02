@@ -122,53 +122,18 @@
             font-weight: 500;
         }
 
-        .top-nav-links {
-            display: flex;
-            flex-direction: row;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 1rem;
-        }
-
-        .top-nav-links .nav-link {
-            color: var(--afia-gray);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .top-nav-links .nav-link:hover {
-            background-color: #e0f2fe;
-            color: var(--afia-teal);
-        }
-
-        .top-nav-links .nav-link.active {
-            background: linear-gradient(135deg, var(--afia-teal) 0%, var(--afia-cyan) 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-        }
     </style>
 </head>
-<body>
-<div>
-        <!-- Top Navigation Bar -->
+<body class="has-portal-sidebar">
+    <x-portal-sidebar portal="client" />
+
+    <div class="portal-main">
         <div class="top-navbar px-lg-5 p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Logo Section -->
-                    <a href="{{ $portalHomeUrl ?? route('dashboard') }}" class="text-decoration-none">
+                    <a href="{{ $portalHomeUrl ?? route('client.dashboard') }}" class="text-decoration-none">
                         <x-afia-orbit-logo class="h-10" />
                     </a>
-
-                    <!-- Horizontal Navigation Menu -->
-                    <nav class="d-flex">
-                        <ul class="top-nav-links">
-                            {{ $nav ?? '' }}
-
-                        </ul>
-                    </nav>
 
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
@@ -218,7 +183,6 @@
             {{ $slot }}
         </div>
 
-        <!-- Footer -->
         <x-footer />
     </div>
 

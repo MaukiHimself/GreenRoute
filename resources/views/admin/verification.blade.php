@@ -28,76 +28,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: var(--white);
-            border-right: 1px solid var(--border-color);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .logo-section {
-            padding: 1.5rem;
-            border-bottom: 2px solid var(--primary-teal);
-            text-align: center;
-            background: var(--white);
-        }
-
-        .logo-section img {
-            max-height: 90px;
-            width: 90%;
-            object-fit: contain;
-        }
-
-        .menu-section {
-            padding: 1rem 0;
-        }
-
-        .menu-header {
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            color: var(--primary-teal);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s ease;
-        }
-
-        .menu-item:hover {
-            background: #e6f2f2;
-            color: var(--primary-teal);
-        }
-
-        .menu-item.active {
-            background: var(--primary-teal);
-            color: var(--white);
-            border-left: 4px solid var(--primary-red);
-        }
-
-        .menu-item i {
-            margin-right: 10px;
-        }
-
-        .menu-item .bi-chevron-right {
-            margin-right: 0;
-            margin-left: auto;
-        }
-
-        /* Main Content */
         .main-content {
-            margin-left: 250px;
             flex: 1;
         }
 
@@ -344,44 +275,11 @@
         }
     </style>
 </head>
-<body>
+<body class="has-portal-sidebar">
+    <x-portal-sidebar portal="admin" />
+
     <div class="admin-layout">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo-section">
-                <img src="{{ asset('result.png') }}" alt="Logo">
-            </div>
-
-            <div class="menu-section">
-                <div class="menu-header">MENU</div>
-                <a href="{{ route('dashboard.admin') }}" class="menu-item">
-                    <span><i class="bi bi-speedometer2"></i>Administrator Dashboard</span>
-                </a>
-                <a href="{{ route('admin.verification') }}" class="menu-item active">
-                    <span><i class="bi bi-check-circle"></i>Verification</span>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-                <a href="{{ route('admin.clients') }}" class="menu-item">
-                    <span><i class="bi bi-people"></i>Clients Information</span>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-                <a href="{{ route('admin.billing') }}" class="menu-item">
-                    <span><i class="bi bi-credit-card"></i>Billing & Payments</span>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-                <a href="{{ route('admin.schedules') }}" class="menu-item">
-                    <span><i class="bi bi-calendar3"></i>Schedules</span>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-                <a href="{{ route('admin.users') }}" class="menu-item">
-                    <span><i class="bi bi-person-gear"></i>Users</span>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
+        <div class="main-content portal-main">
             <!-- Header -->
             <div class="header">
                 <nav aria-label="breadcrumb">

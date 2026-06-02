@@ -20,55 +20,7 @@
             background-color: #f8f9fa;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            min-height: 100vh;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-            position: fixed;
-            width: 250px;
-            z-index: 100;
-        }
-
-        .sidebar .brand {
-            background-color: white;
-            color: var(--primary-teal);
-            padding: 20px 15px;
-            font-weight: 700;
-            font-size: 1.3rem;
-            text-align: center;
-            border-bottom: 2px solid var(--primary-teal);
-        }
-
-        .sidebar .nav-link {
-            color: #333;
-            padding: 12px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
-        .sidebar .nav-link:hover {
-            background-color: var(--light-teal);
-            color: var(--primary-teal);
-        }
-
-        .sidebar .nav-link.active {
-            background-color: var(--primary-teal);
-            color: white;
-            border-left: 4px solid var(--primary-red);
-        }
-
-        .sidebar .nav-link i {
-            width: 24px;
-            text-align: center;
-            margin-right: 10px;
-        }
-
-        /* Main Content Styling */
         .main-content {
-            margin-left: 250px;
             padding: 20px;
             min-height: 100vh;
         }
@@ -237,101 +189,13 @@
             overflow: hidden;
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-
-            .sidebar .brand span {
-                display: none;
-            }
-
-            .sidebar .nav-link span {
-                display: none;
-            }
-
-            .sidebar .nav-link i {
-                margin-right: 0;
-            }
-
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .sidebar .nav-link span {
-                display: inline;
-            }
-        }
     </style>
 </head>
-<body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <!-- Sidebar -->
-            <div class="col-lg-2 sidebar">
-                <div class="brand">
-                    <img src="{{ asset('result.png') }}" alt="Logo" style="max-height: 90px; width: 90%; background-color: white; object-fit: contain;">
-                </div>
-                <nav class="nav flex-column mt-3">
-                    <a class="nav-link active" href="#" data-tab="dashboard">
-                        <i class="bi bi-speedometer2"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="clients">
-                        <i class="bi bi-people"></i>
-                        <span>Client Database</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="billing">
-                        <i class="bi bi-credit-card"></i>
-                        <span>Billing & Payments</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="collection">
-                        <i class="bi bi-calendar3"></i>
-                        <span>Collection Schedules</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="disposal">
-                        <i class="bi bi-trash"></i>
-                        <span>Disposal Schedules</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="chats">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>Chats</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="route-management">
-                        <i class="bi bi-signpost-split"></i>
-                        <span>Routes Management</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="route-optimization">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>Route Optimization</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="gps">
-                        <i class="bi bi-pin-map"></i>
-                        <span>GPS Tracker</span>
-                    </a>
-                    <a class="nav-link" href="#" data-tab="reports">
-                        <i class="bi bi-graph-up"></i>
-                        <span>Reports & Analytics</span>
-                    </a>
-                </nav>
-            </div>
+<body class="has-portal-sidebar">
+    <x-portal-sidebar portal="contractor" :tabbed="true" />
 
-            <!-- Main Content -->
-            <div class="col-lg-10 main-content">
+    <div class="container-fluid p-0">
+        <div class="main-content portal-main">
                 <!-- Header -->
                 <div class="header">
                     <div class="d-flex justify-content-between align-items-center">
@@ -585,18 +449,15 @@
                     <iframe src="/reports" width="100%" height="600" frameborder="0"></iframe>
                 </div>
             </div>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Tab switching logic
-        document.querySelectorAll('[data-tab]').forEach(tab => {
+        document.querySelectorAll('#portal-sidebar [data-tab]').forEach(tab => {
             tab.addEventListener('click', function(e) {
                 e.preventDefault();
 
-                // Remove active class from all tabs
-                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                document.querySelectorAll('#portal-sidebar .portal-sidebar__link[data-tab]').forEach(link => link.classList.remove('active'));
                 this.classList.add('active');
 
                 // Hide all tab content

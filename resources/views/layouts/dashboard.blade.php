@@ -29,32 +29,6 @@
             background-color: var(--afia-light);
         }
 
-        .sidebar {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-            border-right: 1px solid #e2e8f0;
-            min-height: 100vh;
-        }
-
-        .sidebar .nav-link {
-            color: var(--afia-gray);
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            margin: 0.25rem 0;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar .nav-link:hover {
-            background-color: #e0f2fe;
-            color: var(--afia-teal);
-            transform: translateX(4px);
-        }
-
-        .sidebar .nav-link.active {
-            background: linear-gradient(135deg, var(--afia-teal) 0%, var(--afia-cyan) 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-        }
-
         .main-content {
             background-color: var(--afia-light);
         }
@@ -145,42 +119,13 @@
         }
     </style>
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0">
-                <div class="sidebar">
-                    <!-- Logo Section -->
-                    <div class="p-4 border-bottom">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none">
-                            <x-afia-orbit-logo class="h-10" />
-                        </a>
-                    </div>
+<body class="has-portal-sidebar">
+    @php
+        $portal = Auth::user()->user_type === 'admin' ? 'admin' : (Auth::user()->user_type === 'client' ? 'client' : 'contractor');
+    @endphp
+    <x-portal-sidebar :portal="$portal" />
 
-                    <!-- User Info -->
-                    <div class="p-4 border-bottom">
-                        <div class="d-flex align-items-center">
-                            <div class="user-avatar me-3">
-                                {{ substr(Auth::user()->name, 0, 1) }}
-                            </div>
-                            <div>
-                                <div class="fw-semibold text-dark">{{ Auth::user()->name }}</div>
-                                <small class="text-muted">{{ ucfirst(Auth::user()->user_type) }}</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Navigation Menu -->
-                    <nav class="p-3">
-                        {{ $sidebar }}
-                    </nav>
-                </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 px-0">
-                <div class="main-content">
+    <div class="main-content portal-main">
                     <!-- Top Navigation Bar -->
                     <div class="top-navbar p-3">
                         <div class="d-flex justify-content-between align-items-center">
@@ -233,11 +178,7 @@
                         {{ $slot }}
                     </div>
 
-                    <!-- Footer -->
                     <x-footer />
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Bootstrap JS -->
