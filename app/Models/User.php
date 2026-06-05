@@ -125,7 +125,7 @@ class User extends Authenticatable
 
     public function contractor()
     {
-        return $this->hasOne(Contractor::class);
+        return $this->hasOne(Contractor::class, 'user_id');
     }
 
     public function contractorLocations(): HasMany

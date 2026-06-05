@@ -101,6 +101,82 @@
         return line;
     }
 
+    async function drawRoadRoute(ctx, points, apiKey) {
+        if (!points || points.length < 2) return null;
+
+        // Try OpenRouteService first if apiKey is provided
+        if (apiKey && apiKey.trim() !== "") {
+            try {
+                const coordinates = points.map(p => [p.lng, p.lat]);
+                const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'Authorization': apiKey,
+                        'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        coordinates: coordinates,
+                        preference: 'shortest',
+                        units: 'km'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const routeLayer = L.geoJSON(data, {
+                        style: {
+                            color: BRAND,
+                            weight: 5,
+                            opacity: 0.75
+                        }
+                    }).addTo(ctx.map);
+
+                    ctx.polylines.push(routeLayer);
+
+                    // Return metadata for UI updates (distance/duration)
+                    return data.features[0].properties.summary;
+                }
+                console.warn('OpenRouteService failed, falling back to OSRM');
+            } catch (error) {
+                console.warn('OpenRouteService failed with error, falling back to OSRM:', error);
+            }
+        }
+
+        // Fallback to OSRM
+        try {
+            const osrmCoords = points.map(p => `${p.lng},${p.lat}`).join(';');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`;
+            const osrmResponse = await fetch(osrmUrl);
+            
+            if (!osrmResponse.ok) throw new Error('OSRM routing API error');
+
+            const osrmData = await osrmResponse.json();
+            if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes.length > 0) {
+                const route = osrmData.routes[0];
+                const routeLayer = L.geoJSON(route.geometry, {
+                    style: {
+                        color: BRAND,
+                        weight: 5,
+                        opacity: 0.75
+                    }
+                }).addTo(ctx.map);
+
+                ctx.polylines.push(routeLayer);
+
+                // OSRM returns distance in meters, convert to km
+                return {
+                    distance: route.distance / 1000,
+                    duration: route.duration
+                };
+            }
+            throw new Error('OSRM returned no routes');
+        } catch (error) {
+            console.error('All routing engines failed:', error);
+            return null;
+        }
+    }
+
     function fitBounds(ctx, points, padding = [40, 40]) {
         if (!ctx || !points || points.length === 0) {
             return;
@@ -185,6 +261,7 @@
         addMarker,
         addNumberedMarker,
         drawPolyline,
+        drawRoadRoute,
         fitBounds,
         setView,
         setMarkerPosition,
@@ -192,5 +269,43 @@
         haversineKm,
         whenReady,
         osmLink,
+
+        initGlobalReachability: function(ctx, apiKey) {
+            if (!ctx || !ctx.map) {
+                console.error('GreenRouteMap helper error: Valid map context instance missing.');
+                return null;
+            }
+            if (typeof L.Reachability !== 'function') {
+                console.warn('Reachability scripts not detected on this page view component.');
+                return null;
+            }
+
+            // Injects the fully interactive user control panel widget to choose settings
+            return L.reachability({
+                apiKey: apiKey,
+                styleFn: function (value, intervalType) {
+                    return {
+                        color: intervalType === 'time' ? '#22c55e' : '#3b82f6', // Green for Time, Blue for Distance
+                        weight: 2,
+                        opacity: 0.7,
+                        fillOpacity: 0.15
+                    };
+                },
+                settings: {
+                    profile: 'driving-car',       // Set default routing profile optimized for driving vehicles
+                    rangeType: 'time',            // Defaults view option to time, allow users to choose/switch to distance
+                    range: '300,600,900',         // 5, 10, and 15-minute calculations
+                    showOriginMarker: true
+                },
+                controls: {
+                    position: 'topright',
+                    expandDirection: 'left',      // Dynamic sliding UI layout clear of standard Zoom maps controls
+                    buttons: {
+                        draw: 'Click to choose and calculate reachability routing',
+                        clear: 'Clear route paths'
+                    }
+                }
+            }).addTo(ctx.map);
+        }
     };
 })(window);

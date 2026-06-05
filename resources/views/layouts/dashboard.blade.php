@@ -120,16 +120,14 @@
     </style>
 </head>
 <body class="has-portal-sidebar">
-    @php
-        $portal = Auth::user()->user_type === 'admin' ? 'admin' : (Auth::user()->user_type === 'client' ? 'client' : 'contractor');
-    @endphp
-    <x-portal-sidebar :portal="$portal" />
+    <x-portal-sidebar :portal="\App\Support\Portal::forUser()" />
 
     <div class="main-content portal-main">
                     <!-- Top Navigation Bar -->
                     <div class="top-navbar p-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <x-portal-mobile-toggle />
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         {{ $breadcrumb }}

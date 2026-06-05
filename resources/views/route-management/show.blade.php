@@ -131,76 +131,197 @@
             </div>
         </div>
 
-        <!-- Clients List -->
-        <div class="info-card">
-            <h4 class="mb-4">
-                <i class="bi bi-people me-2"></i>Clients on This Route
-            </h4>
-            
-            @forelse($clients as $client)
-                <div class="client-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <h5 class="mb-1">{{ $client->name }}</h5>
-                            <div class="text-muted small">
-                                <i class="bi bi-telephone me-1"></i>{{ $client->phone }}
-                            </div>
-                            @if($client->email)
-                                <div class="text-muted small">
-                                    <i class="bi bi-envelope me-1"></i>{{ $client->email }}
+        <!-- Clients & Map Section -->
+        <div class="row mb-4">
+            <!-- Left: Clients List -->
+            <div class="col-lg-6 col-md-12 mb-4 mb-lg-0">
+                <div class="info-card" style="max-height: 600px; overflow-y: auto;">
+                    <h4 class="mb-4">
+                        <i class="bi bi-people me-2"></i>Clients on This Route
+                    </h4>
+                    
+                    @forelse($clients as $index => $client)
+                        <div class="client-card" data-client-id="{{ $client->id }}" data-lat="{{ $client->latitude }}" data-lng="{{ $client->longitude }}" data-name="{{ $client->name }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    <h5 class="mb-1">
+                                        <span class="badge me-2" style="background-color: {{ $contractorRoute->color }}; color: white;">{{ $index + 1 }}</span>{{ $client->name }}
+                                    </h5>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-telephone me-1"></i>{{ $client->phone }}
+                                    </div>
+                                    @if($client->email)
+                                        <div class="text-muted small">
+                                            <i class="bi bi-envelope me-1"></i>{{ $client->email }}
+                                        </div>
+                                    @endif
                                 </div>
-                            @endif
-                        </div>
-                        <div class="col-md-4">
-                            <div class="small">
-                                <i class="bi bi-geo-alt text-primary me-1"></i>
-                                <strong>{{ $client->address }}</strong>
-                            </div>
-                            <div class="small text-muted">
-                                {{ $client->city }}, {{ $client->state }} {{ $client->zip_code }}
-                            </div>
-                            @if($client->latitude && $client->longitude)
-                                <div class="small text-muted mt-1">
-                                    <i class="bi bi-pin-map-fill me-1"></i>
-                                    GPS: {{ number_format($client->latitude, 6) }}, {{ number_format($client->longitude, 6) }}
+                                <div class="col-md-5">
+                                    <div class="small">
+                                        <i class="bi bi-geo-alt text-primary me-1"></i>
+                                        <strong>{{ $client->address }}</strong>
+                                    </div>
+                                    <div class="small text-muted">
+                                        {{ $client->city }}, {{ $client->state }} {{ $client->zip_code }}
+                                    </div>
+                                    @if($client->latitude && $client->longitude)
+                                        <div class="small text-muted mt-1">
+                                            <i class="bi bi-pin-map-fill me-1"></i>
+                                            GPS: {{ number_format($client->latitude, 6) }}, {{ number_format($client->longitude, 6) }}
+                                        </div>
+                                    @endif
                                 </div>
-                            @endif
+                                <div class="col-md-2 text-end">
+                                    <span class="badge bg-{{ $client->category == 'residential' ? 'success' : 'warning' }} d-block mb-1">
+                                        {{ ucfirst($client->category) }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <span class="badge bg-{{ $client->category == 'residential' ? 'success' : 'warning' }}">
-                                {{ ucfirst($client->category) }}
-                            </span>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            @if($client->email)
-                                <a href="mailto:{{ $client->email }}" class="btn btn-sm btn-outline-primary me-1" title="Email">
-                                    <i class="bi bi-envelope"></i>
-                                </a>
-                            @endif
-                            <a href="tel:{{ $client->phone }}" class="btn btn-sm btn-outline-success me-1" title="Call">
-                                <i class="bi bi-telephone"></i>
+                    @empty
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-3">No clients assigned to this route yet</p>
+                            <a href="{{ route('route-management.edit', $contractorRoute) }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Clients
                             </a>
-                            @if($client->latitude && $client->longitude)
-                                <a href="https://www.openstreetmap.org/?mlat={{ $client->latitude }}&mlon={{ $client->longitude }}#map=16/{{ $client->latitude }}/{{ $client->longitude }}" 
-                                   target="_blank" class="btn btn-sm btn-outline-info" title="View on Map">
-                                    <i class="bi bi-map"></i>
-                                </a>
-                            @endif
                         </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Right: Map -->
+            <div class="col-lg-6 col-md-12">
+                <div class="info-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-map me-2"></i>Route Path on Map
+                        </h4>
+                        <span class="badge" id="route-distance-badge" style="background-color: {{ $contractorRoute->color }}; color: white; padding: 0.5rem 1rem;">Distance: Calculating...</span>
+                    </div>
+                    <div id="map" style="height: 520px; border-radius: 8px; border: 1px solid #e2e8f0; z-index: 1;"></div>
+                    <div class="mt-3 text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>Path calculated sequentially along official roads. Click client cards to locate on map.
                     </div>
                 </div>
-            @empty
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                    <p class="mt-3">No clients assigned to this route yet</p>
-                    <a href="{{ route('route-management.edit', $contractorRoute) }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Add Clients
-                    </a>
-                </div>
-            @endforelse
+            </div>
         </div>
     </div>
 
+    @include('components.leaflet-assets')
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let mapCtx;
+        const clients = @json($clients);
+        const routeColor = "{{ $contractorRoute->color ?? '#055c5c' }}";
+        const token = "{{ config('services.heigit.api_key') }}";
+        const markerEntries = {};
+
+        GreenRouteMap.whenReady(async function () {
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+
+            const routeCoordinates = [];
+            
+            clients.forEach((client, index) => {
+                if (client.latitude && client.longitude) {
+                    routeCoordinates.push({
+                        id: client.id,
+                        lat: parseFloat(client.latitude),
+                        lng: parseFloat(client.longitude),
+                        name: client.name,
+                        address: client.address,
+                        index: index + 1
+                    });
+                }
+            });
+
+            if (routeCoordinates.length === 0) {
+                GreenRouteMap.showMapError('map', 'No client coordinates available for mapping.');
+                document.getElementById('route-distance-badge').textContent = 'Distance: 0 km';
+                return;
+            }
+
+            // Create map centered on first client
+            mapCtx = GreenRouteMap.createMap('map', { 
+                lat: routeCoordinates[0].lat, 
+                lng: routeCoordinates[0].lng, 
+                zoom: 13 
+            });
+
+            if (!mapCtx) return;
+
+            // Plot markers
+            routeCoordinates.forEach(point => {
+                const markerEntry = GreenRouteMap.addNumberedMarker(mapCtx, point.lat, point.lng, point.index, {
+                    title: point.name,
+                    popup: `<strong>Stop ${point.index}: ${point.name}</strong><br>${point.address || ''}`,
+                });
+                markerEntries[point.id] = markerEntry;
+            });
+
+            GreenRouteMap.fitBounds(mapCtx, routeCoordinates);
+
+            // Draw road route path sequentially
+            if (routeCoordinates.length >= 2) {
+                const summary = await GreenRouteMap.drawRoadRoute(mapCtx, routeCoordinates, token);
+                if (summary) {
+                    document.getElementById('route-distance-badge').textContent = `Distance: ${summary.distance.toFixed(1)} km`;
+                } else {
+                    GreenRouteMap.drawPolyline(mapCtx, routeCoordinates, { color: routeColor });
+                    const distance = calculateDirectDistance(routeCoordinates);
+                    document.getElementById('route-distance-badge').textContent = `Distance: ${distance} km (direct)`;
+                }
+            } else {
+                document.getElementById('route-distance-badge').textContent = 'Distance: 0 km';
+            }
+
+            // Client Cards Interactions
+            document.querySelectorAll('.client-card').forEach(card => {
+                const clientId = card.getAttribute('data-client-id');
+                const lat = parseFloat(card.getAttribute('data-lat'));
+                const lng = parseFloat(card.getAttribute('data-lng'));
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    card.style.cursor = 'pointer';
+                    
+                    // Click interaction to focus map on Stop
+                    card.addEventListener('click', function () {
+                        if (mapCtx) {
+                            GreenRouteMap.setView(mapCtx, lat, lng, 15);
+                            const markerEntry = markerEntries[clientId];
+                            if (markerEntry && markerEntry.leaflet) {
+                                markerEntry.leaflet.openPopup();
+                            }
+                        }
+                    });
+
+                    // Hover hover states
+                    card.addEventListener('mouseenter', function () {
+                        card.style.backgroundColor = '#f1f5f9';
+                    });
+
+                    card.addEventListener('mouseleave', function () {
+                        card.style.backgroundColor = '';
+                    });
+                }
+            });
+        });
+
+        function calculateDirectDistance(coordinates) {
+            let totalDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                totalDistance += GreenRouteMap.haversineKm(
+                    coordinates[i - 1].lat,
+                    coordinates[i - 1].lng,
+                    coordinates[i].lat,
+                    coordinates[i].lng
+                );
+            }
+            return totalDistance.toFixed(1);
+        }
+    </script>
 </body>
 </html>

@@ -125,14 +125,19 @@
     </style>
 </head>
 <body class="has-portal-sidebar">
-    <x-portal-sidebar portal="client" />
+    @php
+        $layoutPortal = \App\Support\Portal::forUser();
+    @endphp
+    <x-portal-sidebar :portal="$layoutPortal" />
 
     <div class="portal-main">
         <div class="top-navbar px-lg-5 p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <a href="{{ $portalHomeUrl ?? route('client.dashboard') }}" class="text-decoration-none">
-                        <x-afia-orbit-logo class="h-10" />
+                    <x-portal-mobile-toggle />
+
+                    <a href="{{ $portalHomeUrl }}" class="text-decoration-none d-flex align-items-center">
+                        <x-greenroute-logo size="lg" />
                     </a>
 
                     <nav aria-label="breadcrumb">
@@ -161,7 +166,7 @@
                             </div>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ \App\Support\Portal::profileUrl() }}"><i class="bi bi-person me-2"></i>Profile</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>

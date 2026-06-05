@@ -200,6 +200,7 @@
                 <div class="header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
+                            <x-portal-mobile-toggle />
                             <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2" style="border-color: #e0e0e0; background: #f8f9fa;">
                                 <i class="bi bi-house-door-fill text-teal" style="color: var(--primary-teal);"></i> <span style="color: #333;">Home</span>
                             </a>
@@ -213,9 +214,9 @@
                         </nav>
                     </div>
                         <div class="d-flex align-items-center gap-3">
-                            <span class="user-badge">
-                                <i class="bi bi-bell me-1"></i>Notifications: 2
-                            </span>
+                            <button type="button" onclick="window.location.href='/dashboard/contractor/pending-payment-approvals'" class="user-badge border-0 bg-transparent text-start" style="cursor:pointer;">
+                                <i class="bi bi-bell me-1"></i><span id="paymentNotificationCount">0</span> pending payment approvals
+                            </button>
                             <div class="dropdown">
                                 <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; cursor: pointer;" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-fill text-white"></i>
@@ -267,46 +268,63 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Quick Actions</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3 mb-3">
-                                            <a href="/dashboard/contractor/clients/create" class="quick-action d-block">
-                                                <i class="bi bi-person-plus"></i>
-                                                <h6>Add New Client</h6>
-                                            </a>
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                            <a href="/billing/create" class="quick-action d-block">
-                                                <i class="bi bi-receipt"></i>
-                                                <h6>Create Invoice</h6>
-                                            </a>
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                            <a href="/schedules/create" class="quick-action d-block">
-                                                <i class="bi bi-calendar-plus"></i>
-                                                <h6>Schedule Collection</h6>
-                                            </a>
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                            <a href="/reports" class="quick-action d-block">
-                                                <i class="bi bi-graph-up"></i>
-                                                <h6>View Reports</h6>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                     <!-- Quick Actions -->
+                     <div class="row mb-4">
+                         <div class="col-12">
+                             <div class="card">
+                                 <div class="card-header">
+                                     <h5 class="mb-0">Quick Actions</h5>
+                                 </div>
+                                 <div class="card-body">
+                                     <div class="row">
+                                         <div class="col-md-3 mb-3">
+                                             <a href="/dashboard/contractor/clients/create" class="quick-action d-block">
+                                                 <i class="bi bi-person-plus"></i>
+                                                 <h6>Add New Client</h6>
+                                             </a>
+                                         </div>
+                                         <div class="col-md-3 mb-3">
+                                             <a href="/billing/create" class="quick-action d-block">
+                                                 <i class="bi bi-receipt"></i>
+                                                 <h6>Create Invoice</h6>
+                                             </a>
+                                         </div>
+                                         <div class="col-md-3 mb-3">
+                                             <a href="/schedules/create" class="quick-action d-block">
+                                                 <i class="bi bi-calendar-plus"></i>
+                                                 <h6>Schedule Collection</h6>
+                                             </a>
+                                         </div>
+                                         <div class="col-md-3 mb-3">
+                                             <a href="/reports" class="quick-action d-block">
+                                                 <i class="bi bi-graph-up"></i>
+                                                 <h6>View Reports</h6>
+                                             </a>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
 
-                    <!-- Recent Invoices & Upcoming Collections -->
+                     <!-- Recent Payment Submissions -->
+                     <div class="row mb-4">
+                         <div class="col-12">
+                             <div class="card">
+                                 <div class="card-header d-flex justify-content-between align-items-center">
+                                     <h5 class="mb-0">Recent Payment Submissions</h5>
+                                     <a href="/dashboard/contractor/pending-payment-approvals" class="btn btn-sm btn-outline-teal">View All</a>
+                                 </div>
+                                 <div class="card-body">
+                                     <div id="recentPaymentSubmissions">
+                                         <p class="text-muted">Loading recent payment submissions...</p>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Recent Invoices & Upcoming Collections -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card h-100">
@@ -495,6 +513,10 @@
                     document.getElementById('totalInvoices').textContent = data.total_invoices || 0;
                     document.getElementById('pendingPayments').textContent = 'TZS ' + (data.pending_payments || 0);
                     document.getElementById('activeRoutes').textContent = data.active_routes || 0;
+                    const badge = document.getElementById('paymentNotificationCount');
+                    if (badge) {
+                        badge.textContent = data.new_payment_notifications || 0;
+                    }
                 })
                 .catch(() => {
                     console.log('Dashboard stats not available');
@@ -529,29 +551,59 @@
                     document.getElementById('recentInvoices').innerHTML = '<p class="text-muted">Unable to load invoices</p>';
                 });
 
-            // Load upcoming schedules
-            fetch('/contractor/upcoming-schedules')
-                .then(response => response.json())
-                .then(schedules => {
-                    const container = document.getElementById('upcomingSchedules');
-                    if (schedules.length === 0) {
-                        container.innerHTML = '<p class="text-muted">No upcoming schedules</p>';
-                        return;
-                    }
-                    container.innerHTML = '';
-                    schedules.forEach(schedule => {
-                        container.innerHTML += `
-                            <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
-                                <strong>${schedule.pickup_location}</strong><br>
-                                <small class="text-muted">${schedule.client_name}</small><br>
-                                <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
-                            </div>
-                        `;
-                    });
-                })
-                .catch(() => {
-                    document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
-                });
+             // Load upcoming schedules
+             fetch('/contractor/upcoming-schedules')
+                 .then(response => response.json())
+                 .then(schedules => {
+                     const container = document.getElementById('upcomingSchedules');
+                     if (schedules.length === 0) {
+                         container.innerHTML = '<p class="text-muted">No upcoming schedules</p>';
+                         return;
+                     }
+                     container.innerHTML = '';
+                     schedules.forEach(schedule => {
+                         container.innerHTML += `
+                             <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
+                                 <strong>${schedule.pickup_location}</strong><br>
+                                 <small class="text-muted">${schedule.client_name}</small><br>
+                                 <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
+                             </div>
+                         `;
+                     });
+                 })
+                 .catch(() => {
+                     document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
+                 });
+
+             // Load recent payment submissions
+             fetch('/contractor/recent-pending-payments')
+                 .then(response => response.json())
+                 .then(payments => {
+                     const container = document.getElementById('recentPaymentSubmissions');
+                     if (payments.length === 0) {
+                         container.innerHTML = '<p class="text-muted">No recent payment submissions</p>';
+                         return;
+                     }
+                     container.innerHTML = '';
+                     payments.forEach(payment => {
+                         container.innerHTML += `
+                             <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-start border-3 border-warning">
+                                 <div>
+                                     <strong>Payment #${payment.id}</strong><br>
+                                     <small class="text-muted">${payment.client_name}</small><br>
+                                     <small class="text-muted">Invoice #${payment.invoice_number}</small>
+                                 </div>
+                                 <div class="text-end">
+                                     <span class="fw-bold text-warning">TZS ${payment.amount_submitted}</span><br>
+                                     <small class="badge bg-warning text-dark">${payment.status === 'pending_approval' ? 'Pending Approval' : payment.status}</small>
+                                 </div>
+                             </div>
+                         `;
+                     });
+                 })
+                 .catch(() => {
+                     document.getElementById('recentPaymentSubmissions').innerHTML = '<p class="text-muted">Unable to load payment submissions</p>';
+                 });
         }
 
         // Load dashboard data on page load

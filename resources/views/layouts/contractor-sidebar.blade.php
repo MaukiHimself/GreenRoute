@@ -84,6 +84,7 @@
             <div class="header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-3">
+                        <x-portal-mobile-toggle />
                         @if(isset($backUrl))
                             <a href="{{ $backUrl }}" class="btn-back">
                                 <i class="bi bi-arrow-left"></i>Back

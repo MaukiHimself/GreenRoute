@@ -397,7 +397,7 @@
                     </div>
                 </div>
                 
-                <!-- Category and Status -->
+                <!-- Category, Route and Status -->
                 <div class="form-group">
                     <div class="form-row">
                         <div>
@@ -454,6 +454,20 @@
                                 <option value="Garage" {{ old('category') == 'Garage' ? 'selected' : '' }}>Garage - 10,000 TZS</option>
                             </select>
                             @error('category')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div>
+                            <label for="route" class="form-label">Assign to Route</label>
+                            <select class="form-select @error('route') is-invalid @enderror" id="route" name="route">
+                                <option value="">— No Route Assigned —</option>
+                                @foreach($routes as $r)
+                                    <option value="{{ $r->route_name }}" {{ old('route') == $r->route_name ? 'selected' : '' }}>
+                                        {{ $r->route_name }}
+                                        @if($r->region) ({{ implode(', ', array_filter([$r->region, $r->district, $r->ward])) }}) @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text text-muted">Assign to a collection route for easy schedule creation.</div>
+                            @error('route')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label for="status" class="form-label required">Status</label>

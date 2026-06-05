@@ -19,7 +19,8 @@ class Truck extends Model
         'previous_latitude',
         'previous_longitude',
         'daily_distance',
-        'last_updated'
+        'last_updated',
+        'tracking_token'
     ];
 
     protected $casts = [

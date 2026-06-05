@@ -7,7 +7,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('profile.edit') }}">
+                <a class="nav-link" href="{{ route('client.profile') }}">
                     <i class="bi bi-person me-2"></i>Profile
                 </a>
             </li>

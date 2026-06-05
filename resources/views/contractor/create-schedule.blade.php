@@ -9,7 +9,7 @@
         --primary-red: #640404;
         --white: #ffffff;
     }
-    
+
     .page-header {
         background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 100%);
         color: var(--white);
@@ -17,13 +17,13 @@
         border-radius: 12px 12px 0 0;
         margin-bottom: 0;
     }
-    
+
     .form-container {
         background: var(--white);
         border-radius: 0 0 12px 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .info-box {
         background: linear-gradient(135deg, #f0f9f9 0%, #e6f4f4 100%);
         border-left: 4px solid var(--primary-teal);
@@ -31,38 +31,38 @@
         border-radius: 8px;
         margin-bottom: 1.5rem;
     }
-    
+
     .info-box h3 {
         color: var(--primary-teal);
         font-weight: 600;
         margin-bottom: 0.75rem;
         font-size: 1.1rem;
     }
-    
+
     .form-label {
         color: #2d3748;
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
-    
+
     .required-star {
         color: var(--primary-red);
         font-weight: bold;
     }
-    
+
     .form-control, .form-select {
         border: 2px solid #e2e8f0;
         border-radius: 8px;
         padding: 0.75rem;
         transition: all 0.3s ease;
     }
-    
+
     .form-control:focus, .form-select:focus {
         border-color: var(--primary-teal);
         box-shadow: 0 0 0 3px rgba(5, 92, 92, 0.1);
         outline: none;
     }
-    
+
     .btn-primary-custom {
         background: var(--primary-teal);
         color: var(--white);
@@ -73,13 +73,13 @@
         transition: all 0.3s ease;
         cursor: pointer;
     }
-    
+
     .btn-primary-custom:hover {
         background: #044a4a;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);
     }
-    
+
     .btn-secondary-custom {
         background: var(--white);
         color: var(--primary-red);
@@ -91,14 +91,14 @@
         text-decoration: none;
         display: inline-block;
     }
-    
+
     .btn-secondary-custom:hover {
         background: var(--primary-red);
         color: var(--white);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(100, 4, 4, 0.3);
     }
-    
+
     /* Autocomplete Dropdown Styles */
     .autocomplete-dropdown {
         position: absolute;
@@ -114,11 +114,11 @@
         display: none;
         box-sizing: border-box; /* Ensure padding/border is included in width */
     }
-    
+
     .autocomplete-dropdown.show {
         display: block;
     }
-    
+
     .autocomplete-item {
         padding: 12px 16px;
         cursor: pointer;
@@ -127,27 +127,27 @@
         white-space: normal; /* Allow text wrapping */
         word-break: break-word; /* Break long words if needed */
     }
-    
+
     .autocomplete-item:hover {
         background: #f0f9f9;
         color: var(--primary-teal);
         font-weight: 600;
     }
-    
+
     .autocomplete-item:last-child {
         border-bottom: none;
     }
-    
+
     .autocomplete-item.active {
         background: var(--primary-teal);
         color: white;
         font-weight: 600;
     }
-    
+
     #locationAutocomplete {
         position: relative;
     }
-    
+
     #locationAutocomplete:focus {
         border-color: var(--primary-teal);
         box-shadow: 0 0 0 3px rgba(5, 92, 92, 0.1);
@@ -177,9 +177,9 @@
                     <!-- Site Location Selection -->
                     <div class="mb-4 position-relative">
                         <label class="form-label fw-bold">Site Location <span class="required-star">*</span></label>
-                        <input type="text" 
-                               id="locationAutocomplete" 
-                               class="form-control" 
+                        <input type="text"
+                               id="locationAutocomplete"
+                               class="form-control"
                                placeholder="Click here or start typing to search locations..."
                                autocomplete="off"
                                required>
@@ -191,18 +191,21 @@
                     <!-- Route Name Selection Removed -->
 
                     <!-- Clients Selection -->
-                    <div class="mb-4" id="clientsSection" style="display: none;">
+                    <div class="mb-4" id="clientsSection">
                         <label class="form-label">
                             Select Clients <span class="required-star">*</span>
                         </label>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Clients in selected location</span>
-                            <div>
+                            <span class="text-muted small" id="clientsLabel">All your clients — select a location above to filter</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="showAllBtn" onclick="showAllClients()" style="display:none!important;">
+                                    <i class="bi bi-people me-1"></i>Show All
+                                </button>
                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">Select All</button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">Deselect All</button>
                             </div>
                         </div>
-                        <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto; background: #f8f9fa;">
+                        <div class="border rounded p-3" style="max-height: 320px; overflow-y: auto; background: #f8f9fa;">
                             <div id="clientsList"></div>
                         </div>
                         <div class="form-text text-muted mt-1"><span id="selected_count">0</span> clients selected</div>
@@ -254,7 +257,7 @@
                             <label for="estimated_duration" class="form-label">
                                 Estimated Duration (hours)
                             </label>
-                            <input type="number" name="estimated_duration" id="estimated_duration" 
+                            <input type="number" name="estimated_duration" id="estimated_duration"
                                    step="0.5" min="0" class="form-control">
                         </div>
                     </div>
@@ -265,7 +268,7 @@
                             <label for="total_volume" class="form-label">
                                 Total Volume (cubic yards)
                             </label>
-                            <input type="number" name="total_volume" id="total_volume" 
+                            <input type="number" name="total_volume" id="total_volume"
                                    step="0.1" min="0" class="form-control">
                         </div>
 
@@ -305,156 +308,97 @@
 
 @section('scripts')
 <script>
-// Store all clients data and routes data
 const allClientsData = @json($clients);
-const allRoutesData = @json($routes);
+const allRoutesData  = @json($routes);
 
-console.log('Clients loaded:', allClientsData.length);
-console.log('Routes loaded:', allRoutesData.length);
+const autocompleteInput = document.getElementById('locationAutocomplete');
+const dropdown          = document.getElementById('locationDropdown');
+let currentFocus  = -1;
+let selectedLocation = null;
+let searchTimeout = null;
 
-// Build unique location list from clients
-const locationList = [];
-const locationMap = new Map();
+/* ── helpers ─────────────────────────────────────────── */
+const eq  = (a, b) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+const has = v => v && String(v).trim() !== '';
 
-allClientsData.forEach(client => {
-    // Build location from available fields
-    const parts = [];
-    if (client.region) parts.push(client.region);
-    if (client.district) parts.push(client.district);
-    if (client.ward) parts.push(client.ward);
-    if (client.street) parts.push(client.street);
-    
-    if (parts.length > 0) {
-        const locationString = parts.join(' → ');
-        const locationKey = parts.join('|');
-        
-        if (!locationMap.has(locationKey)) {
-            const locData = {
-                display: locationString,
-                region: client.region || '',
-                district: client.district || '',
-                ward: client.ward || '',
-                street: client.street || '',
-                key: locationKey
-            };
-            locationMap.set(locationKey, locData);
-            locationList.push(locData);
-        }
-    }
+/* ── initial render: show all clients on page load ────── */
+document.addEventListener('DOMContentLoaded', function () {
+    renderClients(allClientsData, 'All your clients — select a location above to filter');
 });
 
-console.log('Unique locations found:', locationList.length);
-console.log('Sample locations:', locationList.slice(0, 5).map(l => l.display));
-
-// Sort locations alphabetically
-locationList.sort((a, b) => a.display.localeCompare(b.display));
-
-// Autocomplete functionality
-const autocompleteInput = document.getElementById('locationAutocomplete');
-const dropdown = document.getElementById('locationDropdown');
-let currentFocus = -1;
-let selectedLocation = null;
-
-function showLocationDropdown(searchTerm = '') {
-    dropdown.innerHTML = '';
-    currentFocus = -1;
-    
-    if (locationList.length === 0) {
-        dropdown.innerHTML = '<div class="autocomplete-item" style="color: #999;">No client locations available. Please ensure clients have location data.</div>';
-        dropdown.classList.add('show');
-        return;
-    }
-    
-    const search = searchTerm.toLowerCase().trim();
-    let filtered = locationList;
-    
-    if (search.length > 0) {
-        filtered = locationList.filter(loc => 
-            loc.display.toLowerCase().includes(search) ||
-            loc.region.toLowerCase().includes(search) ||
-            loc.district.toLowerCase().includes(search) ||
-            loc.ward.toLowerCase().includes(search) ||
-            loc.street.toLowerCase().includes(search)
-        );
-    }
-    
-    if (filtered.length === 0) {
-        dropdown.innerHTML = `<div class="autocomplete-item" style="color: #999;">No locations matching "${searchTerm}"</div>`;
-        dropdown.classList.add('show');
-        return;
-    }
-    
-    const maxResults = 50;
-    const resultsToShow = filtered.slice(0, maxResults);
-    
-    resultsToShow.forEach((loc, index) => {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.textContent = loc.display;
-        item.dataset.index = index;
-        
-        item.addEventListener('click', function() {
-            selectLocation(loc);
-        });
-        
-        dropdown.appendChild(item);
-    });
-    
-    if (filtered.length > maxResults) {
-        const moreItem = document.createElement('div');
-        moreItem.className = 'autocomplete-item';
-        moreItem.style.color = '#999';
-        moreItem.style.fontStyle = 'italic';
-        moreItem.textContent = `+ ${filtered.length - maxResults} more locations (refine your search)`;
-        dropdown.appendChild(moreItem);
-    }
-    
+/* ── autocomplete API calls ───────────────────────────── */
+function showLoadingDropdown() {
+    dropdown.innerHTML = '<div class="autocomplete-item" style="color:#999;"><i class="bi bi-hourglass-split me-2"></i>Searching…</div>';
     dropdown.classList.add('show');
 }
 
-autocompleteInput.addEventListener('input', function() {
-    showLocationDropdown(this.value);
-});
+function buildDropdown(results, searchTerm) {
+    dropdown.innerHTML = '';
+    currentFocus = -1;
 
-// Show all locations when clicking the input field
-autocompleteInput.addEventListener('focus', function() {
-    if (this.value.trim() === '') {
-        showLocationDropdown('');
+    if (!results || results.length === 0) {
+        dropdown.innerHTML = `<div class="autocomplete-item" style="color:#999;">No locations matching "${searchTerm}"</div>`;
+        dropdown.classList.add('show');
+        return;
     }
-});
 
-// Keyboard navigation
-autocompleteInput.addEventListener('keydown', function(e) {
-    const items = dropdown.querySelectorAll('.autocomplete-item');
-    
-    if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        currentFocus++;
-        if (currentFocus >= items.length) currentFocus = 0;
-        setActive(items);
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        currentFocus--;
-        if (currentFocus < 0) currentFocus = items.length - 1;
-        setActive(items);
-    } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (currentFocus > -1 && items[currentFocus]) {
-            items[currentFocus].click();
+    results.forEach(loc => {
+        let display, region, district, ward, street;
+        if (typeof loc === 'object' && loc !== null && 'value' in loc) {
+            display = loc.value; region = loc.region||''; district = loc.district||''; ward = loc.ward||''; street = loc.street||'';
+        } else {
+            display = String(loc); region = display; district = ''; ward = ''; street = '';
         }
-    } else if (e.key === 'Escape') {
-        dropdown.classList.remove('show');
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.textContent = display;
+        item.addEventListener('click', () => selectLocation({ display, region, district, ward, street }));
+        dropdown.appendChild(item);
+    });
+    dropdown.classList.add('show');
+}
+
+autocompleteInput.addEventListener('input', function () {
+    const query = this.value.trim();
+    clearTimeout(searchTimeout);
+    dropdown.classList.remove('show');
+    if (query.length < 2) return;
+    showLoadingDropdown();
+    searchTimeout = setTimeout(() => {
+        fetch(`/location/autocomplete?q=${encodeURIComponent(query)}&type=all&limit=30`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) buildDropdown(data.data, query);
+                else { dropdown.innerHTML = '<div class="autocomplete-item" style="color:#999;">Could not load locations.</div>'; dropdown.classList.add('show'); }
+            })
+            .catch(() => { dropdown.innerHTML = '<div class="autocomplete-item" style="color:#999;">Error loading locations.</div>'; dropdown.classList.add('show'); });
+    }, 300);
+});
+
+autocompleteInput.addEventListener('focus', function () {
+    if (this.value.trim() === '') {
+        fetch('/location/regions')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.data.length)
+                    buildDropdown(data.data.map(r => ({ value: r, region: r, district: '', ward: '', street: '' })), '');
+            })
+            .catch(() => {});
     }
+});
+
+autocompleteInput.addEventListener('keydown', function (e) {
+    const items = dropdown.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown')  { e.preventDefault(); currentFocus = (currentFocus+1) % items.length; setActive(items); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); currentFocus = (currentFocus-1+items.length) % items.length; setActive(items); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (currentFocus > -1 && items[currentFocus]) items[currentFocus].click(); }
+    else if (e.key === 'Escape') dropdown.classList.remove('show');
 });
 
 function setActive(items) {
-    items.forEach((item, index) => {
-        if (index === currentFocus) {
-            item.classList.add('active');
-            item.scrollIntoView({ block: 'nearest' });
-        } else {
-            item.classList.remove('active');
-        }
+    items.forEach((item, i) => {
+        item.classList.toggle('active', i === currentFocus);
+        if (i === currentFocus) item.scrollIntoView({ block: 'nearest' });
     });
 }
 
@@ -462,100 +406,106 @@ function selectLocation(location) {
     selectedLocation = location;
     autocompleteInput.value = location.display;
     dropdown.classList.remove('show');
-    
-    // Update hidden input
     const parts = [location.region, location.district, location.ward, location.street].filter(p => p);
     document.getElementById('site_location_input').value = parts.join('|');
-    
-    // Load routes and clients for this location
     loadLocationData(location);
 }
 
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-    if (!autocompleteInput.contains(e.target) && !dropdown.contains(e.target)) {
+document.addEventListener('click', function (e) {
+    if (!autocompleteInput.contains(e.target) && !dropdown.contains(e.target))
         dropdown.classList.remove('show');
-    }
 });
 
+/* ── client filtering ─────────────────────────────────── */
 function loadLocationData(location) {
     if (!location || !location.region) {
-        document.getElementById('clientsSection').style.display = 'none';
+        renderClients(allClientsData, 'All your clients');
+        document.getElementById('showAllBtn').style.display = 'none';
         return;
     }
-    
-    // Filter Clients
-    const matchingClients = allClientsData.filter(client => {
-        if (client.region !== location.region) return false;
-        if (location.district && client.district !== location.district) return false;
-        if (location.ward && client.ward !== location.ward) return false;
-        if (location.street && client.street !== location.street) return false;
+
+    const matched = allClientsData.filter(client => {
+        if (!eq(client.region, location.region)) return false;
+        if (has(location.district) && has(client.district) && !eq(client.district, location.district)) return false;
+        if (has(location.ward)     && has(client.ward)     && !eq(client.ward,     location.ward))     return false;
+        if (has(location.street)   && has(client.street)   && !eq(client.street,   location.street))   return false;
         return true;
     });
-    
-    renderClients(matchingClients);
-    document.getElementById('clientsSection').style.display = 'block';
+
+    const label = `Clients in <strong>${location.display}</strong>`;
+    renderClients(matched, label, true);
+
+    // Show "Show All" button only when filtered
+    const btn = document.getElementById('showAllBtn');
+    btn.style.cssText = matched.length < allClientsData.length ? '' : 'display:none!important;';
 }
 
-function renderClients(clients) {
+function showAllClients() {
+    selectedLocation = null;
+    autocompleteInput.value = '';
+    document.getElementById('site_location_input').value = '';
+    renderClients(allClientsData, 'All your clients — select a location above to filter');
+    document.getElementById('showAllBtn').style.cssText = 'display:none!important;';
+}
+
+/* ── render ───────────────────────────────────────────── */
+function renderClients(clients, labelHtml, isFiltered = false) {
+    document.getElementById('clientsLabel').innerHTML = labelHtml || '';
     const list = document.getElementById('clientsList');
     list.innerHTML = '';
-    
-    console.log(`Rendering ${clients.length} clients for selected location`);
-    
-    if (clients.length === 0) {
-        list.innerHTML = '<p class="text-muted text-center py-3"><i class="bi bi-info-circle me-2"></i>No clients found in this location.</p>';
-    } else {
-        // Add info header
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'alert alert-info py-2 mb-3';
-        infoDiv.innerHTML = `<i class="bi bi-people-fill me-2"></i><strong>${clients.length}</strong> client${clients.length !== 1 ? 's' : ''} found in this location`;
-        list.appendChild(infoDiv);
-        
-        // Render each client
-        clients.forEach(client => {
-            const div = document.createElement('div');
-            div.className = 'form-check mb-2';
-            div.innerHTML = `
-                <input class="form-check-input client-checkbox" type="checkbox" 
-                       name="client_ids[]" value="${client.id}" 
-                       id="client_${client.id}"
-                       onchange="updateCount()">
-                <label class="form-check-label" for="client_${client.id}">
-                    <strong>${client.name}</strong> <span class="text-muted">(${client.registration_number})</span><br>
-                    <small class="text-muted">${client.address || ''}, ${client.city || ''}</small>
-                    ${client.route ? `<span class="badge bg-secondary ms-2">${client.route}</span>` : ''}
-                </label>
-            `;
-            list.appendChild(div);
-        });
+
+    if (!clients || clients.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-person-x fs-3 d-block mb-2"></i>
+                ${isFiltered
+                    ? 'No clients in this location. <a href="javascript:showAllClients()" class="text-primary">Show all clients</a> or <a href="{{ route('contractor.clients.create') }}" class="text-primary">add a new client</a>.'
+                    : 'No clients yet. <a href="{{ route('contractor.clients.create') }}" class="text-primary">Add your first client</a>.'}
+            </div>`;
+        updateCount();
+        return;
     }
+
+    const badge = `<span class="badge bg-info text-dark ms-2">${clients.length} client${clients.length !== 1 ? 's' : ''}</span>`;
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'alert alert-info py-2 mb-2 d-flex align-items-center';
+    infoDiv.innerHTML = `<i class="bi bi-people-fill me-2"></i>${badge} found`;
+    list.appendChild(infoDiv);
+
+    clients.forEach(client => {
+        const locParts = [client.region, client.district, client.ward, client.street].filter(p => p && String(p).trim());
+        const locStr   = locParts.length ? locParts.join(' → ') : (client.city || 'No location set');
+
+        const div = document.createElement('div');
+        div.className = 'form-check mb-2 p-2 border rounded bg-white';
+        div.innerHTML = `
+            <input class="form-check-input client-checkbox mt-1" type="checkbox"
+                   name="client_ids[]" value="${client.id}"
+                   id="client_${client.id}" onchange="updateCount()">
+            <label class="form-check-label ms-2 w-100" for="client_${client.id}" style="cursor:pointer;">
+                <div>
+                    <strong>${client.name}</strong>
+                    <span class="text-muted small ms-1">(${client.registration_number || 'N/A'})</span>
+                    ${client.route ? `<span class="badge bg-secondary ms-1">${client.route}</span>` : '<span class="badge bg-warning text-dark ms-1">No Route</span>'}
+                </div>
+                <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>${locStr}</small>
+                ${client.phone ? `<small class="text-muted"><i class="bi bi-telephone me-1"></i>${client.phone}</small>` : ''}
+            </label>`;
+        list.appendChild(div);
+    });
     updateCount();
 }
 
 function updateCount() {
-    const count = document.querySelectorAll('.client-checkbox:checked').length;
-    document.getElementById('selected_count').textContent = count;
+    document.getElementById('selected_count').textContent = document.querySelectorAll('.client-checkbox:checked').length;
 }
+function selectAll()   { document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = true);  updateCount(); }
+function deselectAll() { document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = false); updateCount(); }
 
-function selectAll() {
-    document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = true);
-    updateCount();
-}
-
-function deselectAll() {
-    document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = false);
-    updateCount();
-}
-
-// Form validation
-document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-    const locationInput = document.getElementById('site_location_input').value;
-    const checkedClients = document.querySelectorAll('.client-checkbox:checked');
-    if (checkedClients.length === 0) {
+document.getElementById('scheduleForm').addEventListener('submit', function (e) {
+    if (document.querySelectorAll('.client-checkbox:checked').length === 0) {
         e.preventDefault();
         alert('Please select at least one client.');
-        return false;
     }
 });
 </script>

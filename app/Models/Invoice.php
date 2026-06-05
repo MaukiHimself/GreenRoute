@@ -26,6 +26,7 @@ class Invoice extends Model
         'description',
         'notes',
         'amount_paid',
+        'remaining_balance',
         'paid_at',
         'payment_method'
     ];
@@ -38,7 +39,8 @@ class Invoice extends Model
         'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'amount_paid' => 'decimal:2'
+        'amount_paid' => 'decimal:2',
+        'remaining_balance' => 'decimal:2'
     ];
 
     // Relationships
@@ -55,6 +57,21 @@ class Invoice extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    public function paymentSubmissions()
+    {
+        return $this->hasMany(PaymentSubmission::class);
+    }
+
+    public function pendingPaymentSubmissions()
+    {
+        return $this->paymentSubmissions()->whereIn('status', ['pending', 'pending_approval']);
+    }
+
+    public function approvedPaymentSubmissions()
+    {
+        return $this->paymentSubmissions()->where('status', 'approved');
     }
 
     // Accessors
@@ -109,14 +126,14 @@ class Invoice extends Model
         $lastInvoice = static::where('invoice_number', 'like', "INV-{$year}{$month}-%")
                            ->orderBy('invoice_number', 'desc')
                            ->first();
-        
+
         if ($lastInvoice) {
             $lastNumber = (int) substr($lastInvoice->invoice_number, -4);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
         }
-        
+
         return "INV-{$year}{$month}-{$newNumber}";
     }
 
@@ -134,6 +151,7 @@ class Invoice extends Model
     {
         $this->tax_amount = 0;
         $this->total_amount = $this->subtotal;
+        $this->remaining_balance = $this->total_amount - ($this->amount_paid ?? 0);
         $this->save();
     }
 }

@@ -282,13 +282,16 @@
         <div class="main-content portal-main">
             <!-- Header -->
             <div class="header">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard.admin') }}">Administrator</a></li>
-                        <li class="breadcrumb-item active">Verification</li>
-                    </ol>
-                </nav>
+                <div class="d-flex align-items-center gap-3">
+                    <x-portal-mobile-toggle />
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard.admin') }}">Administrator</a></li>
+                            <li class="breadcrumb-item active">Verification</li>
+                        </ol>
+                    </nav>
+                </div>
                 <div class="header-right">
                     <div class="dropdown">
                         <div class="user-profile" data-bs-toggle="dropdown">

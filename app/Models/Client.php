@@ -34,11 +34,15 @@ class Client extends Model
         'email_2',
         'email_3',
         'route',
-        'route_sequence'
+        'route_sequence',
+        'self_registered',
+        'verified_at',
     ];
 
     protected $casts = [
-        'status' => 'string'
+        'status' => 'string',
+        'self_registered' => 'boolean',
+        'verified_at' => 'datetime',
     ];
 
     public function contractor(): BelongsTo

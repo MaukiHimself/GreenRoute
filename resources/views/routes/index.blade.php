@@ -375,7 +375,7 @@
             });
         });
         
-        function displayRoute(route) {
+        async function displayRoute(route) {
             if (!mapCtx) return;
 
             GreenRouteMap.clearMarkers(mapCtx);
@@ -421,8 +421,31 @@
                 routeList.appendChild(routeItem);
             });
             
-            GreenRouteMap.drawPolyline(mapCtx, routeCoordinates);
+            const token = "{{ config('services.heigit.api_key') }}";
+            const summary = await GreenRouteMap.drawRoadRoute(mapCtx, routeCoordinates, token);
+            
+            if (summary) {
+                document.getElementById('totalDistance').textContent = summary.distance.toFixed(1) + ' km';
+            } else {
+                const distance = calculateRouteDistance(routeCoordinates);
+                GreenRouteMap.drawPolyline(mapCtx, routeCoordinates);
+                document.getElementById('totalDistance').textContent = distance + ' km';
+            }
+            
             GreenRouteMap.fitBounds(mapCtx, routeCoordinates);
+        }
+
+        function calculateRouteDistance(coordinates) {
+            let totalDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                totalDistance += GreenRouteMap.haversineKm(
+                    coordinates[i - 1].lat,
+                    coordinates[i - 1].lng,
+                    coordinates[i].lat,
+                    coordinates[i].lng
+                );
+            }
+            return totalDistance.toFixed(1);
         }
     </script>
 </body>

@@ -107,9 +107,14 @@
                             <a href="{{ route('client.invoices.show', $invoice->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 View
                             </a>
-                            <a href="{{ route('client.invoices.download', $invoice->id) }}" class="text-green-600 hover:text-green-900">
+                            <a href="{{ route('client.invoices.download', $invoice->id) }}" class="text-green-600 hover:text-green-900 mr-3">
                                 Download
                             </a>
+                            @if($invoice->status !== 'paid')
+                                <a href="{{ route('client.payment-methods', $invoice) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs font-semibold">
+                                    Pay Now
+                                </a>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -139,7 +144,7 @@ async function fetchInvoicesViaApi(clientRegistrationNumber) {
     try {
         const response = await fetch(`/api/clients/${clientRegistrationNumber}/invoices`);
         const data = await response.json();
-        
+
         if (data.success) {
             console.log('Invoices:', data.data.invoices);
             console.log('Total Amount:', data.data.total_amount);

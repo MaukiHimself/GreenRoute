@@ -163,6 +163,9 @@
 
     <div class="admin-layout">
         <div class="main-content portal-main">
+            <div class="d-lg-none mb-3">
+                <x-portal-mobile-toggle />
+            </div>
             <!-- Back Button -->
             <div class="mb-3">
                 <a href="{{ route('admin.verification') }}" class="btn btn-outline-secondary">

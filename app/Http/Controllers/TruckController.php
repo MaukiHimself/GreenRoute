@@ -29,7 +29,8 @@ class TruckController extends Controller
             'driver_name' => $validated['driver_name'],
             'driver_phone' => $validated['driver_phone'],
             'truck_type' => $validated['truck_type'],
-            'status' => 'active'
+            'status' => 'active',
+            'tracking_token' => \Illuminate\Support\Str::random(32)
         ]);
 
         return redirect()->back()->with('success', 'Truck registered successfully');
@@ -72,10 +73,11 @@ class TruckController extends Controller
 
     public function getLocations()
     {
-        $trucks = Truck::where('contractor_id', Auth::id())
-            ->whereNotNull('current_latitude')
-            ->whereNotNull('current_longitude')
-            ->get();
+        $trucks = Truck::where('contractor_id', Auth::id())->get();
+
+        $trucks->each(function ($truck) {
+            $truck->is_online = $truck->last_updated && $truck->last_updated->diffInMinutes(now()) < 10;
+        });
 
         return response()->json($trucks);
     }
@@ -88,5 +90,55 @@ class TruckController extends Controller
         $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2) * sin($dLng/2);
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
         return $earthRadius * $c;
+    }
+
+    public function driverTrack($token)
+    {
+        $truck = Truck::where('tracking_token', $token)->firstOrFail();
+        return view('driver.track', compact('truck'));
+    }
+
+    public function updateLocationByToken(Request $request, $token)
+    {
+        $truck = Truck::where('tracking_token', $token)->firstOrFail();
+
+        $validated = $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric'
+        ]);
+
+        $truck->update([
+            'current_latitude' => $validated['latitude'],
+            'current_longitude' => $validated['longitude'],
+            'last_updated' => now()
+        ]);
+
+        // Calculate distance if previous location exists
+        if ($truck->previous_latitude && $truck->previous_longitude) {
+            $distance = $this->calculateDistance(
+                $truck->previous_latitude, $truck->previous_longitude,
+                $validated['latitude'], $validated['longitude']
+            );
+            
+            $truck->increment('daily_distance', $distance);
+        }
+
+        $truck->update([
+            'previous_latitude' => $validated['latitude'],
+            'previous_longitude' => $validated['longitude']
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function destroy(Truck $truck)
+    {
+        if ($truck->contractor_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $truck->delete();
+
+        return redirect()->back()->with('success', 'Truck removed successfully');
     }
 }

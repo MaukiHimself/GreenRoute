@@ -11,6 +11,8 @@ use App\Http\Controllers\ClientPortalController;
 use App\Http\Controllers\ContractorFeedbackController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\PaymentSubmissionController;
+use App\Http\Controllers\ContractorPaymentApprovalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -90,6 +92,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('payments/{invoice}/checkout', [App\Http\Controllers\PaymentController::class, 'checkout'])->name('client.payments.checkout');
         Route::post('payments/{invoice}/mobile', [App\Http\Controllers\PaymentController::class, 'payMobile'])->name('client.payments.mobile');
         Route::post('payments/{invoice}/bank', [App\Http\Controllers\PaymentController::class, 'payBank'])->name('client.payments.bank');
+
+        // Payment Submission Routes
+        Route::get('invoices/{invoice}/payment-methods', [PaymentSubmissionController::class, 'showPaymentMethods'])->name('client.payment-methods');
+        Route::get('invoices/{invoice}/payment-submission/{paymentMethod}', [PaymentSubmissionController::class, 'showSubmissionForm'])->name('client.payment-submission-form');
+        Route::post('invoices/{invoice}/payment-submission', [PaymentSubmissionController::class, 'store'])->name('client.payment-submission.store');
+        Route::get('invoices/{invoice}/payment-submitted', [PaymentSubmissionController::class, 'showSubmissionConfirmation'])->name('client.payment-submitted');
     });
 });
 
@@ -122,6 +130,16 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
     Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+
+    // Payment Approval Routes for Contractors
+    Route::prefix('dashboard/contractor')->group(function () {
+        Route::get('pending-payment-approvals', [ContractorPaymentApprovalController::class, 'showPendingApprovals'])->name('contractor.pending-payments');
+        Route::get('payment-approvals/stats', [ContractorPaymentApprovalController::class, 'getStats'])->name('contractor.payment-stats');
+    });
+
+    Route::post('payment-submissions/{submission}/approve', [ContractorPaymentApprovalController::class, 'approve'])->name('payment-submissions.approve');
+    Route::post('payment-submissions/{submission}/reject', [ContractorPaymentApprovalController::class, 'reject'])->name('payment-submissions.reject');
+    Route::get('payment-submissions/{submission}/receipt/download', [ContractorPaymentApprovalController::class, 'downloadReceipt'])->name('payment-submissions.receipt.download');
 });
 
 /*Route::middleware('auth')->group(function () {*/
@@ -151,6 +169,15 @@ Route::prefix('client')->group(function () {
     Route::get('/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'showLogin'])->name('client.login');
     Route::post('/login', [App\Http\Controllers\Auth\ClientAuthController::class, 'login'])->name('client.login.submit');
 
+    // Self-registration (public — no auth required)
+    Route::get('/signup',         [App\Http\Controllers\ClientSelfRegistrationController::class, 'showForm'])->name('client.self-register');
+    Route::post('/signup',        [App\Http\Controllers\ClientSelfRegistrationController::class, 'store'])->name('client.self-register.store');
+    Route::get('/signup/pending', [App\Http\Controllers\ClientSelfRegistrationController::class, 'pendingPage'])->name('client.registration.pending');
+
+    // AJAX: contractor routes for a region
+    Route::get('/registration/routes', [App\Http\Controllers\ClientSelfRegistrationController::class, 'getContractorRoutes'])->name('client.registration.routes');
+
+    // Legacy activation (contractor-created clients)
     Route::get('/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'showRegister'])->name('client.register');
     Route::post('/register', [App\Http\Controllers\Auth\ClientAuthController::class, 'register'])->name('client.register.submit');
 
@@ -161,7 +188,21 @@ Route::prefix('client')->group(function () {
     Route::post('/set-password', [App\Http\Controllers\Auth\ClientAuthController::class, 'setPassword'])->name('client.set-password.submit');
 });
 
-// Contractor registration routes
+// Contractor: approve / reject self-registered clients
+Route::middleware(['auth', 'verified.contractor'])->group(function () {
+    Route::get('/contractor/pending-clients',
+        [App\Http\Controllers\ClientSelfRegistrationController::class, 'pendingApprovals'])
+        ->name('contractor.clients.pending');
+
+    Route::post('/contractor/pending-clients/{client}/approve',
+        [App\Http\Controllers\ClientSelfRegistrationController::class, 'approve'])
+        ->name('contractor.clients.approve');
+
+    Route::post('/contractor/pending-clients/{client}/reject',
+        [App\Http\Controllers\ClientSelfRegistrationController::class, 'reject'])
+        ->name('contractor.clients.reject');
+});
+
 Route::get('/register/contractor', [UserTypeController::class, 'createContractor'])->name('register.contractor');
 Route::post('/register/contractor', [UserTypeController::class, 'storeContractor'])->name('register.contractor.store');
 
@@ -278,14 +319,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     });
 
     // Contractor routes
-    Route::middleware(['auth'])->prefix('contractor')->group(function () {
-        Route::get('/clients/locations', [App\Http\Controllers\ContractorController::class, 'getAssignedClients'])->name('contractor.clients.locations');
-        Route::get('/dashboard-stats', [App\Http\Controllers\ContractorController::class, 'getDashboardStats']);
-        Route::get('/recent-invoices', [App\Http\Controllers\ContractorController::class, 'getRecentInvoices']);
-        Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules']);
-        Route::get('/clients/{client}', [ClientController::class, 'show']);
-        Route::get('/clients/{client}/edit', [ClientController::class, 'edit']);
-    });
+Route::middleware(['auth'])->prefix('contractor')->group(function () {
+     Route::get('/clients/locations', [App\Http\Controllers\ContractorController::class, 'getAssignedClients'])->name('contractor.clients.locations');
+     Route::get('/dashboard-stats', [App\Http\Controllers\ContractorController::class, 'getDashboardStats']);
+     Route::get('/recent-invoices', [App\Http\Controllers\ContractorController::class, 'getRecentInvoices']);
+     Route::get('/recent-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPayments'])->name('contractor.recent-payments');
+     Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules']);
+     Route::get('/recent-pending-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPendingPayments'])->name('contractor.recent-pending-payments');
+    Route::get('/clients/{client}', [ClientController::class, 'show']);
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit']);
+});
 
     // Billing routes
     Route::middleware(['auth'])->prefix('billing')->group(function () {
@@ -347,6 +390,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::post('/', [App\Http\Controllers\TruckController::class, 'store'])->name('trucks.store');
         Route::post('/{truck}/location', [App\Http\Controllers\TruckController::class, 'updateLocation'])->name('trucks.location');
         Route::get('/locations', [App\Http\Controllers\TruckController::class, 'getLocations'])->name('trucks.locations');
+        Route::delete('/{truck}', [App\Http\Controllers\TruckController::class, 'destroy'])->name('trucks.destroy');
     });
 
     // Route Management routes (for creating and managing collection routes)
@@ -359,5 +403,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::put('/{contractorRoute}', [App\Http\Controllers\RouteManagementController::class, 'update'])->name('route-management.update');
         Route::delete('/{contractorRoute}', [App\Http\Controllers\RouteManagementController::class, 'destroy'])->name('route-management.destroy');
     });
+
+    // Location autocomplete for schedule creation (searches tbl_locations)
+    Route::middleware(['auth'])->get('/location/autocomplete', [App\Http\Controllers\LocationController::class, 'autocomplete'])->name('location.autocomplete');
+
+// Driver Public Tracking Routes (No login required)
+Route::get('/driver/track/{token}', [App\Http\Controllers\TruckController::class, 'driverTrack'])->name('driver.track');
+Route::post('/driver/location/{token}', [App\Http\Controllers\TruckController::class, 'updateLocationByToken'])->name('driver.location');
 
 require __DIR__.'/auth.php';

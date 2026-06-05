@@ -41,7 +41,7 @@
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm" role="group">
                                             @if($invoice->status !== 'paid')
-                                                <a href="{{ route('client.payments.checkout', $invoice) }}" class="btn btn-primary" title="Pay Now">
+                                                <a href="{{ route('client.payment-methods', $invoice) }}" class="btn btn-primary" title="Pay Now">
                                                     Pay Now
                                                 </a>
                                             @endif

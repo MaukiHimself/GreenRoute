@@ -184,6 +184,13 @@ class ClientAuthController extends Controller
             ])->withInput($request->only('email'));
         }
 
+        // Block pending/unverified self-registered clients
+        if ($client->status === 'pending') {
+            return back()->withErrors([
+                'email' => 'Your account is pending contractor approval. You will receive an email once approved.',
+            ])->withInput($request->only('email'));
+        }
+
         // Attempt authentication
         if (Auth::attempt(['email' => $user->email, 'password' => $request->password, 'user_type' => 'client'], $request->boolean('remember'))) {
             $request->session()->regenerate();

@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'client/*',
             'login/contractor',
+            'driver/location/*',
         ]);
 
         // Register custom middleware aliases

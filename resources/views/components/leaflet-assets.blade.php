@@ -1,6 +1,11 @@
 {{-- Free maps: OpenStreetMap tiles + Leaflet (no API key required) --}}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+{{-- HEIGIT Leaflet Reachability Plugin --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet.reachability@0.2.0/dist/leaflet.reachability.css">
+<script src="https://unpkg.com/leaflet.reachability@0.2.0/dist/leaflet.reachability.min.js"></script>
+
 <script src="{{ asset('js/greenroute-map.js') }}"></script>
 <style>
     .leaflet-container { font-family: inherit; z-index: 1; }

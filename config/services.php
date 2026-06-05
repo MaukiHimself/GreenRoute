@@ -55,4 +55,8 @@ return [
         'maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    'heigit' => [
+        'api_key' => env('HEIGIT_API_KEY'),
+    ],
+
 ];

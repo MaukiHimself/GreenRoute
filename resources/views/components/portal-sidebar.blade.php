@@ -5,10 +5,11 @@
 ])
 
 @php
-    $tabbed = filter_var($tabbed, FILTER_VALIDATE_BOOLEAN);
-@endphp
+    use App\Support\Portal;
 
-@php
+    $tabbed = filter_var($tabbed, FILTER_VALIDATE_BOOLEAN);
+    $portal = $portal ?? Portal::forUser();
+
     $homeUrl = $homeUrl ?? match ($portal) {
         'admin' => route('dashboard.admin'),
         'contractor' => route('dashboard.contractor'),
@@ -25,8 +26,13 @@
             <i class="bi bi-list"></i>
         </button>
         <a href="{{ $homeUrl }}" class="portal-sidebar__brand">
-            <img src="{{ asset('result.png') }}" alt="{{ config('app.name', 'GreenRoute') }}">
+            <x-greenroute-logo size="sidebar-expanded" class="portal-sidebar__logo portal-sidebar__logo--full" />
+            <x-greenroute-logo size="sidebar" class="portal-sidebar__logo portal-sidebar__logo--icon" />
         </a>
+        <!-- Mobile close button -->
+        <button type="button" class="portal-sidebar__close-mobile btn btn-link text-white p-2 ms-auto d-lg-none" id="portal-sidebar-close" aria-label="Close sidebar">
+            <i class="bi bi-x-lg fs-5"></i>
+        </button>
     </div>
 
     <nav class="portal-sidebar__nav">
@@ -35,6 +41,10 @@
 
     <div class="portal-sidebar__footer">
         @if($portal === 'admin')
+            <a href="{{ Portal::profileUrl() }}" class="portal-sidebar__link {{ Portal::profileRouteIsActive() ? 'active' : '' }}" data-tooltip="Profile">
+                <i class="bi bi-person"></i>
+                <span class="portal-sidebar__label">Profile</span>
+            </a>
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit" class="portal-sidebar__link" data-tooltip="Logout">
@@ -43,7 +53,7 @@
                 </button>
             </form>
         @else
-            <a href="{{ route('profile.edit') }}" class="portal-sidebar__link {{ request()->routeIs('profile.*') ? 'active' : '' }}" data-tooltip="Profile">
+            <a href="{{ Portal::profileUrl() }}" class="portal-sidebar__link {{ Portal::profileRouteIsActive() ? 'active' : '' }}" data-tooltip="Profile">
                 <i class="bi bi-person"></i>
                 <span class="portal-sidebar__label">Profile</span>
             </a>
@@ -57,5 +67,8 @@
         @endif
     </div>
 </aside>
+
+<!-- Mobile overlay -->
+<div class="portal-sidebar-overlay" id="portal-sidebar-overlay"></div>
 
 <script src="{{ asset('js/portal-sidebar.js') }}" defer></script>

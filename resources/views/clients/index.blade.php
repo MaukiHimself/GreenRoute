@@ -288,6 +288,11 @@
             background: var(--text-muted);
             color: white;
         }
+
+        .status-pending {
+            background: #f59e0b;
+            color: white;
+        }
         
         .action-buttons {
             display: flex;
@@ -455,6 +460,12 @@
                     </select>
                 </div>
                 <div class="col-lg-2 text-lg-end">
+                    @php $pendingCount = \App\Models\Client::where('contractor_id', auth()->id())->where('status','pending')->where('self_registered',true)->count(); @endphp
+                    @if($pendingCount > 0)
+                        <a href="{{ route('contractor.clients.pending') }}" class="btn btn-warning btn-sm mb-2 d-block">
+                            <i class="bi bi-person-check me-1"></i>{{ $pendingCount }} Pending Approval{{ $pendingCount > 1 ? 's' : '' }}
+                        </a>
+                    @endif
                     <a href="{{ route('contractor.clients.create') }}" class="btn btn-primary">
                         <i class="bi bi-person-plus me-1"></i> Add Client
                     </a>
@@ -464,6 +475,20 @@
 
         <!-- Clients Table -->
         <div class="table-section">
+            {{-- Pending self-registrations banner --}}
+            @php $pendingBanner = \App\Models\Client::where('contractor_id', auth()->id())->where('status','pending')->where('self_registered',true)->count(); @endphp
+            @if($pendingBanner > 0)
+                <div class="alert alert-warning d-flex align-items-center justify-content-between mb-3" style="border-radius:10px; border:2px solid #f59e0b;">
+                    <div>
+                        <i class="bi bi-person-exclamation me-2 fs-5"></i>
+                        <strong>{{ $pendingBanner }} client{{ $pendingBanner > 1 ? 's' : '' }} waiting for your approval.</strong>
+                        They self-registered and cannot log in until you approve them below.
+                    </div>
+                    <a href="{{ route('contractor.clients.pending') }}" class="btn btn-warning btn-sm ms-3 text-nowrap">
+                        <i class="bi bi-person-check me-1"></i>Review All
+                    </a>
+                </div>
+            @endif
             <div class="table-header">
                 <h4 class="table-title">Clients</h4>
                 <div class="sort-buttons">
@@ -489,7 +514,7 @@
                         </thead>
                         <tbody>
                             @foreach($clients as $client)
-                                <tr>
+                                <tr style="{{ $client->status === 'pending' ? 'background:#fffbeb;' : '' }}">
                                     <td>
                                         <div class="client-avatar">
                                             <i class="bi bi-person"></i>
@@ -515,25 +540,46 @@
                                         <span class="location-badge">{{ $client->city }}, {{ $client->state }}</span>
                                     </td>
                                     <td>
-                                        <span class="status-badge {{ $client->status === 'active' ? 'status-active' : 'status-inactive' }}">
+                                        <span class="status-badge {{ $client->status === 'active' ? 'status-active' : ($client->status === 'pending' ? 'status-pending' : 'status-inactive') }}">
+                                            @if($client->status === 'pending') <i class="bi bi-hourglass-split me-1"></i> @endif
                                             {{ ucfirst($client->status) }}
                                         </span>
+                                        @if($client->self_registered && $client->status === 'pending')
+                                            <div class="small text-muted mt-1"><i class="bi bi-person-up"></i> Self-registered</div>
+                                        @endif
                                     </td>
                                     <td class="text-end">
                                         <div class="action-buttons">
-                                            <a href="{{ route('contractor.clients.show', $client) }}" class="btn-outline-primary btn-sm" title="View">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ route('contractor.clients.edit', $client) }}" class="btn-outline-primary btn-sm" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form action="{{ route('contractor.clients.destroy', $client) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this client?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-outline-danger btn-sm" title="Delete">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                            @if($client->status === 'pending' && $client->self_registered)
+                                                <form action="{{ route('contractor.clients.approve', $client) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Approve & activate"
+                                                            onclick="return confirm('Approve {{ addslashes($client->name) }}? They will receive login credentials by email.')">
+                                                        <i class="bi bi-check-lg me-1"></i>Approve
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('contractor.clients.reject', $client) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"
+                                                            onclick="return confirm('Reject {{ addslashes($client->name) }}?')">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <a href="{{ route('contractor.clients.show', $client) }}" class="btn-outline-primary btn-sm" title="View">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{{ route('contractor.clients.edit', $client) }}" class="btn-outline-primary btn-sm" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form action="{{ route('contractor.clients.destroy', $client) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this client?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-outline-danger btn-sm" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

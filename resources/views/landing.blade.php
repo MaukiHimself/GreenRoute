@@ -65,8 +65,8 @@
         }
 
         .logo-text img {
-            height: 200px;
-            max-width: 520px;
+            height: 240px;
+            max-width: 560px;
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
@@ -288,7 +288,7 @@
                             Schedule waste pickups, track collection history, manage invoices, and access support through our intuitive client dashboard.
                         </p>
                         <div>
-                            <a href="{{ route('client.register') }}" class="btn-custom btn-primary-custom">
+                            <a href="{{ route('client.self-register') }}" class="btn-custom btn-primary-custom">
                                 <i class="bi bi-person-plus me-2"></i>Get Started
                             </a>
                             <a href="{{ route('client.login') }}" class="btn-custom btn-outline-custom">

@@ -330,6 +330,9 @@
                                     <p class="support-text">Need help accessing your account?
                                         <a href="#" class="support-link">Contact Support</a>
                                     </p>
+                                    <p class="support-text mt-2">New client? 
+                                        <a href="{{ route('client.self-register') }}" class="support-link fw-bold">Register yourself here</a>
+                                    </p>
                                 </div>
                             </div>
                         </div>

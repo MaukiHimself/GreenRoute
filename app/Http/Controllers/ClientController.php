@@ -31,7 +31,12 @@ class ClientController extends Controller
      */
     public function create()
     {
-        return view('clients.create');
+        $routes = \App\Models\ContractorRoute::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('route_name')
+            ->get();
+
+        return view('clients.create', compact('routes'));
     }
 
     /**
@@ -65,7 +70,8 @@ class ClientController extends Controller
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:10',
             'notes' => 'nullable|string',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'route' => 'nullable|string|max:255',
         ]);
 
         $validated['contractor_id'] = Auth::id();

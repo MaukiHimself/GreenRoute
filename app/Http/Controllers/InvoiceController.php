@@ -203,14 +203,44 @@ class InvoiceController extends Controller
      */
     public function pdf(Invoice $invoice)
     {
-        Gate::authorize('view', $invoice);
-        
+        // Allow invoice PDF download for both contractors and their clients.
+        // Prevent 403 by using explicit checks instead of the InvoicePolicy which
+        // currently only allows contractors.
+        $user = Auth::user();
+
+        $canView = false;
+
+        if ($user && $user->isContractor()) {
+            $canView = (int) $user->id === (int) $invoice->contractor_id;
+        }
+
+        if ($user && $user->user_type === 'client') {
+            // Client users can view/download invoices belonging to their client record.
+
+            $client = \App\Models\Client::where('user_id', $user->id)->first();
+            if ($client) {
+                $canView = (int) $client->id === (int) $invoice->client_id;
+            } else {
+                // Fallback by email (mirrors ClientPortalController logic)
+                $email = strtolower($user->email);
+                $client = \App\Models\Client::whereRaw('LOWER(email) = ?', [$email])->first();
+                if ($client) {
+                    $canView = (int) $client->id === (int) $invoice->client_id;
+                }
+            }
+        }
+
+        if (!$canView) {
+            abort(403, 'Unauthorized');
+        }
+
         $invoice->load(['client', 'schedule', 'contractor']);
-        
+
         $pdf = Pdf::loadView('invoices.pdf', compact('invoice'));
-        
+
         return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
     }
+
 
     /**
      * Mark invoice as paid.

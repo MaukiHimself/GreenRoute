@@ -137,7 +137,7 @@
             <div class="auth-card">
                 <div class="logo-section">
                     <a href="/" class="logo text-decoration-none">
-                        <img src="{{ asset('result.png') }}" alt="GreenRoute Logo" style="max-height: 90px; width: auto;">
+                        <x-greenroute-logo size="xl" />
                     </a>
                 </div>
                 {{ $slot }}
