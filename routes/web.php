@@ -75,6 +75,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ClientPortalController::class, 'dashboard'])->name('client.dashboard');
         Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');
         Route::put('profile', [ClientPortalController::class, 'updateProfile'])->name('client.profile.update');
+        Route::post('profile/picture', [ProfileController::class, 'uploadPicture'])->name('client.profile.picture');
+        Route::post('profile/dark-mode', [ProfileController::class, 'toggleDarkMode'])->name('client.profile.dark-mode');
+        Route::post('profile/password', [ProfileController::class, 'updatePassword'])->name('client.profile.password');
         Route::get('schedules', [ClientPortalController::class, 'schedules'])->name('client.schedules');
         Route::get('request-service', [ClientPortalController::class, 'requestService'])->name('client.request.service');
         Route::post('request-service', [ClientPortalController::class, 'storeServiceRequest'])->name('client.request.service.store');
@@ -136,6 +139,10 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
         Route::get('pending-payment-approvals', [ContractorPaymentApprovalController::class, 'showPendingApprovals'])->name('contractor.pending-payments');
         Route::get('payment-approvals/stats', [ContractorPaymentApprovalController::class, 'getStats'])->name('contractor.payment-stats');
     });
+
+    Route::get('dashboard/contractor/{tab?}', [DashboardController::class, 'contractorDashboard'])
+        ->where('tab', '.*')
+        ->name('dashboard.contractor.tab');
 
     Route::post('payment-submissions/{submission}/approve', [ContractorPaymentApprovalController::class, 'approve'])->name('payment-submissions.approve');
     Route::post('payment-submissions/{submission}/reject', [ContractorPaymentApprovalController::class, 'reject'])->name('payment-submissions.reject');

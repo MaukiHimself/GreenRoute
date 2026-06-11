@@ -42,8 +42,99 @@
 
         .breadcrumb-item.active {
             color: var(--primary-teal);
-            font-weight: 600;
+            font-weight: 500;
         }
+
+        @if(Auth::user()->dark_mode)
+        body.dark-mode-active {
+            background-color: #1a1d23;
+        }
+        body.dark-mode-active .content-wrapper,
+        body.dark-mode-active .main-content {
+            background-color: #1a1d23;
+        }
+        body.dark-mode-active .nav-sidebar {
+            background-color: #111318 !important;
+        }
+        body.dark-mode-active .nav-menu > li > a {
+            color: #adb5bd;
+        }
+        body.dark-mode-active .nav-menu > li > a:hover,
+        body.dark-mode-active .nav-menu > li.active > a {
+            background-color: #0d3d3d;
+            color: #8bb8b8;
+        }
+        body.dark-mode-active .page-header {
+            background-color: #252930 !important;
+            border-color: #2d3139 !important;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .header-title {
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .card {
+            background-color: #252930;
+            border-color: #2d3139;
+            color: #e9ecef;
+        }
+        body.dark-mode-active .card-header {
+            background-color: #1a1d23;
+            border-color: #2d3139 !important;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .form-control,
+        body.dark-mode-active .form-select {
+            background-color: #252930;
+            border-color: #2d3139;
+            color: #e9ecef;
+        }
+        body.dark-mode-active .form-label {
+            color: #e9ecef;
+        }
+        body.dark-mode-active .table {
+            color: #e9ecef;
+        }
+        body.dark-mode-active .table thead th {
+            background: #0d3d3d !important;
+        }
+        body.dark-mode-active .table tbody td {
+            border-color: #2d3139;
+        }
+        body.dark-mode-active .dropdown-menu {
+            background-color: #252930;
+            border-color: #2d3139;
+        }
+        body.dark-mode-active .dropdown-item {
+            color: #e9ecef;
+        }
+        body.dark-mode-active .dropdown-item:hover {
+            background-color: #0d3d3d;
+        }
+        body.dark-mode-active .btn-outline-secondary {
+            border-color: #8bb8b8 !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .breadcrumb a {
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .alert-success {
+            background: rgba(5, 92, 92, 0.2);
+            border-color: #055c5c;
+            color: #8bb8b8;
+        }
+        body.dark-mode-active .input-group-text {
+            background-color: #252930 !important;
+            border-color: #2d3139 !important;
+            color: #adb5bd !important;
+        }
+        body.dark-mode-active .btn-outline-primary {
+            border-color: #055c5c !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .text-muted {
+            color: #adb5bd !important;
+        }
+        @endif
 
         .user-badge {
             background-color: var(--primary-teal);
@@ -76,7 +167,7 @@
     </style>
     @stack('head-scripts')
 </head>
-<body class="has-portal-sidebar">
+<body class="has-portal-sidebar" @if(Auth::user()->dark_mode) style="background-color: #1a1d23;" @endif>
     <x-portal-sidebar portal="contractor" />
 
     <div class="main-content portal-main">
@@ -103,11 +194,16 @@
                             <i class="bi bi-bell me-1"></i>Notifications: 2
                         </span>
                         <div class="dropdown">
-                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; cursor: pointer;" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-fill text-white"></i>
-                            </div>
+                            @if(Auth::user()->profile_picture)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" data-bs-toggle="dropdown">
+                            @else
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; cursor: pointer;" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-fill text-white"></i>
+                                </div>
+                            @endif
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">

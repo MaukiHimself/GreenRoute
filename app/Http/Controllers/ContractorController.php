@@ -12,14 +12,26 @@ class ContractorController extends Controller
 {
     public function dashboard()
     {
-        return view('contractor.dashboard');
+        $contractorId = Auth::id();
+        
+        $stats = [
+            'total_clients' => Client::where('contractor_id', $contractorId)->count(),
+            'active_clients' => Client::where('contractor_id', $contractorId)->where('status', 'active')->count(),
+            'pending_clients' => Client::where('contractor_id', $contractorId)->where('status', 'pending')->where('self_registered', true)->count(),
+            'total_routes' => \App\Models\ContractorRoute::where('contractor_id', $contractorId)->where('is_active', true)->count(),
+            'completed_jobs' => Schedule::where('contractor_id', $contractorId)->where('status', 'completed')->count(),
+            'monthly_revenue' => Invoice::where('contractor_id', $contractorId)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total_amount'),
+        ];
+        
+        return view('contractor.dashboard', compact('stats'));
     }
 
     public function getAssignedClients()
     {
-        $query = Client::where('contractor_id', auth()->id())
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude');
+        $query = Client::where('contractor_id', auth()->id());
 
         // Apply search filters
         if (request('name')) {
@@ -38,7 +50,7 @@ class ContractorController extends Controller
             $query->where('registration_number', 'like', '%' . request('registration_number') . '%');
         }
 
-        $clients = $query->select('id', 'name', 'contact_name', 'category', 'registration_number', 'address', 'latitude', 'longitude', 'phone', 'phone_2', 'phone_3', 'email', 'email_2', 'email_3')
+        $clients = $query->select('id', 'name', 'contact_name', 'category', 'registration_number', 'address', 'latitude', 'longitude', 'phone', 'phone_2', 'phone_3', 'email', 'email_2', 'email_3', 'status', 'self_registered', 'route', 'region')
             ->get();
 
         return response()->json($clients);

@@ -22,7 +22,9 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Client::where('contractor_id', Auth::id())->paginate(10);
+        $clients = Client::where('contractor_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         return view('clients.index', compact('clients'));
     }
 

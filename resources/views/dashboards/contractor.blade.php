@@ -561,26 +561,28 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">24</div>
+                    <div class="stat-value">{{ $stats['active_clients'] ?? 0 }}</div>
                     <div class="stat-label">Active Clients</div>
                 </div>
             </div>
+            @if(($stats['pending_clients'] ?? 0) > 0)
+            <div class="stat-item d-flex align-items-center" style="background: #fffbeb; border: 2px solid #f59e0b;">
+                <div class="stat-icon warning">
+                    <i class="bi bi-person-exclamation"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $stats['pending_clients'] ?? 0 }}</div>
+                    <div class="stat-label">Pending Approvals</div>
+                </div>
+            </div>
+            @endif
             <div class="stat-item d-flex align-items-center">
                 <div class="stat-icon success">
                     <i class="bi bi-truck"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">12</div>
+                    <div class="stat-value">{{ $stats['total_routes'] ?? 0 }}</div>
                     <div class="stat-label">Total Routes</div>
-                </div>
-            </div>
-            <div class="stat-item d-flex align-items-center">
-                <div class="stat-icon warning">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value">36</div>
-                    <div class="stat-label">Completed Jobs</div>
                 </div>
             </div>
             <div class="stat-item d-flex align-items-center">
@@ -588,7 +590,7 @@
                     <i class="bi bi-currency-dollar"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">$2,450</div>
+                    <div class="stat-value">${{ number_format($stats['monthly_revenue'] ?? 0, 0) }}</div>
                     <div class="stat-label">Monthly Revenue</div>
                 </div>
             </div>

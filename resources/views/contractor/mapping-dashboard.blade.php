@@ -471,37 +471,60 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function showTab(tabName) {
+            document.querySelectorAll('#portal-sidebar .portal-sidebar__link[data-tab]').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('#portal-sidebar .portal-sidebar__link[data-tab="' + tabName + '"]').forEach(link => link.classList.add('active'));
+
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            const tabId = tabName + '-tab';
+            const selectedTabEl = document.getElementById(tabId);
+            if (selectedTabEl) {
+                selectedTabEl.style.display = 'block';
+            }
+
+            if (tabName === 'disposal') {
+                const disposalIframe = document.getElementById('disposal-iframe');
+                if (disposalIframe) {
+                    disposalIframe.src = disposalIframe.src;
+                }
+            }
+
+            if (tabName === 'clients') {
+                loadClientsTable();
+            } else if (tabName === 'gps') {
+                initGPSMap();
+            }
+        }
+
         document.querySelectorAll('#portal-sidebar [data-tab]').forEach(tab => {
             tab.addEventListener('click', function(e) {
                 e.preventDefault();
-
-                document.querySelectorAll('#portal-sidebar .portal-sidebar__link[data-tab]').forEach(link => link.classList.remove('active'));
-                this.classList.add('active');
-
-                // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
-
-                // Show selected tab content
-                const tabId = this.getAttribute('data-tab') + '-tab';
-                const selectedTab = this.getAttribute('data-tab');
-                document.getElementById(tabId).style.display = 'block';
-
-                // Refresh disposal iframe when tab is clicked to show latest completed schedules
-                if (selectedTab === 'disposal') {
-                    const disposalIframe = document.getElementById('disposal-iframe');
-                    if (disposalIframe) {
-                        disposalIframe.src = disposalIframe.src; // Force refresh
-                    }
-                }
-
-                // Load specific content for tabs
-                if (selectedTab === 'clients') {
-                    loadClientsTable();
-                } else if (selectedTab === 'gps') {
-                    initGPSMap();
-                }
+                const tabName = this.getAttribute('data-tab');
+                const path = '/dashboard/contractor' + (tabName === 'dashboard' ? '' : '/' + tabName);
+                history.pushState({tab: tabName}, '', path);
+                showTab(tabName);
             });
         });
+
+        window.addEventListener('popstate', function(e) {
+            if (e.state && e.state.tab) {
+                showTab(e.state.tab);
+            } else {
+                const path = window.location.pathname;
+                const segments = path.split('/').filter(Boolean);
+                const tabName = segments[segments.length - 1] || 'dashboard';
+                showTab(tabName);
+            }
+        });
+
+        (function() {
+            const path = window.location.pathname;
+            const segments = path.split('/').filter(Boolean);
+            const lastSegment = segments[segments.length - 1] || 'dashboard';
+            const validTabs = ['dashboard', 'clients', 'billing', 'collection', 'disposal', 'gps', 'schedules', 'routes', 'reports', 'zones', 'pending-payment-approvals'];
+            const tabName = validTabs.includes(lastSegment) ? lastSegment : 'dashboard';
+            showTab(tabName);
+        })();
 
         // Initialize dashboard data
         function loadDashboardData() {
@@ -630,29 +653,46 @@
                     const tbody = document.getElementById('clientsTable');
                     tbody.innerHTML = '';
                     if (clients.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No clients found matching your search criteria</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No clients found matching your search criteria</td></tr>';
                         return;
                     }
                     clients.forEach(client => {
+                        const isPending = client.status === 'pending';
+                        const rowBg = isPending ? 'background:#fffbeb;' : '';
+                        const statusBadge = isPending
+                            ? '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>'
+                            : '<span class="badge bg-success">Active</span>';
+                        const selfRegBadge = client.self_registered
+                            ? '<br><small class="text-muted"><i class="bi bi-person-up"></i> Self-registered</small>'
+                            : '';
+                        const actionButtons = isPending
+                            ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}?')">
+                                   @csrf
+                                   <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
+                               </form>
+                               <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
+                                   @csrf
+                                   <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                               </form>`
+                            : `<a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                               <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
                         tbody.innerHTML += `
-                            <tr>
+                            <tr style="${rowBg}">
                                 <td>${client.registration_number || 'N/A'}</td>
-                                <td>${client.name}</td>
+                                <td><strong>${client.name}</strong>${selfRegBadge}</td>
                                 <td>${client.contact_name || 'N/A'}</td>
-                                <td><span class="badge badge-teal">${client.category || 'N/A'}</span></td>
-                                <td>${client.phone}<br><small>${client.phone_2 || ''}<br>${client.phone_3 || ''}</small></td>
-                                <td>${client.email}<br><small>${client.email_2 || ''}<br>${client.email_3 || ''}</small></td>
-                                <td>${client.address}</td>
-                                <td>
-                                    <a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
-                                    <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>
-                                </td>
+                                <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
+                                <td>${client.phone || 'N/A'}<br><small>${client.phone_2 || ''} ${client.phone_3 ? '<br>' + client.phone_3 : ''}</small></td>
+                                <td>${client.email || 'N/A'}</td>
+                                <td>${client.address || 'N/A'}${client.route ? '<br><small class="text-muted">Route: ' + client.route + ' (' + client.region + ')</small>' : ''}</td>
+                                <td>${statusBadge}</td>
+                                <td><div class="d-flex gap-1">${actionButtons}</div></td>
                             </tr>
                         `;
                     });
                 })
                 .catch(() => {
-                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">Error searching clients</td></tr>';
+                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="9" class="text-center">Error searching clients</td></tr>';
                 });
         }
 
@@ -671,26 +711,48 @@
                 .then(clients => {
                     const tbody = document.getElementById('clientsTable');
                     tbody.innerHTML = '';
+                    if (clients.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No clients found</td></tr>';
+                        return;
+                    }
                     clients.forEach(client => {
+                        const isPending = client.status === 'pending';
+                        const rowBg = isPending ? 'background:#fffbeb;' : '';
+                        const statusBadge = isPending
+                            ? '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>'
+                            : '<span class="badge bg-success">Active</span>';
+                        const selfRegBadge = client.self_registered
+                            ? '<br><small class="text-muted"><i class="bi bi-person-up"></i> Self-registered</small>'
+                            : '';
+                        const actionButtons = isPending
+                            ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}? They will receive login credentials by email.')">
+                                   @csrf
+                                   <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
+                               </form>
+                               <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
+                                   @csrf
+                                   <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                               </form>`
+                            : `<a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                               <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
+
                         tbody.innerHTML += `
-                            <tr>
+                            <tr style="${rowBg}">
                                 <td>${client.registration_number || 'N/A'}</td>
-                                <td>${client.name}</td>
+                                <td><strong>${client.name}</strong>${selfRegBadge}</td>
                                 <td>${client.contact_name || 'N/A'}</td>
-                                <td><span class="badge badge-teal">${client.category || 'N/A'}</span></td>
-                                <td>${client.phone}<br><small>${client.phone_2 || ''}<br>${client.phone_3 || ''}</small></td>
-                                <td>${client.email}<br><small>${client.email_2 || ''}<br>${client.email_3 || ''}</small></td>
-                                <td>${client.address}</td>
-                                <td>
-                                    <a href="/dashboard/contractor/clients/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
-                                    <a href="/dashboard/contractor/clients/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>
-                                </td>
+                                <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
+                                <td>${client.phone || 'N/A'}<br><small>${client.phone_2 || ''} ${client.phone_3 ? '<br>' + client.phone_3 : ''}</small></td>
+                                <td>${client.email || 'N/A'}</td>
+                                <td>${client.address || 'N/A'}${client.route ? '<br><small class="text-muted">Route: ' + client.route + ' (' + client.region + ')</small>' : ''}</td>
+                                <td>${statusBadge}</td>
+                                <td><div class="d-flex gap-1">${actionButtons}</div></td>
                             </tr>
                         `;
                     });
                 })
                 .catch(() => {
-                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="8" class="text-center">No clients found</td></tr>';
+                    document.getElementById('clientsTable').innerHTML = '<tr><td colspan="9" class="text-center">No clients found</td></tr>';
                 });
         }
 

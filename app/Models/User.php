@@ -33,6 +33,8 @@ class User extends Authenticatable
         'subscription_status',
         'subscription_date',
         'remember_login',
+        'profile_picture',
+        'dark_mode',
     ];
 
     /**

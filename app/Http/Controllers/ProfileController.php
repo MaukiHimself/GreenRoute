@@ -67,9 +67,45 @@ class ProfileController extends Controller
         };
     }
 
-    /**
-     * Delete the user's account.
-     */
+    public function uploadPicture(Request $request)
+    {
+        $request->validate([
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+            \Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        $path = $request->file('profile_picture')->store('profile-pictures', 'public');
+        $user->update(['profile_picture' => $path]);
+
+        return back()->with('status', 'profile-picture-updated');
+    }
+
+    public function toggleDarkMode(Request $request)
+    {
+        $user = $request->user();
+        $user->update(['dark_mode' => ! $user->dark_mode]);
+
+        return back();
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        $request->user()->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return back()->with('status', 'password-updated');
+    }
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

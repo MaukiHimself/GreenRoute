@@ -170,9 +170,13 @@
 
                 <div class="header-right">
                     <div class="user-info">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                        </div>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile" class="user-avatar" style="object-fit: cover; width: 40px; height: 40px;">
+                        @else
+                            <div class="user-avatar">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                            </div>
+                        @endif
                         <span class="user-name">{{ Auth::user()->name }}</span>
                     </div>
                 </div>

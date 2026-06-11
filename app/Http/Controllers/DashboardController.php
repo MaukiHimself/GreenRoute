@@ -56,7 +56,7 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function contractorDashboard()
+    public function contractorDashboard($tab = null)
     {
         if (Auth::user()->user_type !== 'contractor') {
             return redirect()->route('dashboard');

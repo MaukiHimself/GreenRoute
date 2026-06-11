@@ -40,31 +40,13 @@
     </nav>
 
     <div class="portal-sidebar__footer">
-        @if($portal === 'admin')
-            <a href="{{ Portal::profileUrl() }}" class="portal-sidebar__link {{ Portal::profileRouteIsActive() ? 'active' : '' }}" data-tooltip="Profile">
-                <i class="bi bi-person"></i>
-                <span class="portal-sidebar__label">Profile</span>
-            </a>
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button type="submit" class="portal-sidebar__link" data-tooltip="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span class="portal-sidebar__label">Logout</span>
-                </button>
-            </form>
-        @else
-            <a href="{{ Portal::profileUrl() }}" class="portal-sidebar__link {{ Portal::profileRouteIsActive() ? 'active' : '' }}" data-tooltip="Profile">
-                <i class="bi bi-person"></i>
-                <span class="portal-sidebar__label">Profile</span>
-            </a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="portal-sidebar__link" data-tooltip="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span class="portal-sidebar__label">Logout</span>
-                </button>
-            </form>
-        @endif
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="portal-sidebar__link" data-tooltip="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="portal-sidebar__label">Logout</span>
+            </button>
+        </form>
     </div>
 </aside>
 

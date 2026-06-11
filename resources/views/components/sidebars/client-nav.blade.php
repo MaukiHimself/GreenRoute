@@ -7,13 +7,6 @@
     <span class="portal-sidebar__label">Dashboard</span>
 </a>
 
-<a href="{{ route('client.profile') }}"
-   class="portal-sidebar__link {{ request()->routeIs('client.profile*') ? 'active' : '' }}"
-   data-tooltip="Profile">
-    <i class="bi bi-person"></i>
-    <span class="portal-sidebar__label">Profile</span>
-</a>
-
 <a href="{{ route('client.schedules') }}"
    class="portal-sidebar__link {{ request()->routeIs('client.schedules') ? 'active' : '' }}"
    data-tooltip="Schedules">

@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/picture', [ProfileController::class, 'uploadPicture'])->name('profile.picture');
+    Route::post('/profile/dark-mode', [ProfileController::class, 'toggleDarkMode'])->name('profile.toggle-dark-mode');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

@@ -123,8 +123,143 @@
         }
 
     </style>
+
+    @if(Auth::user()->dark_mode)
+    <style>
+        body.dark-mode-active,
+        body.dark-mode-active .bg-white,
+        body.dark-mode-active .card,
+        body.dark-mode-active .table-section,
+        body.dark-mode-active .search-section,
+        body.dark-mode-active .page-header,
+        body.dark-mode-active .portal-sidebar {
+            background-color: #1a1d23 !important;
+            border-color: #2d3139 !important;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .text-dark,
+        body.dark-mode-active .table-title,
+        body.dark-mode-active h1, body.dark-mode-active h2, body.dark-mode-active h3, body.dark-mode-active h4, body.dark-mode-active h5 {
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .text-muted {
+            color: #adb5bd !important;
+        }
+        body.dark-mode-active .table {
+            color: #e9ecef;
+        }
+        body.dark-mode-active .table thead th {
+            background: #0d3d3d !important;
+        }
+        body.dark-mode-active .table tbody tr {
+            border-bottom-color: #2d3139;
+        }
+        body.dark-mode-active .table tbody tr:hover {
+            background-color: #252930 !important;
+        }
+        body.dark-mode-active .border-bottom,
+        body.dark-mode-active .border-top {
+            border-color: #2d3139 !important;
+        }
+        body.dark-mode-active .breadcrumb-item a {
+            color: #8bb8b8;
+        }
+        body.dark-mode-active .dropdown-menu {
+            background-color: #252930 !important;
+            border-color: #2d3139 !important;
+        }
+        body.dark-mode-active .dropdown-item {
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .dropdown-item:hover {
+            background-color: #0d3d3d !important;
+        }
+        body.dark-mode-active .form-control,
+        body.dark-mode-active .form-select {
+            background-color: #252930;
+            border-color: #2d3139;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .form-control:focus,
+        body.dark-mode-active .form-select:focus {
+            background-color: #2d3139;
+            border-color: #055c5c;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .form-label {
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .btn-outline-dark {
+            border-color: #8bb8b8 !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .input-group-text {
+            background-color: #252930 !important;
+            border-color: #2d3139 !important;
+            color: #adb5bd !important;
+        }
+        body.dark-mode-active .input-group-text i {
+            color: #adb5bd !important;
+        }
+        body.dark-mode-active .form-text {
+            color: #adb5bd !important;
+        }
+        body.dark-mode-active .location-badge {
+            background: rgba(5, 92, 92, 0.2) !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .badge.bg-info {
+            background-color: #0d3d3d !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .badge.bg-success {
+            background-color: #155724 !important;
+        }
+        body.dark-mode-active .badge.bg-warning {
+            background-color: #665200 !important;
+            color: #fcd34d !important;
+        }
+        body.dark-mode-active .btn-outline-secondary {
+            border-color: #8bb8b8 !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .btn-outline-secondary:hover {
+            background-color: #252930 !important;
+            color: #e9ecef !important;
+        }
+        body.dark-mode-active .btn-outline-primary {
+            border-color: #055c5c !important;
+            color: #8bb8b8 !important;
+        }
+        body.dark-mode-active .btn-outline-primary:hover {
+            background-color: #055c5c !important;
+            color: #fff !important;
+        }
+        body.dark-mode-active .btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #f87171 !important;
+        }
+        body.dark-mode-active .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+        }
+        body.dark-mode-active .modal-content {
+            background-color: #252930;
+            border-color: #2d3139;
+            color: #e9ecef;
+        }
+        body.dark-mode-active .modal-header,
+        body.dark-mode-active .modal-footer {
+            border-color: #2d3139;
+        }
+        body.dark-mode-active .close,
+        body.dark-mode-active .btn-close {
+            filter: invert(1);
+        }
+    </style>
+    @endif
 </head>
-<body class="has-portal-sidebar">
+<body class="has-portal-sidebar{{ Auth::user()->dark_mode ? ' dark-mode-active' : '' }}">
     @php
         $layoutPortal = \App\Support\Portal::forUser();
     @endphp
@@ -161,13 +296,15 @@
                     <!-- User Menu -->
                     <div class="dropdown">
                         <button class="btn btn-link text-muted p-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <div class="user-avatar">
-                                {{ substr(Auth::user()->name, 0, 1) }}
-                            </div>
+                            @if(Auth::user()->profile_picture)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;">
+                            @else
+                                <div class="user-avatar">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                            @endif
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ \App\Support\Portal::profileUrl() }}"><i class="bi bi-person me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
