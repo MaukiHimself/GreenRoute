@@ -129,6 +129,33 @@
                                     <textarea class="form-control" name="address" rows="3" required>{{ old('address', $client->address) }}</textarea>
                                 </div>
                                 <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Latitude</label>
+                                            <input type="text" class="form-control" id="latitude" name="latitude" value="{{ old('latitude', $client->latitude) }}" readonly placeholder="Detect location or click on map">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Longitude</label>
+                                            <input type="text" class="form-control" id="longitude" name="longitude" value="{{ old('longitude', $client->longitude) }}" readonly placeholder="Detect location or click on map">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label d-block fw-semibold text-teal"><i class="bi bi-geo-alt-fill me-1"></i>GPS Location Capture</label>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <button type="button" id="watchLocation" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-crosshair me-1"></i>Detect Precise GPS Coordinates
+                                        </button>
+                                        <span class="text-muted small align-self-center">You can click on the map or drag the marker to adjust coordinates.</span>
+                                    </div>
+                                    <div id="locationStatus" class="alert alert-info py-2 mb-2 small">
+                                        📍 Click the button to fetch coordinates, or click/drag marker on map.
+                                    </div>
+                                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px;" class="mb-2"></div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label class="form-label">City</label>
@@ -255,4 +282,145 @@
             </div>
         </div>
     </div>
+
+    @include('components.leaflet-assets')
+
+    <script>
+        let mapCtx, locationMarker;
+        
+        GreenRouteMap.whenReady(function () {
+            // Default coordinates: Moshi/Tanzania, or existing client coordinates
+            let defaultLat = -3.3731;
+            let defaultLng = 36.8822;
+            
+            const dbLat = document.getElementById('latitude').value;
+            const dbLng = document.getElementById('longitude').value;
+            const hasExistingCoords = dbLat && dbLng && dbLat !== '' && dbLng !== '';
+            
+            if (hasExistingCoords) {
+                defaultLat = parseFloat(dbLat);
+                defaultLng = parseFloat(dbLng);
+            }
+            
+            mapCtx = GreenRouteMap.createMap('map', { lat: defaultLat, lng: defaultLng, zoom: hasExistingCoords ? 16 : 12 });
+            
+            // Add draggable marker to allow fine-tuning coordinates
+            locationMarker = L.marker([defaultLat, defaultLng], {
+                draggable: true,
+                title: 'Your Location'
+            }).addTo(mapCtx);
+            
+            if (hasExistingCoords) {
+                document.getElementById('locationStatus').innerHTML = `📍 Existing coordinates loaded: ${defaultLat}, ${defaultLng}`;
+            } else {
+                document.getElementById('locationStatus').innerHTML = `📍 No coordinates stored yet. Click "Detect Precise GPS Coordinates" or drag the marker to your building.`;
+            }
+            
+            // Event handler when marker is dragged
+            locationMarker.on('dragend', function (event) {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                updateInputs(position.lat, position.lng);
+                document.getElementById('locationStatus').innerHTML = `📍 Location adjusted by dragging marker: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+            });
+            
+            // Map click handler to move marker
+            mapCtx.on('click', function (event) {
+                const clickedCoords = event.latlng;
+                locationMarker.setLatLng(clickedCoords);
+                updateInputs(clickedCoords.lat, clickedCoords.lng);
+                document.getElementById('locationStatus').innerHTML = `📍 Location set by map click: ${clickedCoords.lat.toFixed(6)}, ${clickedCoords.lng.toFixed(6)}`;
+            });
+            
+            document.getElementById('watchLocation').addEventListener('click', watchPreciseLocation);
+        });
+        
+        let watchId = null;
+        let locationAttempts = 0;
+        
+        function watchPreciseLocation() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            locationAttempts = 0;
+            const statusEl = document.getElementById('locationStatus');
+            statusEl.innerHTML = '🎯 Detecting precise coordinates from your browser GPS...';
+            statusEl.className = 'alert alert-warning py-2 mb-2 small';
+            
+            let bestAccuracy = Infinity;
+            let bestPosition = null;
+            const maxAttempts = 20;
+            const targetAccuracy = 20;
+            
+            if (!navigator.geolocation) {
+                statusEl.innerHTML = '❌ Geolocation not supported by this browser.';
+                statusEl.className = 'alert alert-danger py-2 mb-2 small';
+                return;
+            }
+            
+            watchId = navigator.geolocation.watchPosition(
+                function (position) {
+                    locationAttempts++;
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    statusEl.innerHTML = `📍 Detecting location (Attempt ${locationAttempts}/${maxAttempts}) - Accuracy: ${Math.round(accuracy)}m`;
+                    
+                    if (accuracy < bestAccuracy) {
+                        bestAccuracy = accuracy;
+                        bestPosition = position;
+                        updateMarkerAndInputs(lat, lng);
+                    }
+                    
+                    if (accuracy <= targetAccuracy || locationAttempts >= maxAttempts) {
+                        navigator.geolocation.clearWatch(watchId);
+                        watchId = null;
+                        
+                        const finalAccuracy = bestPosition ? Math.round(bestPosition.coords.accuracy) : Math.round(accuracy);
+                        statusEl.className = 'alert alert-success py-2 mb-2 small';
+                        statusEl.innerHTML = `✅ Precise GPS location detected! Accuracy: ±${finalAccuracy}m.`;
+                        
+                        if (bestPosition && bestPosition !== position) {
+                            updateMarkerAndInputs(bestPosition.coords.latitude, bestPosition.coords.longitude);
+                        }
+                    }
+                },
+                function (error) {
+                    let errMessage = 'Unable to detect GPS coordinates.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errMessage = 'Permission denied. Please allow location/GPS access in your browser settings.';
+                    }
+                    statusEl.className = 'alert alert-danger py-2 mb-2 small';
+                    statusEl.innerHTML = `❌ GPS Error: ${errMessage}`;
+                    if (watchId) {
+                        navigator.geolocation.clearWatch(watchId);
+                        watchId = null;
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+        
+        function updateMarkerAndInputs(lat, lng) {
+            if (locationMarker) {
+                locationMarker.setLatLng([lat, lng]);
+            }
+            if (mapCtx) {
+                mapCtx.setView([lat, lng], 16);
+            }
+            updateInputs(lat, lng);
+        }
+        
+        function updateInputs(lat, lng) {
+            document.getElementById('latitude').value = lat.toFixed(8);
+            document.getElementById('longitude').value = lng.toFixed(8);
+        }
+    </script>
 </x-dashboard-layout>

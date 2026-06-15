@@ -35,6 +35,51 @@
         <li class="breadcrumb-item active">Request Service</li>
     </x-slot>
 
+    @if($servicePrices->count() > 0)
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-semibold"><i class="bi bi-tag me-2 text-primary"></i>Service Price List</h5>
+                            <p class="text-muted small mb-0">Transparent pricing from your contractor. Select a service to request.</p>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Service Type</th>
+                                        <th>Volume</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th class="text-end pe-4">Price (TZS)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($servicePrices as $price)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-semibold">{{ \App\Models\ServicePrice::getLabel($price->service_type) }}</div>
+                                            </td>
+                                            <td>{{ $price->volume_tier ? \App\Models\ServicePrice::getVolumeLabel($price->volume_tier) : 'Standard' }}</td>
+                                            <td><span class="badge bg-light text-dark">{{ $price->category ? ucfirst($price->category) : 'All' }}</span></td>
+                                            <td class="small text-muted">{{ $price->description ?: $price->includes ? \Illuminate\Support\Str::limit($price->includes, 50) : '—' }}</td>
+                                            <td class="text-end pe-4 fw-bold text-success">
+                                                TZS {{ number_format($price->price, 2) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
@@ -65,6 +110,14 @@
                                         <option value="organic_waste">Organic Waste</option>
                                         <option value="construction_debris">Construction Debris</option>
                                     </select>
+                                    @if($servicePrices->count() > 0)
+                                        <div class="form-text">
+                                            @php
+                                                $matchedPrice = $servicePrices->first();
+                                            @endphp
+                                            Starting from <strong>TZS {{ number_format($matchedPrice->price, 2) }}</strong> — check table above
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -122,10 +175,17 @@
                             <textarea class="form-control" name="special_instructions" rows="4" placeholder="Any special handling requirements, access instructions, or additional notes..."></textarea>
                         </div>
 
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> Your service request will be reviewed by your assigned contractor. You will receive confirmation within 24 hours.
-                        </div>
+                        @if($servicePrices->count() > 0)
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Estimate:</strong> Your contractor has listed prices above. The final price will be confirmed after they review your request.
+                            </div>
+                        @else
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Note:</strong> Your service request will be reviewed by your assigned contractor. You will receive confirmation with pricing within 24 hours.
+                            </div>
+                        @endif
 
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-send me-2"></i>Submit Request

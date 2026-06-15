@@ -10,7 +10,7 @@ class Feedback extends Model
     protected $table = 'feedback';
 
     protected $fillable = [
-        'client_id', 'contractor_id', 'subject', 'message', 'status'
+        'client_id', 'contractor_id', 'subject', 'message', 'response', 'status', 'responded_at'
     ];
 
     public function client(): BelongsTo

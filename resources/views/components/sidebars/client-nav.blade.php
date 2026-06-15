@@ -21,6 +21,13 @@
     <span class="portal-sidebar__label">Invoices</span>
 </a>
 
+<a href="{{ route('client.location') }}"
+   class="portal-sidebar__link {{ request()->routeIs('client.location*') ? 'active' : '' }}"
+   data-tooltip="My Location">
+    <i class="bi bi-geo-alt"></i>
+    <span class="portal-sidebar__label">My Location</span>
+</a>
+
 <a href="{{ route('client.payments') }}"
    class="portal-sidebar__link {{ request()->routeIs('client.payments*') ? 'active' : '' }}"
    data-tooltip="Payments">

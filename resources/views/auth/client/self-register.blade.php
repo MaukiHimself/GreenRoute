@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register — GreenRoute Client Portal</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -118,6 +119,8 @@
                             </div>
                         </div>
 
+                        {{-- Notes --}}
+
                         {{-- Route / Contractor selection --}}
                         <p class="section-label mt-4"><i class="bi bi-signpost-split me-2"></i>Select Your Collection Route</p>
                         <div class="mb-3">
@@ -157,77 +160,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.getElementById('regionSelect').addEventListener('change', function () {
-    const region = this.value;
-    const wrapper = document.getElementById('routeWrapper');
-    const spinner = document.getElementById('routeLoadingSpinner');
-    const hiddenInput = document.getElementById('route_id');
-
-    hiddenInput.value = '';
-    wrapper.innerHTML = '';
-
-    if (!region) {
-        wrapper.innerHTML = '<p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Select your region to see available routes.</p>';
-        return;
-    }
-
-    spinner.style.display = 'block';
-
-    fetch(`/client/registration/routes?region=${encodeURIComponent(region)}`)
-        .then(r => r.json())
-        .then(data => {
-            spinner.style.display = 'none';
-            if (!data.success || !data.data.length) {
-                wrapper.innerHTML = `<div class="alert alert-warning small mb-0"><i class="bi bi-exclamation-triangle me-2"></i>No collection routes found in <strong>${region}</strong>. Please contact your local waste management authority.</div>`;
-                return;
-            }
-
-            let html = '<div class="row g-2">';
-            data.data.forEach(route => {
-                const loc = [route.district, route.ward].filter(Boolean).join(', ');
-                const oldVal = "{{ old('route_id') }}";
-                const checked = (String(oldVal) === String(route.id)) ? 'checked' : '';
-                html += `
-                    <div class="col-12">
-                        <label class="d-flex align-items-start border rounded p-3 bg-white gap-2" style="cursor:pointer;" onclick="document.getElementById('route_id').value='${route.id}'">
-                            <input type="radio" name="_route_display" value="${route.id}" ${checked} class="form-check-input mt-1 flex-shrink-0">
-                            <div>
-                                <strong>${route.route_name}</strong>
-                                ${loc ? `<span class="text-muted ms-2 small">(${loc})</span>` : ''}
-                                ${route.contractor ? `<div class="text-muted small"><i class="bi bi-person-circle me-1"></i>${route.contractor.name}</div>` : ''}
-                            </div>
-                        </label>
-                    </div>`;
-            });
-            html += '</div>';
-            wrapper.innerHTML = html;
-
-            // Sync radio → hidden input
-            wrapper.querySelectorAll('input[type=radio]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    hiddenInput.value = this.value;
-                });
-            });
-
-            // If only one route, auto-select
-            if (data.data.length === 1) {
-                hiddenInput.value = data.data[0].id;
-                const r = wrapper.querySelector('input[type=radio]');
-                if (r) r.checked = true;
-            }
-        })
-        .catch(() => {
-            spinner.style.display = 'none';
-            wrapper.innerHTML = '<div class="alert alert-danger small mb-0">Failed to load routes. Please try again.</div>';
-        });
-});
-
-// Trigger on page load if region was already selected (old() value)
-window.addEventListener('DOMContentLoaded', function () {
-    const sel = document.getElementById('regionSelect');
-    if (sel.value) sel.dispatchEvent(new Event('change'));
-});
-</script>
 </body>
 </html>

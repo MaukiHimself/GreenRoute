@@ -197,21 +197,26 @@
     <div class="chat-container">
         <!-- Chat Header -->
         <div class="chat-header">
-            <div class="contractor-info">
-                @if($contractor)
-                    <div class="contractor-avatar">{{ strtoupper(substr($contractor->name, 0, 2)) }}</div>
-                    <div>
-                        <h3 class="mb-0" style="font-size: 1.25rem;">{{ $contractor->name }}</h3>
-                        <p class="mb-0 opacity-75" style="font-size: 0.9rem;">
-                            <i class="bi bi-telephone me-1"></i>{{ $contractor->phone ?? 'N/A' }}
-                        </p>
-                    </div>
-                @else
-                    <div>
-                        <h3 class="mb-0" style="font-size: 1.25rem;">No Contractor Assigned</h3>
-                        <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Please contact support</p>
-                    </div>
-                @endif
+            <div class="d-flex justify-content-between align-items-start w-100">
+                <div class="contractor-info">
+                    @if($contractor)
+                        <div class="contractor-avatar">{{ strtoupper(substr($contractor->name, 0, 2)) }}</div>
+                        <div>
+                            <h3 class="mb-0" style="font-size: 1.25rem;">{{ $contractor->name }}</h3>
+                            <p class="mb-0 opacity-75" style="font-size: 0.9rem;">
+                                <i class="bi bi-telephone me-1"></i>{{ $contractor->phone ?? 'N/A' }}
+                            </p>
+                        </div>
+                    @else
+                        <div>
+                            <h3 class="mb-0" style="font-size: 1.25rem;">No Contractor Assigned</h3>
+                            <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Please contact support</p>
+                        </div>
+                    @endif
+                </div>
+                <a href="{{ route('client.dashboard') }}" class="btn btn-light btn-sm rounded-pill px-3">
+                    <i class="bi bi-house-door me-1"></i>Home
+                </a>
             </div>
         </div>
 

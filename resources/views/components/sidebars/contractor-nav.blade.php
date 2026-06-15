@@ -23,10 +23,6 @@
         <i class="bi bi-trash"></i>
         <span class="portal-sidebar__label">Disposal</span>
     </a>
-    <a class="portal-sidebar__link" href="#" data-tab="chats" data-tooltip="Chats">
-        <i class="bi bi-chat-dots"></i>
-        <span class="portal-sidebar__label">Chats</span>
-    </a>
     <a class="portal-sidebar__link" href="#" data-tab="route-management" data-tooltip="Routes">
         <i class="bi bi-signpost-split"></i>
         <span class="portal-sidebar__label">Routes</span>
@@ -43,35 +39,19 @@
         <i class="bi bi-graph-up"></i>
         <span class="portal-sidebar__label">Reports</span>
     </a>
-@else
-    <div class="portal-sidebar__section-title">Main</div>
 
-    <a href="{{ route('dashboard.contractor') }}"
-       class="portal-sidebar__link {{ request()->routeIs('dashboard.contractor') ? 'active' : '' }}"
-       data-tooltip="Dashboard">
-        <i class="bi bi-speedometer2"></i>
-        <span class="portal-sidebar__label">Dashboard</span>
+    <a href="{{ route('contractor.equipment.index') }}"
+       class="portal-sidebar__link {{ request()->routeIs('contractor.equipment.*') ? 'active' : '' }}"
+       data-tooltip="Equipment">
+        <i class="bi bi-tools"></i>
+        <span class="portal-sidebar__label">Equipment</span>
     </a>
 
-    <a href="{{ route('contractor.clients.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('contractor.clients.*') ? 'active' : '' }}"
-       data-tooltip="Clients">
-        <i class="bi bi-people"></i>
-        <span class="portal-sidebar__label">Clients</span>
-    </a>
-
-    <a href="{{ route('schedules.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('schedules.*') ? 'active' : '' }}"
-       data-tooltip="Schedules">
-        <i class="bi bi-calendar3"></i>
-        <span class="portal-sidebar__label">Schedules</span>
-    </a>
-
-    <a href="{{ route('routes.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('routes.*') ? 'active' : '' }}"
-       data-tooltip="Routes">
-        <i class="bi bi-geo-alt"></i>
-        <span class="portal-sidebar__label">Routes</span>
+    <a href="{{ route('contractor.pricing.index') }}"
+       class="portal-sidebar__link {{ request()->routeIs('contractor.pricing.*') ? 'active' : '' }}"
+       data-tooltip="Pricing">
+        <i class="bi bi-tag"></i>
+        <span class="portal-sidebar__label">Pricing</span>
     </a>
 
     <div class="portal-sidebar__section-title">Communication</div>
@@ -83,40 +63,10 @@
         <span class="portal-sidebar__label">Chats</span>
     </a>
 
-    <div class="portal-sidebar__section-title">Operations</div>
-
-    <a href="{{ route('invoices.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
-       data-tooltip="Invoices">
-        <i class="bi bi-file-earmark-text"></i>
-        <span class="portal-sidebar__label">Invoices</span>
-    </a>
-
-    <a href="{{ route('billing.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('billing.*') ? 'active' : '' }}"
-       data-tooltip="Billing">
-        <i class="bi bi-credit-card"></i>
-        <span class="portal-sidebar__label">Billing</span>
-    </a>
-
-    <a href="{{ route('disposal.index') }}"
-       class="portal-sidebar__link {{ request()->routeIs('disposal.*') ? 'active' : '' }}"
-       data-tooltip="Disposal">
-        <i class="bi bi-trash"></i>
-        <span class="portal-sidebar__label">Disposal</span>
-    </a>
-
-    <a href="/gps"
-       class="portal-sidebar__link {{ request()->is('gps*') ? 'active' : '' }}"
-       data-tooltip="GPS">
-        <i class="bi bi-pin-map"></i>
-        <span class="portal-sidebar__label">GPS Tracker</span>
-    </a>
-
-    <a href="/reports"
-       class="portal-sidebar__link {{ request()->is('reports*') ? 'active' : '' }}"
-       data-tooltip="Reports">
-        <i class="bi bi-graph-up"></i>
-        <span class="portal-sidebar__label">Reports</span>
+    <a href="{{ route('contractor.feedback.index') }}"
+       class="portal-sidebar__link {{ request()->routeIs('contractor.feedback.*') ? 'active' : '' }}"
+       data-tooltip="Feedback">
+        <i class="bi bi-chat-square-text"></i>
+        <span class="portal-sidebar__label">Feedback</span>
     </a>
 @endif

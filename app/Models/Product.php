@@ -3,16 +3,34 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
-    //
     protected $fillable=[
-        'username',
-        'password'
+        'name',
+        'price',
+        'description',
+        'specifications',
+        'unit',
+        'category',
+        'image',
+        'is_available',
+        'contractor_id',
     ];
-    public function setPasswordAttribute($value)
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'is_available' => 'boolean',
+    ];
+
+    public function contractor(): BelongsTo
     {
-        $this->attributes['Password']=bcrypt($value);
+        return $this->belongsTo(User::class, 'contractor_id');
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        return 'TZS ' . number_format($this->price, 2) . ($this->unit ? ' / ' . $this->unit : '');
     }
 }

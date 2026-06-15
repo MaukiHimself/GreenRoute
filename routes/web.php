@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\GeocodingController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Auth\UserTypeController;
@@ -28,41 +29,6 @@ Route::get('/terms-of-service', function () {
 Route::get('/privacy-policy', function () {
     return view('legal.privacy-policy');
 })->name('privacy-policy');
-
-// Test route for dashboard component
-Route::get('/test-dashboard', function () {
-    // Create a mock user for testing
-    $user = new \App\Models\User();
-    $user->id = 1;
-    $user->name = 'Test User';
-    $user->email = 'test@example.com';
-    $user->user_type = 'contractor';
-
-    // Mock authentication
-    auth()->login($user);
-
-    return view('test-dashboard');
-});
-
-// Test route for subscription system
-Route::get('/test-subscription', function () {
-    return view('test-subscription');
-});
-
-// Test route for Location API
-Route::get('/test-locations', function () {
-    return view('location-test');
-});
-
-// Test route for OpenStreetMap / Leaflet
-Route::get('/test-maps', function () {
-    return view('test-maps');
-});
-
-// Debug route for API testing
-Route::get('/debug-api', function () {
-    return view('debug-api');
-});
 
 // Main dashboard route that redirects to the appropriate dashboard based on user type
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -90,6 +56,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('support', [ClientPortalController::class, 'storeSupport'])->name('client.support.submit');
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
         Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
+        Route::get('location', [ClientPortalController::class, 'location'])->name('client.location');
+        Route::post('location', [ClientPortalController::class, 'updateLocation'])->name('client.location.update');
 
         // Payment Routes
         Route::get('payments/{invoice}/checkout', [App\Http\Controllers\PaymentController::class, 'checkout'])->name('client.payments.checkout');
@@ -125,8 +93,38 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
             ->name('contractor.clients.resend-invitation');
         Route::post('clients/{client}/reset-password', [ClientController::class, 'resetPassword'])
             ->name('contractor.clients.reset-password');
+        Route::post('clients/geocode-bulk', [GeocodingController::class, 'geocodeBulk'])
+            ->name('contractor.clients.geocode-bulk');
+        Route::post('clients/{client}/geocode', [GeocodingController::class, 'geocodeClient'])
+            ->name('contractor.clients.geocode');
 
         Route::get('feedback', [ContractorFeedbackController::class, 'index'])->name('contractor.feedback.index');
+        Route::get('feedback/{feedback}', [ContractorFeedbackController::class, 'show'])->name('contractor.feedback.show');
+        Route::post('feedback/{feedback}/respond', [ContractorFeedbackController::class, 'respond'])->name('contractor.feedback.respond');
+        Route::post('feedback/{feedback}/status', [ContractorFeedbackController::class, 'updateStatus'])->name('contractor.feedback.status');
+
+        Route::resource('equipment', \App\Http\Controllers\ContractorEquipmentController::class)->names([
+            'index' => 'contractor.equipment.index',
+            'create' => 'contractor.equipment.create',
+            'store' => 'contractor.equipment.store',
+            'show' => 'contractor.equipment.show',
+            'edit' => 'contractor.equipment.edit',
+            'update' => 'contractor.equipment.update',
+            'destroy' => 'contractor.equipment.destroy',
+        ]);
+        Route::post('equipment/{equipment}/toggle', [\App\Http\Controllers\ContractorEquipmentController::class, 'toggleAvailability'])
+            ->name('contractor.equipment.toggle');
+
+        Route::resource('pricing', \App\Http\Controllers\ContractorServicePricingController::class)->names([
+            'index' => 'contractor.pricing.index',
+            'create' => 'contractor.pricing.create',
+            'store' => 'contractor.pricing.store',
+            'edit' => 'contractor.pricing.edit',
+            'update' => 'contractor.pricing.update',
+            'destroy' => 'contractor.pricing.destroy',
+        ]);
+        Route::post('pricing/{price}/toggle', [\App\Http\Controllers\ContractorServicePricingController::class, 'toggleActive'])
+            ->name('contractor.pricing.toggle');
     });
 
     // Invoice management for contractors
@@ -162,10 +160,7 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
 
 
 
-    // Registration routes
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+
 
 // Client registration routes
 Route::get('/register/client', [UserTypeController::class, 'createClient'])->name('register.client');

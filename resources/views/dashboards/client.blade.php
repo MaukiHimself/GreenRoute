@@ -22,6 +22,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{{ route('client.location') }}">
+                    <i class="bi bi-geo-alt me-2"></i>My Location
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{{ route('client.chats') }}">
                     <i class="bi bi-chat-dots me-2"></i>Chats
                 </a>

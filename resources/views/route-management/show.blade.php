@@ -141,13 +141,24 @@
                     </h4>
                     
                     @forelse($clients as $index => $client)
-                        <div class="client-card" data-client-id="{{ $client->id }}" data-lat="{{ $client->latitude }}" data-lng="{{ $client->longitude }}" data-name="{{ $client->name }}">
+                        <div class="client-card" 
+                             data-client-id="{{ $client->id }}" 
+                             data-lat="{{ $client->latitude }}" 
+                             data-lng="{{ $client->longitude }}"
+                             data-name="{{ $client->name }}"
+                             data-address="{{ $client->address }}"
+                             data-city="{{ $client->city }}"
+                             data-state="{{ $client->state }}"
+                             data-zipcode="{{ $client->zip_code }}"
+                             data-phone="{{ $client->phone }}"
+                             data-email="{{ $client->email }}"
+                             data-category="{{ $client->category }}">
                             <div class="row align-items-center">
                                 <div class="col-md-5">
                                     <h5 class="mb-1">
                                         <span class="badge me-2" style="background-color: {{ $contractorRoute->color }}; color: white;">{{ $index + 1 }}</span>{{ $client->name }}
                                     </h5>
-                                    <div class="text-muted small">
+                                    <div class="phone-display text-muted small">
                                         <i class="bi bi-telephone me-1"></i>{{ $client->phone }}
                                     </div>
                                     @if($client->email)
@@ -218,43 +229,62 @@
         const routeColor = "{{ $contractorRoute->color ?? '#055c5c' }}";
         const token = "{{ config('services.heigit.api_key') }}";
         const markerEntries = {};
+        let routeCoordinates = [];
 
         GreenRouteMap.whenReady(async function () {
             const mapEl = document.getElementById('map');
             if (!mapEl) return;
 
-            const routeCoordinates = [];
-            
+            const clientsWithCoords = [];
+            const clientsWithoutCoords = [];
+
             clients.forEach((client, index) => {
                 if (client.latitude && client.longitude) {
-                    routeCoordinates.push({
-                        id: client.id,
-                        lat: parseFloat(client.latitude),
-                        lng: parseFloat(client.longitude),
-                        name: client.name,
-                        address: client.address,
-                        index: index + 1
-                    });
+                    clientsWithCoords.push({...client, originalIndex: index});
+                } else {
+                    clientsWithoutCoords.push({...client, originalIndex: index});
                 }
             });
 
-            if (routeCoordinates.length === 0) {
-                GreenRouteMap.showMapError('map', 'No client coordinates available for mapping.');
+            if (clientsWithCoords.length === 0 && clientsWithoutCoords.length === 0) {
+                GreenRouteMap.showMapError('map', 'No clients assigned to this route.');
                 document.getElementById('route-distance-badge').textContent = 'Distance: 0 km';
                 return;
             }
 
-            // Create map centered on first client
+            // Geocode clients without coordinates using Nominatim (free OSM geocoder)
+            if (clientsWithoutCoords.length > 0) {
+                const geocoded = await geocodeClients(clientsWithoutCoords);
+                clientsWithCoords.push(...geocoded);
+            }
+
+            // Build route coordinates array
+            clientsWithCoords.forEach((client) => {
+                routeCoordinates.push({
+                    id: client.id,
+                    lat: parseFloat(client.latitude),
+                    lng: parseFloat(client.longitude),
+                    name: client.name,
+                    address: [client.address, client.city, client.state, client.zip_code].filter(Boolean).join(', '),
+                    index: 0
+                });
+            });
+
+            // Optimize route using nearest-neighbor
+            const optimizedRoute = optimizeRoute(routeCoordinates);
+
+            // Create map
             mapCtx = GreenRouteMap.createMap('map', { 
-                lat: routeCoordinates[0].lat, 
-                lng: routeCoordinates[0].lng, 
+                lat: optimizedRoute[0].lat, 
+                lng: optimizedRoute[0].lng, 
                 zoom: 13 
             });
 
             if (!mapCtx) return;
 
-            // Plot markers
-            routeCoordinates.forEach(point => {
+            // Plot optimized markers with sequence numbers
+            optimizedRoute.forEach((point, i) => {
+                point.index = i + 1;
                 const markerEntry = GreenRouteMap.addNumberedMarker(mapCtx, point.lat, point.lng, point.index, {
                     title: point.name,
                     popup: `<strong>Stop ${point.index}: ${point.name}</strong><br>${point.address || ''}`,
@@ -262,16 +292,16 @@
                 markerEntries[point.id] = markerEntry;
             });
 
-            GreenRouteMap.fitBounds(mapCtx, routeCoordinates);
+            GreenRouteMap.fitBounds(mapCtx, optimizedRoute);
 
-            // Draw road route path sequentially
-            if (routeCoordinates.length >= 2) {
-                const summary = await GreenRouteMap.drawRoadRoute(mapCtx, routeCoordinates, token);
+            // Draw driving route
+            if (optimizedRoute.length >= 2) {
+                const summary = await GreenRouteMap.drawRoadRoute(mapCtx, optimizedRoute, token);
                 if (summary) {
                     document.getElementById('route-distance-badge').textContent = `Distance: ${summary.distance.toFixed(1)} km`;
                 } else {
-                    GreenRouteMap.drawPolyline(mapCtx, routeCoordinates, { color: routeColor });
-                    const distance = calculateDirectDistance(routeCoordinates);
+                    GreenRouteMap.drawPolyline(mapCtx, optimizedRoute, { color: routeColor });
+                    const distance = calculateDirectDistance(optimizedRoute);
                     document.getElementById('route-distance-badge').textContent = `Distance: ${distance} km (direct)`;
                 }
             } else {
@@ -279,36 +309,176 @@
             }
 
             // Client Cards Interactions
-            document.querySelectorAll('.client-card').forEach(card => {
-                const clientId = card.getAttribute('data-client-id');
-                const lat = parseFloat(card.getAttribute('data-lat'));
-                const lng = parseFloat(card.getAttribute('data-lng'));
+            rebuildClientCards(optimizedRoute);
+        });
 
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    card.style.cursor = 'pointer';
-                    
-                    // Click interaction to focus map on Stop
-                    card.addEventListener('click', function () {
-                        if (mapCtx) {
-                            GreenRouteMap.setView(mapCtx, lat, lng, 15);
-                            const markerEntry = markerEntries[clientId];
-                            if (markerEntry && markerEntry.leaflet) {
-                                markerEntry.leaflet.openPopup();
-                            }
+        function rebuildClientCards(optimizedRoute) {
+            // Update stop numbers on existing cards
+            const stopMap = {};
+            optimizedRoute.forEach((point, i) => {
+                stopMap[point.id] = { ...point, stopNumber: i + 1 };
+            });
+
+            document.querySelectorAll('.client-card').forEach(card => {
+                const clientId = parseInt(card.getAttribute('data-client-id'));
+                const stop = stopMap[clientId];
+
+                if (!stop) return;
+
+                const lat = stop.lat;
+                const lng = stop.lng;
+                const name = stop.name;
+                const address = stop.address;
+                const phone = card.dataset.phone || '';
+                const email = card.dataset.email || '';
+                const category = card.dataset.category || '';
+                const color = "{{ $contractorRoute->color }}";
+
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <h5 class="mb-1">
+                                <span class="badge me-2" style="background-color: ${color}; color: white;">${stop.stopNumber}</span>${name}
+                            </h5>
+                            ${phone ? `<div class="text-muted small"><i class="bi bi-telephone me-1"></i>${phone}</div>` : ''}
+                            ${email ? `<div class="text-muted small"><i class="bi bi-envelope me-1"></i>${email}</div>` : ''}
+                        </div>
+                        <div class="col-md-5">
+                            <div class="small">
+                                <i class="bi bi-geo-alt text-primary me-1"></i>
+                                <strong>${address}</strong>
+                            </div>
+                            ${stop.lat ? `<div class="small text-muted mt-1"><i class="bi bi-pin-map-fill me-1"></i>GPS: ${stop.lat.toFixed(6)}, ${stop.lng.toFixed(6)}</div>` : '<div class="small text-warning mt-1"><i class="bi bi-search me-1"></i>Location estimated from address</div>'}
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <span class="badge bg-${category === 'residential' ? 'success' : 'warning'} d-block mb-1">${category ? category.charAt(0).toUpperCase() + category.slice(1) : ''}</span>
+                        </div>
+                    </div>`;
+
+                card.addEventListener('click', function () {
+                    if (mapCtx) {
+                        GreenRouteMap.setView(mapCtx, lat, lng, 15);
+                        const markerEntry = markerEntries[clientId];
+                        if (markerEntry && markerEntry.leaflet) {
+                            markerEntry.leaflet.openPopup();
+                        }
+                    }
+                });
+
+                card.addEventListener('mouseenter', function () {
+                    card.style.backgroundColor = '#f1f5f9';
+                });
+                card.addEventListener('mouseleave', function () {
+                    card.style.backgroundColor = '';
+                });
+            });
+        }
                         }
                     });
 
-                    // Hover hover states
                     card.addEventListener('mouseenter', function () {
                         card.style.backgroundColor = '#f1f5f9';
                     });
-
                     card.addEventListener('mouseleave', function () {
                         card.style.backgroundColor = '';
                     });
                 }
             });
-        });
+        }
+
+        async function geocodeClients(clients) {
+            const results = [];
+            for (const client of clients) {
+                const addressParts = [client.address, client.city, client.state, client.zip_code].filter(Boolean);
+                const address = addressParts.join(', ');
+                if (!address) {
+                    client.latitude = null;
+                    client.longitude = null;
+                    results.push(client);
+                    continue;
+                }
+
+                client.latitude = null;
+                client.longitude = null;
+                results.push(client);
+
+                try {
+                    const response = await fetch(`/dashboard/contractor/clients/${client.id}/geocode`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        client.latitude = data.data.latitude;
+                        client.longitude = data.data.longitude;
+                    }
+                } catch (err) {
+                    console.warn('Geocoding failed, will try direct Nominatim', err);
+                    try {
+                        const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+                        const fallbackResp = await fetch(fallbackUrl, {
+                            headers: { 'User-Agent': '{{ env('NOMINATIM_USER_AGENT', 'GreenRoute/1.0') }}' }
+                        });
+                        const fallbackData = await fallbackResp.json();
+                        if (fallbackData && fallbackData.length > 0) {
+                            client.latitude = parseFloat(fallbackData[0].lat);
+                            client.longitude = parseFloat(fallbackData[0].lon);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1100));
+                    } catch (directErr) {
+                        console.warn('Direct Nominatim also failed', directErr);
+                    }
+                }
+            }
+            return results;
+        }
+
+        function optimizeRoute(coordinates) {
+            // Filter out any entries with invalid coordinates
+            const valid = coordinates.filter(c => c.lat && c.lng && 
+                !isNaN(parseFloat(c.lat)) && !isNaN(parseFloat(c.lng)));
+            
+            if (valid.length <= 1) return valid;
+
+            const optimized = [];
+            const used = new Set();
+
+            let current = valid[0];
+            optimized.push(current);
+            used.add(current.id);
+
+            while (used.size < valid.length) {
+                let nearestIdx = -1;
+                let nearestDist = Infinity;
+                const currLat = optimized[optimized.length - 1].lat;
+                const currLng = optimized[optimized.length - 1].lng;
+
+                for (let i = 0; i < valid.length; i++) {
+                    if (used.has(valid[i].id)) continue;
+                    const d = GreenRouteMap.haversineKm(
+                        currLat, currLng,
+                        valid[i].lat, valid[i].lng
+                    );
+                    if (d < nearestDist) {
+                        nearestDist = d;
+                        nearestIdx = i;
+                    }
+                }
+
+                if (nearestIdx !== -1) {
+                    optimized.push(valid[nearestIdx]);
+                    used.add(valid[nearestIdx].id);
+                } else {
+                    break;
+                }
+            }
+
+            return optimized;
+        }
 
         function calculateDirectDistance(coordinates) {
             let totalDistance = 0;

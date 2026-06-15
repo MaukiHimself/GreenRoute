@@ -238,6 +238,8 @@ class ClientPortalController extends Controller
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:10',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $client->update($validated);
@@ -267,7 +269,17 @@ class ClientPortalController extends Controller
         abort_unless($client, 404);
 
         $products = Product::all();
-        return view('client_portal.request_service', compact('client', 'products'));
+
+        $servicePrices = collect();
+        if ($client->contractor_id) {
+            $servicePrices = \App\Models\ServicePrice::where('contractor_id', $client->contractor_id)
+                ->where('is_active', true)
+                ->orderBy('service_type')
+                ->orderBy('volume_tier')
+                ->get();
+        }
+
+        return view('client_portal.request_service', compact('client', 'products', 'servicePrices'));
     }
 
     public function storeServiceRequest(Request $request)
@@ -486,5 +498,28 @@ class ClientPortalController extends Controller
         ]);
 
         return redirect()->route('client.support')->with('success', 'Support ticket submitted successfully.');
+    }
+
+    public function location()
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        return view('client_portal.location', compact('client'));
+    }
+
+    public function updateLocation(Request $request)
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        $validated = $request->validate([
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+        ]);
+
+        $client->update($validated);
+
+        return redirect()->route('client.location')->with('success', 'GPS location updated successfully. Your contractor can now use this for route optimization and scheduling.');
     }
 }
