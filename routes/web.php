@@ -13,6 +13,7 @@ use App\Http\Controllers\ContractorFeedbackController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\PaymentSubmissionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ContractorPaymentApprovalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -44,10 +45,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('profile/picture', [ProfileController::class, 'uploadPicture'])->name('client.profile.picture');
         Route::post('profile/dark-mode', [ProfileController::class, 'toggleDarkMode'])->name('client.profile.dark-mode');
         Route::post('profile/password', [ProfileController::class, 'updatePassword'])->name('client.profile.password');
+        Route::get('billing-rates', [ClientPortalController::class, 'billingRates'])->name('client.billing-rates');
         Route::get('schedules', [ClientPortalController::class, 'schedules'])->name('client.schedules');
         Route::get('request-service', [ClientPortalController::class, 'requestService'])->name('client.request.service');
         Route::post('request-service', [ClientPortalController::class, 'storeServiceRequest'])->name('client.request.service.store');
         Route::get('equipment', [ClientPortalController::class, 'equipment'])->name('client.equipment');
+        Route::post('equipment/{product}/request', [ClientPortalController::class, 'requestEquipment'])->name('client.equipment.request');
         Route::get('contractor-info', [ClientPortalController::class, 'contractorInfo'])->name('client.contractor.info');
         Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
         Route::get('payments', [ClientPortalController::class, 'payments'])->name('client.payments');
@@ -114,6 +117,10 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
         ]);
         Route::post('equipment/{equipment}/toggle', [\App\Http\Controllers\ContractorEquipmentController::class, 'toggleAvailability'])
             ->name('contractor.equipment.toggle');
+        Route::get('equipment-requests', [\App\Http\Controllers\ContractorEquipmentController::class, 'requests'])
+            ->name('contractor.equipment.requests');
+        Route::post('equipment-requests/{equipmentRequest}/respond', [\App\Http\Controllers\ContractorEquipmentController::class, 'respondRequest'])
+            ->name('contractor.equipment.requests.respond');
 
         Route::resource('pricing', \App\Http\Controllers\ContractorServicePricingController::class)->names([
             'index' => 'contractor.pricing.index',
@@ -125,6 +132,7 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
         ]);
         Route::post('pricing/{price}/toggle', [\App\Http\Controllers\ContractorServicePricingController::class, 'toggleActive'])
             ->name('contractor.pricing.toggle');
+
     });
 
     // Invoice management for contractors
@@ -308,6 +316,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
         // Billing Rates Management routes
         Route::get('/billing-rates', [App\Http\Controllers\AdminController::class, 'billingRates'])->name('admin.billing.rates');
+        Route::get('/billing-rate-changes', [App\Http\Controllers\AdminController::class, 'billingRateChanges'])->name('admin.billing.rate-changes');
         Route::get('/billing-rates/create', [App\Http\Controllers\AdminController::class, 'createBillingRate'])->name('admin.billing.rates.create');
         Route::post('/billing-rates', [App\Http\Controllers\AdminController::class, 'storeBillingRate'])->name('admin.billing.rates.store');
         Route::get('/billing-rates/{rate}/edit', [App\Http\Controllers\AdminController::class, 'editBillingRate'])->name('admin.billing.rates.edit');
@@ -348,6 +357,8 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
         Route::get('/', [ScheduleController::class, 'index'])->name('schedules.index');
         Route::get('/create', [ScheduleController::class, 'create'])->name('schedules.create');
         Route::post('/', [ScheduleController::class, 'store'])->name('schedules.store');
+        Route::get('/{schedule}/edit', [ScheduleController::class, 'edit'])->name('schedules.edit');
+        Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('schedules.update');
         Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('schedules.show');
         Route::get('/{schedule}/print', [ScheduleController::class, 'print'])->name('schedules.print');
         Route::post('/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.status');

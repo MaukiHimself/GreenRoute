@@ -248,6 +248,9 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('schedules.edit', $schedule) }}" class="btn-primary-custom">
+                        <i class="bi bi-pencil"></i> Edit Billing
+                    </a>
                     <a href="{{ route('schedules.print', $schedule) }}" class="btn-primary-custom" target="_blank">
                         <i class="bi bi-printer"></i> Print
                     </a>
@@ -306,6 +309,43 @@
                 </table>
             </div>
         </div>
+
+        @if($schedule->displayed_price !== null || $schedule->billingRate)
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="bi bi-currency-dollar me-2"></i>Billing Price
+            </h2>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Official Billing Rate</th>
+                            <td>{{ $schedule->billingRateLabel ?? 'Manual contractor price' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Official Fee</th>
+                            <td>{{ $schedule->base_collection_fee !== null ? 'TZS ' . number_format($schedule->base_collection_fee, 2) : 'Not set' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Contractor Adjusted Price</th>
+                            <td>{{ $schedule->contractor_adjusted_fee !== null ? 'TZS ' . number_format($schedule->contractor_adjusted_fee, 2) : 'Not changed' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Final Schedule Price</th>
+                            <td class="fw-bold">{{ $schedule->displayed_price !== null ? 'TZS ' . number_format($schedule->displayed_price, 2) : 'Not set' }}</td>
+                        </tr>
+                        @if($schedule->billing_rate_change_reason)
+                        <tr>
+                            <th>Reason</th>
+                            <td>{{ $schedule->billing_rate_change_reason }}</td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         <!-- Notes Section -->
         @if($schedule->notes)

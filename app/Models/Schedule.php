@@ -15,6 +15,15 @@ class Schedule extends Model
         'client_registration_number',
         'route',
         'route_group_id',
+        'billing_rate_id',
+        'billing_rate_category',
+        'billing_rate_location',
+        'billing_rate_frequency',
+        'base_collection_fee',
+        'contractor_adjusted_fee',
+        'schedule_price',
+        'billing_rate_change_reason',
+        'billing_rate_modified_at',
         'pickup_date',
         'pickup_time',
         'scheduled_date',
@@ -43,6 +52,10 @@ class Schedule extends Model
         'scheduled_date' => 'date',
         'scheduled_time' => 'datetime:H:i',
         'estimated_duration' => 'decimal:2',
+        'base_collection_fee' => 'decimal:2',
+        'contractor_adjusted_fee' => 'decimal:2',
+        'schedule_price' => 'decimal:2',
+        'billing_rate_modified_at' => 'datetime',
         'service_type' => 'string',
         'frequency' => 'string',
         'includes_organic_waste' => 'boolean',
@@ -59,9 +72,50 @@ class Schedule extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function billingRate(): BelongsTo
+    {
+        return $this->belongsTo(BillingRate::class);
+    }
+
+    public function billingRateChanges(): HasMany
+    {
+        return $this->hasMany(ContractorBillingRateChange::class);
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function getBillingRateLabelAttribute(): ?string
+    {
+        if ($this->billingRate) {
+            return $this->billingRate->label;
+        }
+
+        return collect([
+            $this->billing_rate_category,
+            $this->billing_rate_location,
+            $this->billing_rate_frequency ? ucfirst(str_replace('-', ' ', $this->billing_rate_frequency)) : null,
+        ])->filter()->implode(' - ');
+    }
+
+    public function getDisplayedPriceAttribute(): ?float
+    {
+        return $this->schedule_price ?? $this->contractor_adjusted_fee ?? $this->base_collection_fee;
+    }
+
+    public function getHasBillingAdjustmentAttribute(): bool
+    {
+        if ($this->contractor_adjusted_fee === null) {
+            return false;
+        }
+
+        if ($this->base_collection_fee === null) {
+            return true;
+        }
+
+        return (float) $this->contractor_adjusted_fee !== (float) $this->base_collection_fee;
     }
 
     public function getFullAddressAttribute(): string

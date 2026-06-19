@@ -15,6 +15,8 @@ class Invoice extends Model
         'contractor_registration_number',
         'client_registration_number',
         'schedule_id',
+        'service_price_id',
+        'product_id',
         'invoice_date',
         'due_date',
         'status',
@@ -57,6 +59,16 @@ class Invoice extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    public function servicePrice(): BelongsTo
+    {
+        return $this->belongsTo(ServicePrice::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function paymentSubmissions()

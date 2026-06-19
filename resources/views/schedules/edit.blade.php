@@ -87,6 +87,49 @@
                     @enderror
                 </div>
 
+                <!-- Billing Rate -->
+                <div class="mb-6">
+                    <label for="billing_rate_id" class="block text-sm font-medium text-gray-700 mb-2">Official Billing Rate</label>
+                    <select name="billing_rate_id" id="billing_rate_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('billing_rate_id') border-red-500 @enderror">
+                        <option value="">Select an official billing rate</option>
+                        @foreach($billingRates as $rate)
+                            <option value="{{ $rate->id }}" data-fee="{{ $rate->collection_fee }}" {{ old('billing_rate_id', $schedule->billing_rate_id) == $rate->id ? 'selected' : '' }}>
+                                {{ $rate->label }} - TZS {{ number_format($rate->collection_fee, 2) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('billing_rate_id')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="contractor_adjusted_fee" class="block text-sm font-medium text-gray-700 mb-2">Contractor Adjusted Price (TZS)</label>
+                        <input type="number" name="contractor_adjusted_fee" id="contractor_adjusted_fee" value="{{ old('contractor_adjusted_fee', $schedule->contractor_adjusted_fee) }}"
+                               step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('contractor_adjusted_fee') border-red-500 @enderror">
+                        @error('contractor_adjusted_fee')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="schedule_price_preview" class="block text-sm font-medium text-gray-700 mb-2">Schedule Price (TZS)</label>
+                        <input type="text" name="schedule_price_preview" id="schedule_price_preview" value="TZS {{ number_format($schedule->displayed_price ?? 0, 2) }}" readonly
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="billing_rate_change_reason" class="block text-sm font-medium text-gray-700 mb-2">Reason for Rate Selection or Price Override</label>
+                    <textarea name="billing_rate_change_reason" id="billing_rate_change_reason" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('billing_rate_change_reason') border-red-500 @enderror"
+                              placeholder="Example: Client requested additional service, difficult access, or volume difference">{{ old('billing_rate_change_reason', $schedule->billing_rate_change_reason) }}</textarea>
+                    @error('billing_rate_change_reason')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Location Details -->
                 <div class="mb-6">
                     <label for="pickup_location" class="block text-sm font-medium text-gray-700 mb-2">Pickup Location *</label>
@@ -172,4 +215,21 @@
         </div>
     </div>
 </div>
+<script>
+function updateBillingPreview() {
+    const rateSelect = document.getElementById('billing_rate_id');
+    const overrideInput = document.getElementById('contractor_adjusted_fee');
+    const preview = document.getElementById('schedule_price_preview');
+    const selectedOption = rateSelect.options[rateSelect.selectedIndex];
+    const officialFee = selectedOption.dataset.fee ? parseFloat(selectedOption.dataset.fee) : null;
+    const overrideFee = overrideInput.value.trim() === '' ? null : parseFloat(overrideInput.value);
+    const finalFee = overrideFee !== null ? overrideFee : officialFee;
+
+    preview.value = finalFee !== null ? 'TZS ' + finalFee.toFixed(2) : 'TZS 0.00';
+}
+
+document.getElementById('billing_rate_id').addEventListener('change', updateBillingPreview);
+document.getElementById('contractor_adjusted_fee').addEventListener('input', updateBillingPreview);
+updateBillingPreview();
+</script>
 @endsection

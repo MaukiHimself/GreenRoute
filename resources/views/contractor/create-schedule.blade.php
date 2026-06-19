@@ -262,6 +262,49 @@
                         </div>
                     </div>
 
+                    <!-- Billing Rate -->
+                    <div class="mb-4">
+                        <label for="billing_rate_id" class="form-label">
+                            Official Billing Rate
+                        </label>
+                        <select name="billing_rate_id" id="billing_rate_id" class="form-select">
+                            <option value="">Select an official billing rate</option>
+                            @foreach($billingRates as $rate)
+                                <option value="{{ $rate->id }}" data-fee="{{ $rate->collection_fee }}">
+                                    {{ $rate->label }} - TZS {{ number_format($rate->collection_fee, 2) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Official rates come from the admin billing rate table. Leave blank to enter a contractor price manually.</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="contractor_adjusted_fee" class="form-label">
+                                Contractor Adjusted Price (TZS)
+                            </label>
+                            <input type="number" name="contractor_adjusted_fee" id="contractor_adjusted_fee"
+                                   step="0.01" min="0" class="form-control"
+                                   placeholder="Leave blank to use the official rate">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="schedule_price_preview" class="form-label">
+                                Schedule Price (TZS)
+                            </label>
+                            <input type="text" name="schedule_price_preview" id="schedule_price_preview"
+                                   class="form-control" readonly value="TZS 0.00">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="billing_rate_change_reason" class="form-label">
+                            Reason for Rate Selection or Price Override
+                        </label>
+                        <textarea name="billing_rate_change_reason" id="billing_rate_change_reason" rows="3"
+                                  class="form-control"
+                                  placeholder="Example: Client requested additional service, difficult access, or volume difference"></textarea>
+                    </div>
+
                     <!-- Additional Fields -->
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3">
@@ -310,6 +353,11 @@
 <script>
 const allClientsData = @json($clients);
 const allRoutesData  = @json($routes);
+const billingRates = @json($billingRates->map(fn($rate) => [
+    'id' => $rate->id,
+    'fee' => (float) $rate->collection_fee,
+    'label' => $rate->label,
+]));
 
 const autocompleteInput = document.getElementById('locationAutocomplete');
 const dropdown          = document.getElementById('locationDropdown');
@@ -501,6 +549,21 @@ function updateCount() {
 }
 function selectAll()   { document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = true);  updateCount(); }
 function deselectAll() { document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = false); updateCount(); }
+
+function updateBillingPreview() {
+    const rateSelect = document.getElementById('billing_rate_id');
+    const overrideInput = document.getElementById('contractor_adjusted_fee');
+    const preview = document.getElementById('schedule_price_preview');
+    const selectedOption = rateSelect.options[rateSelect.selectedIndex];
+    const officialFee = selectedOption.dataset.fee ? parseFloat(selectedOption.dataset.fee) : null;
+    const overrideFee = overrideInput.value.trim() === '' ? null : parseFloat(overrideInput.value);
+    const finalFee = overrideFee !== null ? overrideFee : officialFee;
+
+    preview.value = finalFee !== null ? 'TZS ' + finalFee.toFixed(2) : 'TZS 0.00';
+}
+
+document.getElementById('billing_rate_id').addEventListener('change', updateBillingPreview);
+document.getElementById('contractor_adjusted_fee').addEventListener('input', updateBillingPreview);
 
 document.getElementById('scheduleForm').addEventListener('submit', function (e) {
     if (document.querySelectorAll('.client-checkbox:checked').length === 0) {

@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\ContractorRoute;
 use App\Models\ContractorLocation;
 use App\Models\BillingRate;
+use App\Models\ContractorBillingRateChange;
 use App\Mail\ContractorApproved;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -146,7 +147,7 @@ class AdminController extends Controller
     public function schedules(Request $request)
     {
         // Build query with filters
-        $query = \App\Models\Schedule::with(['client', 'contractor']);
+        $query = \App\Models\Schedule::with(['client', 'contractor', 'billingRate']);
 
         // Filter by contractor
         if ($request->filled('contractor_id')) {
@@ -628,6 +629,46 @@ class AdminController extends Controller
         $commercialRates = BillingRate::where('category', 'LIKE', 'Commercial%')->count();
 
         return view('admin.billing-rates', compact('rates', 'categories', 'locations', 'totalRates', 'activeRates', 'residentialRates', 'commercialRates'));
+    }
+
+    public function billingRateChanges(Request $request)
+    {
+        $query = ContractorBillingRateChange::with([
+            'contractor',
+            'client',
+            'schedule',
+            'billingRate',
+            'oldBillingRate',
+            'newBillingRate',
+        ]);
+
+        if ($request->filled('contractor_id')) {
+            $query->where('contractor_id', $request->contractor_id);
+        }
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $changes = $query->orderByDesc('created_at')->paginate(30);
+
+        $contractors = User::where('user_type', 'contractor')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.billing-rate-changes', [
+            'changes' => $changes,
+            'contractors' => $contractors,
+            'filters' => $request->only(['contractor_id', 'action', 'date_from', 'date_to']),
+        ]);
     }
 
     public function createBillingRate()

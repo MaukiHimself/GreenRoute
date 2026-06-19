@@ -36,6 +36,7 @@
                 <th>Category</th>
                 <th>Phone</th>
                 <th>Completed</th>
+                <th>Price</th>
                 <th>Notes</th>
             </tr>
         </thead>
@@ -47,6 +48,7 @@
                 <td>{{ ucfirst($locationSchedule->client->category) }}</td>
                 <td>{{ $locationSchedule->client->phone }}</td>
                 <td><span class="checkbox"></span></td>
+                <td>{{ $locationSchedule->displayed_price !== null ? 'TZS ' . number_format($locationSchedule->displayed_price, 2) : 'Not set' }}</td>
                 <td style="width: 150px; border-bottom: 1px solid #ccc;">&nbsp;</td>
             </tr>
             @endforeach

@@ -235,7 +235,12 @@
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">Disposal Schedule</h1>
+            <div>
+                <h1 class="page-title">Disposal Schedule</h1>
+            </div>
+            <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Return
+            </a>
         </div>
 
         <!-- Disposal Table - No Cards -->

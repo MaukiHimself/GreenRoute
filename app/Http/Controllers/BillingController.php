@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Client;
+use App\Models\ServicePrice;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -81,7 +83,17 @@ class BillingController extends Controller
     public function create()
     {
         $clients = Client::where('contractor_id', Auth::id())->get();
-        return view('billing.create', compact('clients'));
+        $services = ServicePrice::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('service_type')
+            ->orderBy('volume_tier')
+            ->get();
+        $equipments = Product::where('contractor_id', Auth::id())
+            ->where('is_available', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('billing.create', compact('clients', 'services', 'equipments'));
     }
 
     public function store(Request $request)
@@ -91,19 +103,45 @@ class BillingController extends Controller
             'service_type' => 'required|string',
             'description' => 'required|string',
             'due_date' => 'required|date|after:today',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'service_price_id' => ['nullable', 'exists:service_prices,id'],
+            'product_id' => ['nullable', 'exists:products,id'],
         ];
 
         if ($request->input('mode') === 'single') {
-            $rules['client_id'] = 'required|exists:clients,id';
-            $rules['subtotal'] = 'required|numeric|min:0';
+            $rules['client_id'] = ['required', 'exists:clients,id'];
+            $rules['subtotal'] = ['nullable', 'numeric', 'min:0'];
         } else {
-            $rules['client_ids'] = 'required|array|min:1';
-            $rules['client_ids.*'] = 'exists:clients,id';
-            $rules['subtotal'] = 'nullable|numeric|min:0'; // Optional for group mode
+            $rules['client_ids'] = ['required', 'array', 'min:1'];
+            $rules['client_ids.*'] = ['exists:clients,id'];
+            $rules['subtotal'] = ['nullable', 'numeric', 'min:0'];
         }
 
         $validated = $request->validate($rules);
+
+        if ($request->filled('service_price_id')) {
+            $servicePrice = ServicePrice::where('id', $validated['service_price_id'])
+                ->where('contractor_id', Auth::id())
+                ->where('is_active', true)
+                ->firstOrFail();
+        } else {
+            $servicePrice = null;
+        }
+
+        if ($request->filled('product_id')) {
+            $equipment = Product::where('id', $validated['product_id'])
+                ->where('contractor_id', Auth::id())
+                ->where('is_available', true)
+                ->firstOrFail();
+        } else {
+            $equipment = null;
+        }
+
+        if ($request->input('mode') === 'single' && empty($validated['subtotal']) && !$servicePrice && !$equipment) {
+            return redirect()->back()
+                ->withErrors(['subtotal' => 'Enter a subtotal or select a service/equipment item.'])
+                ->withInput();
+        }
 
         $clientIds = [];
         if ($request->input('mode') === 'single') {
@@ -114,44 +152,65 @@ class BillingController extends Controller
 
         $count = 0;
         foreach ($clientIds as $clientId) {
+            $client = Client::where('id', $clientId)->where('contractor_id', Auth::id())->firstOrFail();
             $invoice = new Invoice();
             $invoice->invoice_number = $invoice->generateInvoiceNumber();
             $invoice->contractor_id = Auth::id();
             $invoice->client_id = $clientId;
+            $invoice->service_price_id = $servicePrice?->id;
+            $invoice->product_id = $equipment?->id;
             $invoice->invoice_date = now();
             $invoice->due_date = $validated['due_date'];
             $invoice->status = 'draft';
-            
-            // Determine subtotal based on mode
+
+            $manualSubtotal = (float) ($validated['subtotal'] ?? 0);
+            $serviceSubtotal = $servicePrice?->price ? (float) $servicePrice->price : 0;
+            $equipmentSubtotal = $equipment?->price ? (float) $equipment->price : 0;
+
             if ($request->input('mode') === 'group') {
-                $client = Client::find($clientId);
-                // Automated pricing based on category
-                if ($client && isset(self::CATEGORY_PRICES[$client->category])) {
-                    $invoice->subtotal = self::CATEGORY_PRICES[$client->category];
-                } else {
-                    // Fallback to manual subtotal if category not found or price not set
-                    $invoice->subtotal = $validated['subtotal'] ?? 0;
-                }
+                $categorySubtotal = isset(self::CATEGORY_PRICES[$client->category])
+                    ? (float) self::CATEGORY_PRICES[$client->category]
+                    : 0;
+
+                $invoice->subtotal = $categorySubtotal + $serviceSubtotal + $equipmentSubtotal + $manualSubtotal;
             } else {
-                // Single mode uses manual subtotal
-                $invoice->subtotal = $validated['subtotal'];
+                $invoice->subtotal = $manualSubtotal + $serviceSubtotal + $equipmentSubtotal;
             }
 
-            $invoice->tax_rate = 0; // Tax rate removed
+            $invoice->tax_rate = 0;
             $invoice->service_type = $validated['service_type'];
             $invoice->description = $validated['description'];
-            $invoice->notes = $validated['notes'];
+            $invoice->notes = $this->buildBillingNotes($validated['notes'] ?? null, $servicePrice, $equipment);
             $invoice->amount_paid = 0;
-            
+
             $invoice->calculateTotals();
             $count++;
         }
 
-        $message = $count > 1 
-            ? "$count invoices created successfully" 
+        $message = $count > 1
+            ? "$count invoices created successfully"
             : 'Invoice created successfully';
 
         return redirect()->route('billing.index')->with('success', $message);
+    }
+
+    private function buildBillingNotes(?string $notes, ?ServicePrice $servicePrice, ?Product $equipment): ?string
+    {
+        $items = [];
+
+        if ($servicePrice) {
+            $items[] = 'Service: ' . ServicePrice::getLabel($servicePrice->service_type) . ' - TZS ' . number_format($servicePrice->price, 2);
+        }
+
+        if ($equipment) {
+            $items[] = 'Equipment: ' . ($equipment->name ?? 'Equipment') . ' - TZS ' . number_format($equipment->price ?? 0, 2);
+        }
+
+        if ($notes) {
+            $items[] = 'Notes: ' . $notes;
+        }
+
+        return $items ? implode("\n", $items) : null;
     }
 
     public function show(Invoice $invoice)

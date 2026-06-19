@@ -112,7 +112,8 @@ class ContractorController extends Controller
                      'pickup_location' => $schedule->pickup_location,
                      'client_name' => $schedule->client ? $schedule->client->name : 'Unknown Client',
                      'pickup_date' => $schedule->pickup_date->format('M d, Y'),
-                     'pickup_time' => $schedule->pickup_time
+                     'pickup_time' => $schedule->pickup_time,
+                     'schedule_price' => $schedule->displayed_price ? number_format($schedule->displayed_price, 2) : null
                  ];
              });
 

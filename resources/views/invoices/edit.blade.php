@@ -68,7 +68,7 @@
                         <option value="">No related schedule</option>
                         @foreach($schedules as $schedule)
                             <option value="{{ $schedule->id }}" {{ old('schedule_id', $invoice->schedule_id) == $schedule->id ? 'selected' : '' }}>
-                                {{ $schedule->client->name }} - {{ $schedule->pickup_date->format('M d, Y') }} ({{ $schedule->service_type }})
+                                {{ $schedule->client->name }} - {{ $schedule->pickup_date->format('M d, Y') }} ({{ $schedule->service_type }})@if($schedule->displayed_price !== null) - TZS {{ number_format($schedule->displayed_price, 2) }}@endif
                             </option>
                         @endforeach
                     </select>

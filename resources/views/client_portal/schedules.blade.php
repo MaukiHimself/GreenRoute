@@ -2,6 +2,7 @@
     <x-slot name="sidebar">
         <ul class="nav nav-pills flex-column">
             <li class="nav-item"><a class="nav-link active" href="{{ route('client.schedules') }}"><i class="bi bi-calendar3 me-2"></i>Schedules</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('client.billing-rates') }}"><i class="bi bi-currency-dollar me-2"></i>Billing Rates</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('client.invoices') }}"><i class="bi bi-receipt me-2"></i>Invoices</a></li>
         </ul>
     </x-slot>
@@ -25,6 +26,7 @@
                                 <th>Address</th>
                                 <th>Contractor</th>
                                 <th>Service</th>
+                                <th>Price</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -40,12 +42,25 @@
                                     </td>
                                     <td><span class="badge bg-primary">{{ ucfirst($schedule->service_type) }}</span></td>
                                     <td>
+                                        @if($schedule->displayed_price !== null)
+                                            <div class="fw-semibold">TZS {{ number_format($schedule->displayed_price, 2) }}</div>
+                                            @if($schedule->billingRate)
+                                                <small class="text-muted">{{ $schedule->billingRate->label }}</small>
+                                            @endif
+                                            @if($schedule->has_billing_adjustment)
+                                                <div><small class="text-warning">Contractor adjusted</small></div>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">Not set</span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         @php $st=$schedule->status; @endphp
                                         <span class="badge {{ $st==='scheduled' ? 'bg-warning' : ($st==='completed' ? 'bg-success' : 'bg-secondary') }}">{{ ucfirst(str_replace('_',' ',$st)) }}</span>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7" class="text-center text-muted p-4">No schedules found.</td></tr>
+                                <tr><td colspan="8" class="text-center text-muted p-4">No schedules found.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

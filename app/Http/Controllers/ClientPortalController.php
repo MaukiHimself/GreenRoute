@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BillingRate;
 use App\Models\Client;
+use App\Models\EquipmentRequest;
 use App\Models\Invoice;
 use App\Models\Schedule;
 use App\Models\Feedback;
@@ -43,7 +45,7 @@ class ClientPortalController extends Controller
 
         if (!$client) {
             // If logged in as Contractor, redirect to Contractor Dashboard
-            if (Auth::user()->hasRole('contractor')) {
+            if (Auth::user()->isContractor()) {
                 return redirect()->route('dashboard.contractor');
             }
 
@@ -249,18 +251,29 @@ class ClientPortalController extends Controller
     public function schedules()
     {
         $client = $this->resolveClient();
-        if (!$client) {
-            $client = Client::where('registration_number', 'CL041204')->first();
-        }
         abort_unless($client, 404);
 
-        $schedules = Schedule::with('contractor')
+        $schedules = Schedule::with(['contractor', 'billingRate'])
             ->where('client_id', $client->id)
             ->where('contractor_id', $client->contractor_id)
             ->orderByDesc('pickup_date')
             ->paginate(15);
 
         return view('client_portal.schedules', compact('client', 'schedules'));
+    }
+
+    public function billingRates()
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        $rates = BillingRate::where('is_active', true)
+            ->orderBy('category')
+            ->orderBy('location')
+            ->orderBy('frequency')
+            ->paginate(50);
+
+        return view('client_portal.billing-rates', compact('client', 'rates'));
     }
 
     public function requestService()
@@ -321,12 +334,27 @@ class ClientPortalController extends Controller
 
         $contractor = User::with('contractor')->find($client->contractor_id);
 
+        $autoBillingRate = null;
+        if ($client->category) {
+            $searchLocation = $client->region ?: $client->city;
+            $autoBillingRate = BillingRate::getRateByLocation($client->category, $searchLocation);
+        }
+
+        $schedulePrice = $autoBillingRate?->collection_fee;
+
         Schedule::create([
             'client_id' => $client->id,
             'contractor_id' => $client->contractor_id,
             'client_registration_number' => $client->registration_number,
             'contractor_registration_number' => $contractor?->contractor?->registration_number,
             'route' => $client->route ?? 'Not Assigned',
+            'billing_rate_id' => $autoBillingRate?->id,
+            'billing_rate_category' => $autoBillingRate?->category,
+            'billing_rate_location' => $autoBillingRate?->location,
+            'billing_rate_frequency' => $autoBillingRate?->frequency,
+            'base_collection_fee' => $autoBillingRate?->collection_fee,
+            'schedule_price' => $schedulePrice,
+            'billing_rate_modified_at' => $autoBillingRate ? now() : null,
             'pickup_date' => $validated['pickup_date'],
             'pickup_time' => $pickupTime,
             'scheduled_date' => $validated['pickup_date'],
@@ -350,8 +378,53 @@ class ClientPortalController extends Controller
         $client = $this->resolveClient();
         abort_unless($client, 404);
 
-        $products = Product::all();
-        return view('client_portal.equipment', compact('client', 'products'));
+        $products = Product::where('contractor_id', $client->contractor_id)
+            ->where('is_available', true)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Load the client's existing pending requests so we can show "Requested" state
+        $requestedIds = EquipmentRequest::where('client_id', $client->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->pluck('product_id')
+            ->toArray();
+
+        return view('client_portal.equipment', compact('client', 'products', 'requestedIds'));
+    }
+
+    public function requestEquipment(Request $request, Product $product)
+    {
+        $client = $this->resolveClient();
+        abort_unless($client, 404);
+
+        // Make sure the product belongs to this client's contractor
+        abort_unless((int) $product->contractor_id === (int) $client->contractor_id, 403);
+
+        $data = $request->validate([
+            'quantity' => 'required|integer|min:1|max:100',
+            'notes'    => 'nullable|string|max:1000',
+        ]);
+
+        // Prevent duplicate pending requests for the same product
+        $exists = EquipmentRequest::where('client_id', $client->id)
+            ->where('product_id', $product->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'You already have an active request for this equipment.');
+        }
+
+        EquipmentRequest::create([
+            'product_id'    => $product->id,
+            'client_id'     => $client->id,
+            'contractor_id' => $client->contractor_id,
+            'quantity'      => $data['quantity'],
+            'notes'         => $data['notes'] ?? null,
+            'status'        => 'pending',
+        ]);
+
+        return back()->with('success', 'Equipment request sent to your contractor.');
     }
 
     public function contractorInfo()

@@ -587,9 +587,10 @@
                      schedules.forEach(schedule => {
                          container.innerHTML += `
                              <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
-                                 <strong>${schedule.pickup_location}</strong><br>
-                                 <small class="text-muted">${schedule.client_name}</small><br>
-                                 <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
+                                  <strong>${schedule.pickup_location}</strong><br>
+                                  <small class="text-muted">${schedule.client_name}</small><br>
+                                  <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
+                                  ${schedule.schedule_price ? `<br><small class="text-success fw-bold">TZS ${schedule.schedule_price}</small>` : ''}
                              </div>
                          `;
                      });

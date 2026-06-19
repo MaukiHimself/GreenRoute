@@ -95,6 +95,18 @@
                         <strong class="primary-dark">Service Type:</strong> 
                         <span class="ms-2">{{ ucfirst(str_replace('_', ' ', $invoice->service_type)) }}</span>
                     </div>
+                    @if($invoice->servicePrice)
+                        <div class="mb-2">
+                            <strong class="primary-dark">Saved Service:</strong>
+                            <span class="ms-2">{{ $invoice->servicePrice->service_type }} - TZS {{ number_format($invoice->servicePrice->price, 2) }}</span>
+                        </div>
+                    @endif
+                    @if($invoice->product)
+                        <div class="mb-2">
+                            <strong class="primary-dark">Equipment:</strong>
+                            <span class="ms-2">{{ $invoice->product->name }} - TZS {{ number_format($invoice->product->price ?? 0, 2) }}</span>
+                        </div>
+                    @endif
                     <div class="mb-2">
                         <strong class="primary-dark">Status:</strong> 
                         <span class="ms-2">

@@ -1,12 +1,13 @@
 @props([
     'portal' => 'admin',
-    'tabbed' => false,
+    'tabbed' => null,
     'homeUrl' => null,
 ])
 
 @php
     use App\Support\Portal;
 
+    $tabbed = $tabbed ?? true;
     $tabbed = filter_var($tabbed, FILTER_VALIDATE_BOOLEAN);
     $portal = $portal ?? Portal::forUser();
 

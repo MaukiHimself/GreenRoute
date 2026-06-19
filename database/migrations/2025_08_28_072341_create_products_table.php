@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique();
-            $table->string('password');
+            $table->string('username')->nullable()->unique();
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

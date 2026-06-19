@@ -13,6 +13,10 @@ class Feedback extends Model
         'client_id', 'contractor_id', 'subject', 'message', 'response', 'status', 'responded_at'
     ];
 
+    protected $casts = [
+        'responded_at' => 'datetime',
+    ];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

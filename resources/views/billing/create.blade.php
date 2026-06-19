@@ -181,6 +181,32 @@
                         </select>
                         @error('service_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+
+                    <div class="col-md-6">
+                        <label for="service_price_id" class="form-label">Saved Service Price</label>
+                        <select class="form-select @error('service_price_id') is-invalid @enderror" id="service_price_id" name="service_price_id" data-price="0">
+                            <option value="">Select saved service</option>
+                            @foreach($services as $service)
+                                <option value="{{ $service->id }}" data-price="{{ $service->price }}" {{ old('service_price_id') == $service->id ? 'selected' : '' }}>
+                                    {{ $service->service_type }} - {{ $service->volume_tier ? $service->volume_tier : 'Standard' }} - TZS {{ number_format($service->price, 2) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('service_price_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="product_id" class="form-label">Equipment</label>
+                        <select class="form-select @error('product_id') is-invalid @enderror" id="product_id" name="product_id" data-price="0">
+                            <option value="">Select equipment</option>
+                            @foreach($equipments as $equipment)
+                                <option value="{{ $equipment->id }}" data-price="{{ $equipment->price ?? 0 }}" {{ old('product_id') == $equipment->id ? 'selected' : '' }}>
+                                    {{ $equipment->name }} - TZS {{ number_format($equipment->price ?? 0, 2) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('product_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                 </div>
                 
                 <div class="mb-3">
@@ -191,8 +217,9 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-6" id="subtotal_section">
-                        <label for="subtotal" class="form-label">Subtotal (TZS) *</label>
+                        <label for="subtotal" class="form-label">Manual Subtotal (TZS)</label>
                         <input type="number" class="form-control @error('subtotal') is-invalid @enderror" id="subtotal" name="subtotal" step="0.01" value="{{ old('subtotal') }}">
+                        <div class="form-text text-muted">Leave blank when using saved services/equipment; selected item prices are added automatically.</div>
                         @error('subtotal')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-6">
@@ -243,9 +270,34 @@
             
             // Show subtotal for single mode
             subtotalSection.style.display = 'block';
-            subtotalInput.required = true;
+            subtotalInput.required = false;
+        }
+
+        updateSelectedItems();
+    }
+
+    function updateSelectedItems() {
+        const serviceSelect = document.getElementById('service_price_id');
+        const equipmentSelect = document.getElementById('product_id');
+        const subtotalInput = document.getElementById('subtotal');
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+
+        if (!serviceSelect || !equipmentSelect || !subtotalInput || mode === 'group') {
+            return;
+        }
+
+        const selectedServicePrice = parseFloat(serviceSelect.options[serviceSelect.selectedIndex]?.dataset.price || 0) || 0;
+        const selectedEquipmentPrice = parseFloat(equipmentSelect.options[equipmentSelect.selectedIndex]?.dataset.price || 0) || 0;
+        const selectedItemsTotal = selectedServicePrice + selectedEquipmentPrice;
+        const manualSubtotal = parseFloat(subtotalInput.value) || 0;
+
+        if (selectedItemsTotal > 0) {
+            subtotalInput.value = (manualSubtotal + selectedItemsTotal).toFixed(2);
         }
     }
+
+    document.getElementById('service_price_id')?.addEventListener('change', updateSelectedItems);
+    document.getElementById('product_id')?.addEventListener('change', updateSelectedItems);
 
     // Get clients data from server
     const allClients = @json($clients);

@@ -52,6 +52,12 @@
         <i class="bi bi-chevron-down portal-sidebar__chevron"></i>
     </button>
     <div class="portal-sidebar__submenu">
+        <a href="{{ route('client.billing-rates') }}"
+           class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('client.billing-rates') ? 'active' : '' }}"
+           data-tooltip="Billing rates">
+            <i class="bi bi-currency-dollar"></i>
+            <span class="portal-sidebar__label">Billing rates</span>
+        </a>
         <a href="{{ route('client.request.service') }}"
            class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('client.request*') ? 'active' : '' }}"
            data-tooltip="Request service">

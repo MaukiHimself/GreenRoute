@@ -720,23 +720,14 @@
                     </div>
                     
                     <div class="quick-actions-grid">
-                        <a href="{{ route('clients.create') }}" class="action-btn primary">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon">
-                                    <i class="bi bi-person-plus"></i>
-                                </div>
-                                <span>Add New Client</span>
-                            </div>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                        <a href="{{ route('schedules.create') }}" class="action-btn">
+                        <a href="{{ route('schedules.create') }}" class="action-btn primary">
                             <div class="d-flex align-items-center">
                                 <div class="action-icon">
                                     <i class="bi bi-calendar-plus"></i>
                                 </div>
                                 <span>Schedule Pickup</span>
                             </div>
-                            <i class="bi bi-arrow-right text-primary"></i>
+                            <i class="bi bi-arrow-right"></i>
                         </a>
                         <a href="{{ route('invoices.create') }}" class="action-btn">
                             <div class="d-flex align-items-center">
@@ -747,12 +738,21 @@
                             </div>
                             <i class="bi bi-arrow-right text-primary"></i>
                         </a>
-                        <a href="#" class="action-btn">
+                        <a href="{{ route('reports.index') }}" class="action-btn">
                             <div class="d-flex align-items-center">
                                 <div class="action-icon">
                                     <i class="bi bi-graph-up"></i>
                                 </div>
                                 <span>View Reports</span>
+                            </div>
+                            <i class="bi bi-arrow-right text-primary"></i>
+                        </a>
+                        <a href="{{ route('contractor.equipment.index') }}" class="action-btn">
+                            <div class="d-flex align-items-center">
+                                <div class="action-icon">
+                                    <i class="bi bi-tools"></i>
+                                </div>
+                                <span>Equipment</span>
                             </div>
                             <i class="bi bi-arrow-right text-primary"></i>
                         </a>

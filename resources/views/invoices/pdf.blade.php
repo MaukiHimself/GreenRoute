@@ -388,6 +388,9 @@
                                 <br><small style="color: #64748b;">
                                     Pickup: {{ $invoice->schedule->pickup_date->format('M d, Y') }}<br>
                                     Location: {{ $invoice->schedule->pickup_location }}
+                                    @if($invoice->schedule->displayed_price !== null)
+                                        <br>Schedule price: TZS {{ number_format($invoice->schedule->displayed_price, 2) }}
+                                    @endif
                                 </small>
                             @endif
                         </td>

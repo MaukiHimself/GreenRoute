@@ -81,6 +81,9 @@
                                         <a href="{{ route('schedules.show', $invoice->schedule) }}" class="text-blue-600 hover:text-blue-800">
                                             {{ $invoice->schedule->pickup_date->format('M d, Y') }} - {{ $invoice->schedule->pickup_time }}
                                         </a>
+                                        @if($invoice->schedule->displayed_price !== null)
+                                            <div class="text-sm text-gray-500">Schedule price: TZS {{ number_format($invoice->schedule->displayed_price, 2) }}</div>
+                                        @endif
                                     </p>
                                 </div>
                             @endif

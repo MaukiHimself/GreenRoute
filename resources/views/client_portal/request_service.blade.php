@@ -65,7 +65,7 @@
                                             </td>
                                             <td>{{ $price->volume_tier ? \App\Models\ServicePrice::getVolumeLabel($price->volume_tier) : 'Standard' }}</td>
                                             <td><span class="badge bg-light text-dark">{{ $price->category ? ucfirst($price->category) : 'All' }}</span></td>
-                                            <td class="small text-muted">{{ $price->description ?: $price->includes ? \Illuminate\Support\Str::limit($price->includes, 50) : '—' }}</td>
+                                            <td class="small text-muted">{{ $price->description ?: ($price->includes ? \Illuminate\Support\Str::limit($price->includes, 50) : '—') }}</td>
                                             <td class="text-end pe-4 fw-bold text-success">
                                                 TZS {{ number_format($price->price, 2) }}
                                             </td>

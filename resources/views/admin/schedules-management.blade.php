@@ -381,6 +381,9 @@
                             <th>Client</th>
                             <th>Location</th>
                             <th>Service Type</th>
+                            <th>Price</th>
+                            <th>Billing Rate</th>
+                            <th>Adjusted</th>
                             <th>Frequency</th>
                             <th>Organic</th>
                             <th>Status</th>
@@ -405,10 +408,23 @@
                                 </td>
                                 <td>{{ $schedule->service_type ?? 'Standard' }}</td>
                                 <td>
-                                    @if($schedule->frequency)
-                                        <span style="font-size: 0.85rem;">{{ ucfirst(str_replace('-', ' ', $schedule->frequency)) }}</span>
+                                    @if($schedule->displayed_price !== null)
+                                        <strong>TZS {{ number_format($schedule->displayed_price, 2) }}</strong>
                                     @else
-                                        <span style="font-size: 0.85rem; color: #999;">-</span>
+                                        <span style="font-size: 0.85rem; color: #999;">Not set</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.85rem;">{{ $schedule->billingRateLabel ?? '-' }}</div>
+                                    @if($schedule->billing_rate_change_reason)
+                                        <div style="font-size: 0.75rem; color: #666;">{{ \Illuminate\Support\Str::limit($schedule->billing_rate_change_reason, 60) }}</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($schedule->has_billing_adjustment)
+                                        <span class="organic-badge">Yes</span>
+                                    @else
+                                        <span style="font-size: 0.85rem; color: #999;">No</span>
                                     @endif
                                 </td>
                                 <td>

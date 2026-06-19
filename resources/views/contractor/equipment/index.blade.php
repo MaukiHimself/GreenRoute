@@ -14,9 +14,14 @@
             <h4 class="mb-0 fw-semibold">Equipment Inventory</h4>
             <p class="text-muted small mb-0">Manage waste storage equipment and containers offered to clients</p>
         </div>
-        <a href="{{ route('contractor.equipment.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-2"></i>Add Equipment
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('contractor.equipment.requests') }}" class="btn btn-outline-primary">
+                <i class="bi bi-inbox me-2"></i>Client Requests
+            </a>
+            <a href="{{ route('contractor.equipment.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Add Equipment
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

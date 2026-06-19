@@ -43,6 +43,12 @@
             <i class="bi bi-currency-dollar"></i>
             <span class="portal-sidebar__label">Billing rates</span>
         </a>
+        <a href="{{ route('admin.billing.rate-changes') }}"
+           class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('admin.billing.rate-changes') ? 'active' : '' }}"
+           data-tooltip="Billing changes">
+            <i class="bi bi-activity"></i>
+            <span class="portal-sidebar__label">Billing changes</span>
+        </a>
     </div>
 </div>
 

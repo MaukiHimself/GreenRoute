@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Schedule;
+use App\Models\EquipmentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -39,7 +40,7 @@ class ContractorEquipmentController extends Controller
             'specifications' => 'nullable|string|max:2000',
             'category' => 'nullable|string|max:100',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'is_available' => 'sometimes|boolean',
+            'is_available' => 'nullable',
         ]);
 
         $validated['contractor_id'] = Auth::id();
@@ -73,7 +74,7 @@ class ContractorEquipmentController extends Controller
             'specifications' => 'nullable|string|max:2000',
             'category' => 'nullable|string|max:100',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'is_available' => 'sometimes|boolean',
+            'is_available' => 'nullable',
         ]);
 
         $validated['is_available'] = $request->has('is_available');
@@ -123,5 +124,35 @@ class ContractorEquipmentController extends Controller
         if ((int) $equipment->contractor_id !== (int) Auth::id()) {
             abort(403, 'Unauthorized');
         }
+    }
+
+    // ── Equipment Requests ────────────────────────────────────────────────
+
+    public function requests()
+    {
+        $requests = EquipmentRequest::with(['product', 'client'])
+            ->where('contractor_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        return view('contractor.equipment.requests', compact('requests'));
+    }
+
+    public function respondRequest(Request $request, EquipmentRequest $equipmentRequest)
+    {
+        abort_unless((int) $equipmentRequest->contractor_id === (int) Auth::id(), 403);
+
+        $data = $request->validate([
+            'status'              => 'required|in:approved,rejected,fulfilled',
+            'contractor_response' => 'nullable|string|max:1000',
+        ]);
+
+        $equipmentRequest->update([
+            'status'              => $data['status'],
+            'contractor_response' => $data['contractor_response'] ?? null,
+            'responded_at'        => now(),
+        ]);
+
+        return back()->with('success', 'Request updated successfully.');
     }
 }

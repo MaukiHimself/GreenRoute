@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BillingRate extends Model
 {
@@ -22,6 +23,27 @@ class BillingRate extends Model
         'collection_fee' => 'decimal:2',
         'is_active' => 'boolean'
     ];
+
+    public function getLabelAttribute(): string
+    {
+        $frequency = $this->frequency ? ucfirst(str_replace('-', ' ', $this->frequency)) : 'Any';
+        return "{$this->category} - {$this->location} - {$frequency}";
+    }
+
+    public function getFormattedCollectionFeeAttribute(): string
+    {
+        return number_format($this->collection_fee, 2);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
+    public function changes(): HasMany
+    {
+        return $this->hasMany(ContractorBillingRateChange::class);
+    }
 
     /**
      * Get billing rate by category and location

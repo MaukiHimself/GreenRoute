@@ -2,7 +2,7 @@
     <x-slot name="sidebar">
         <ul class="nav nav-pills flex-column">
             <li class="nav-item"><a class="nav-link" href="{{ route('dashboard.contractor') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('clients.index') }}"><i class="bi bi-people me-2"></i>Clients</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('contractor.clients.index') }}"><i class="bi bi-people me-2"></i>Clients</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('schedules.index') }}"><i class="bi bi-calendar3 me-2"></i>Schedules</a></li>
             <li class="nav-item"><a class="nav-link active" href="{{ route('invoices.index') }}"><i class="bi bi-receipt me-2"></i>Invoices</a></li>
         </ul>
@@ -34,7 +34,7 @@
             <div class="card-body">
                 <form action="{{ route('invoices.store') }}" method="POST">
                     @csrf
-                    
+
                     <!-- Mode Selection -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Invoice Mode</label>
@@ -65,22 +65,22 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         <!-- Group Selection Section -->
                         <div class="col-12" id="group_section" style="display: none;">
                             <div class="card bg-light border-0 mb-3">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">Select Location Group</h6>
                                     <div class="mb-3 position-relative">
-                                        <input type="text" 
-                                               id="locationAutocomplete" 
-                                               class="form-control" 
+                                        <input type="text"
+                                               id="locationAutocomplete"
+                                               class="form-control"
                                                placeholder="Type to search location (e.g., ARUSHA → ARUMERU → Ward → Street)"
                                                autocomplete="off">
                                         <div id="locationDropdown" class="autocomplete-dropdown"></div>
                                         <small class="text-muted">Search and select a location in format: Region → District → Ward → Street</small>
                                     </div>
-                                    
+
                                     <div id="clients_list_container" style="display: none;">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <label class="form-label mb-0 fw-bold">Select Clients to Invoice</label>
@@ -104,7 +104,7 @@
                                 <option value="">No related schedule</option>
                                 @foreach($schedules as $schedule)
                                     <option value="{{ $schedule->id }}" {{ old('schedule_id') == $schedule->id ? 'selected' : '' }}>
-                                        {{ $schedule->client->name }} - {{ $schedule->pickup_date->format('M d, Y') }} ({{ $schedule->service_type }})
+                                        {{ $schedule->client->name }} - {{ $schedule->pickup_date->format('M d, Y') }} ({{ $schedule->service_type }})@if($schedule->displayed_price !== null) - TZS {{ number_format($schedule->displayed_price, 2) }}@endif
                                     </option>
                                 @endforeach
                             </select>
@@ -180,11 +180,11 @@
         display: none;
         box-sizing: border-box;
     }
-    
+
     .autocomplete-dropdown.show {
         display: block;
     }
-    
+
     .autocomplete-item {
         padding: 12px 16px;
         cursor: pointer;
@@ -193,31 +193,31 @@
         white-space: normal;
         word-break: break-word;
     }
-    
+
     .autocomplete-item:hover {
         background: #e7f3ff;
         color: #0d6efd;
         font-weight: 600;
     }
-    
+
     .autocomplete-item:last-child {
         border-bottom: none;
     }
-    
+
     .autocomplete-item.active {
         background: #0d6efd;
         color: white;
         font-weight: 600;
     }
     </style>
-    
+
     <script>
     function toggleMode() {
         const mode = document.querySelector('input[name="mode"]:checked').value;
         const singleSection = document.getElementById('single_client_section');
         const groupSection = document.getElementById('group_section');
         const clientSelect = document.getElementById('client_id');
-        
+
         if (mode === 'group') {
             singleSection.style.display = 'none';
             groupSection.style.display = 'block';
@@ -230,11 +230,12 @@
     }
 
     const allClients = @json($clients);
-    
+    const schedulePrices = @json($schedules->mapWithKeys(fn($schedule) => [$schedule->id => $schedule->displayed_price]));
+
     // Build unique location list from clients
     const locationList = [];
     const locationMap = new Map();
-    
+
     allClients.forEach(client => {
         // Build location from available fields
         const parts = [];
@@ -242,11 +243,11 @@
         if (client.district) parts.push(client.district);
         if (client.ward) parts.push(client.ward);
         if (client.street) parts.push(client.street);
-        
+
         if (parts.length > 0) {
             const locationString = parts.join(' → ');
             const locationKey = parts.join('|');
-            
+
             if (!locationMap.has(locationKey)) {
                 const locData = {
                     display: locationString,
@@ -261,34 +262,34 @@
             }
         }
     });
-    
+
     console.log('Invoice form - Unique locations found:', locationList.length);
     console.log('Sample locations:', locationList.slice(0, 5).map(l => l.display));
-    
+
     // Sort locations alphabetically
     locationList.sort((a, b) => a.display.localeCompare(b.display));
-    
+
     // Autocomplete functionality
     const autocompleteInput = document.getElementById('locationAutocomplete');
     const dropdown = document.getElementById('locationDropdown');
     let currentFocus = -1;
     let selectedLocation = null;
-    
+
     function showLocationDropdown(searchTerm = '') {
         dropdown.innerHTML = '';
         currentFocus = -1;
-        
+
         if (locationList.length === 0) {
             dropdown.innerHTML = '<div class="autocomplete-item" style="color: #999;">No client locations available. Please ensure clients have location data.</div>';
             dropdown.classList.add('show');
             return;
         }
-        
+
         const search = searchTerm.toLowerCase().trim();
         let filtered = locationList;
-        
+
         if (search.length > 0) {
-            filtered = locationList.filter(loc => 
+            filtered = locationList.filter(loc =>
                 loc.display.toLowerCase().includes(search) ||
                 loc.region.toLowerCase().includes(search) ||
                 loc.district.toLowerCase().includes(search) ||
@@ -296,29 +297,29 @@
                 loc.street.toLowerCase().includes(search)
             );
         }
-        
+
         if (filtered.length === 0) {
             dropdown.innerHTML = `<div class="autocomplete-item" style="color: #999;">No locations matching "${searchTerm}"</div>`;
             dropdown.classList.add('show');
             return;
         }
-        
+
         const maxResults = 50;
         const resultsToShow = filtered.slice(0, maxResults);
-        
+
         resultsToShow.forEach((loc, index) => {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
             item.textContent = loc.display;
             item.dataset.index = index;
-            
+
             item.addEventListener('click', function() {
                 selectLocation(loc);
             });
-            
+
             dropdown.appendChild(item);
         });
-        
+
         if (filtered.length > maxResults) {
             const moreItem = document.createElement('div');
             moreItem.className = 'autocomplete-item';
@@ -327,25 +328,25 @@
             moreItem.textContent = `+ ${filtered.length - maxResults} more locations (refine your search)`;
             dropdown.appendChild(moreItem);
         }
-        
+
         dropdown.classList.add('show');
     }
-    
+
     autocompleteInput.addEventListener('input', function() {
         showLocationDropdown(this.value);
     });
-    
+
     // Show all locations when clicking the input field
     autocompleteInput.addEventListener('focus', function() {
         if (this.value.trim() === '') {
             showLocationDropdown('');
         }
     });
-    
+
     // Keyboard navigation
     autocompleteInput.addEventListener('keydown', function(e) {
         const items = dropdown.querySelectorAll('.autocomplete-item');
-        
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             currentFocus++;
@@ -365,7 +366,7 @@
             dropdown.classList.remove('show');
         }
     });
-    
+
     function setActive(items) {
         items.forEach((item, index) => {
             if (index === currentFocus) {
@@ -376,24 +377,24 @@
             }
         });
     }
-    
+
     function selectLocation(location) {
         selectedLocation = location;
         autocompleteInput.value = location.display;
         dropdown.classList.remove('show');
         loadGroupClients(location);
     }
-    
+
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
         if (autocompleteInput && !autocompleteInput.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.remove('show');
         }
     });
-    
+
     function loadGroupClients(location) {
         if (!location || !location.region) return;
-        
+
         // Filter clients based on selection
         const filteredClients = allClients.filter(client => {
             if (client.region !== location.region) return false;
@@ -402,12 +403,12 @@
             if (location.street && client.street !== location.street) return false;
             return true;
         });
-        
+
         const listContainer = document.getElementById('clients_list_container');
         const list = document.getElementById('clients_list');
         listContainer.style.display = 'block';
         list.innerHTML = '';
-        
+
         if (filteredClients.length === 0) {
             list.innerHTML = '<p class="text-muted text-center my-2">No clients found in this location.</p>';
         } else {
@@ -426,22 +427,22 @@
         }
         updateCount();
     }
-    
+
     function updateCount() {
         const count = document.querySelectorAll('.client-checkbox:checked').length;
         document.getElementById('selected_count').textContent = count;
     }
-    
+
     function selectAll() {
         document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = true);
         updateCount();
     }
-    
+
     function deselectAll() {
         document.querySelectorAll('.client-checkbox').forEach(cb => cb.checked = false);
         updateCount();
     }
-    
+
     // (Dependent dropdowns removed - using autocomplete instead)
 
     function calculateTotals() {
@@ -455,6 +456,18 @@
     }
     document.getElementById('subtotal').addEventListener('input', calculateTotals);
     document.getElementById('tax_rate').addEventListener('input', calculateTotals);
+
+    const scheduleSelect = document.getElementById('schedule_id');
+    if (scheduleSelect) {
+        scheduleSelect.addEventListener('change', function() {
+            const price = schedulePrices[this.value];
+            if (price !== null && price !== undefined && price !== '') {
+                document.getElementById('subtotal').value = price;
+                calculateTotals();
+            }
+        });
+    }
+
     calculateTotals();
     </script>
 </x-dashboard-layout>

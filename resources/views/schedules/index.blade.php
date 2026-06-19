@@ -278,6 +278,7 @@
                             <th>Pickup Location</th>
                             <th>Address</th>
                             <th>Pickup Date</th>
+                            <th>Price</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -293,6 +294,13 @@
                             <td>{{ $schedule->pickup_address }}</td>
                             <td>{{ $schedule->pickup_date ? $schedule->pickup_date->format('M d, Y') : 'N/A' }}</td>
                             <td>
+                                @if($schedule->displayed_price !== null)
+                                    <span class="badge bg-success">TZS {{ number_format($schedule->displayed_price, 2) }}</span>
+                                @else
+                                    <span class="text-muted">Not set</span>
+                                @endif
+                            </td>
+                            <td>
                                 <select class="form-select form-select-sm" onchange="updateStatus({{ $schedule->id }}, this.value)">
                                     <option value="scheduled" {{ $schedule->status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                                     <option value="in_progress" {{ $schedule->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
@@ -303,13 +311,14 @@
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a href="{{ route('schedules.show', $schedule) }}" class="btn btn-outline-primary">View</a>
+                                    <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-outline-secondary">Edit Billing</a>
                                     <a href="{{ route('schedules.print', $schedule) }}" class="btn btn-outline-secondary" target="_blank">Print</a>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center">No schedules found</td>
+                            <td colspan="8" class="text-center">No schedules found</td>
                         </tr>
                         @endforelse
                     </tbody>
