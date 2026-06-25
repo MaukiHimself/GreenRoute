@@ -1,24 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Create Collection Schedule</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary-teal: #055c5c;
-            --primary-red: #640404;
-            --white: #ffffff;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+@extends('layouts.contractor-sidebar')
+
+@section('title', 'Create Collection Schedule')
+
+@section('styles')
+<style>
+    :root {
+        --primary-teal: #055c5c;
+        --primary-red: #c0392b;
+        --white: #ffffff;
+    }
         
         .page-header {
             background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 100%);
@@ -95,21 +85,19 @@
             box-shadow: 0 4px 12px rgba(100, 4, 4, 0.3);
         }
     </style>
-</head>
-<body>
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Page Header -->
-                <div class="page-header d-flex justify-content-between align-items-center">
-                    <h1 class="mb-0" style="font-size: 1.75rem; font-weight: 700;">
-                        <i class="bi bi-calendar-plus me-2"></i>Create Collection Schedule
-                    </h1>
-                    <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" target="_parent">
-                        <i class="bi bi-house-door-fill"></i> Home
-                    </a>
-                </div>
-                <p class="mb-0" style="opacity: 0.95;">Create a bulk schedule for clients at a specific location</p>
+@endsection
+
+@section('content')
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <h1 class="mb-0" style="font-size: 1.75rem; font-weight: 700;">
+                    <i class="bi bi-calendar-plus me-2"></i>Create Collection Schedule
+                </h1>
+            </div>
+            <p class="mb-0" style="opacity: 0.95;">Create a bulk schedule for clients at a specific location</p>
 
                 <!-- Form Container -->
                 <div class="form-container">
@@ -258,5 +246,7 @@
             });
         });
     </script>
-</body>
-</html>
+@endsection
+
+@push('scripts')
+@endpush

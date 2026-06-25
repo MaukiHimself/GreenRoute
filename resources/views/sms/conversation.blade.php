@@ -11,7 +11,7 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-red: #c0392b;
             --white: #ffffff;
         }
         

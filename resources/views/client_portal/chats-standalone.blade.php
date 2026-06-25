@@ -1,32 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Chat with Contractor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+<x-dashboard-layout title="Chat with Contractor">
+    <x-slot name="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('client.dashboard') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Client</a></li>
+        <li class="breadcrumb-item active">Chats</li>
+    </x-slot>
+
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
-        }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8f9fa;
+            --primary-red: #c0392b;
         }
         
         .chat-container {
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            height: calc(100vh - 2rem);
-            margin: 1rem;
+            height: calc(100vh - 12rem); /* Adjusted height to fit within dashboard-layout */
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -191,13 +180,12 @@
             margin-bottom: 1rem;
         }
     </style>
-</head>
-<body>
+
     <!-- Chat Container -->
     <div class="chat-container">
         <!-- Chat Header -->
         <div class="chat-header">
-            <div class="d-flex justify-content-between align-items-start w-100">
+            <div class="d-flex justify-content-between align-items-center w-100">
                 <div class="contractor-info">
                     @if($contractor)
                         <div class="contractor-avatar">{{ strtoupper(substr($contractor->name, 0, 2)) }}</div>
@@ -214,9 +202,6 @@
                         </div>
                     @endif
                 </div>
-                <a href="{{ route('client.dashboard') }}" class="btn btn-light btn-sm rounded-pill px-3">
-                    <i class="bi bi-house-door me-1"></i>Home
-                </a>
             </div>
         </div>
 
@@ -284,7 +269,6 @@
         @endif
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         @if($contractor)
         const messagesContainer = document.getElementById('messagesContainer');
@@ -357,5 +341,4 @@
         });
         @endif
     </script>
-</body>
-</html>
+</x-dashboard-layout>

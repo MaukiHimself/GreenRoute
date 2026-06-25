@@ -10,7 +10,7 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-red: #c0392b;
         }
 
         body {
@@ -272,7 +272,7 @@
             <p><strong>Need Help?</strong></p>
             <p>
                 If you have any questions or concerns, please contact us:<br>
-                <a href="mailto:support@greenrouteorbit.com"><i class="bi bi-envelope me-2"></i>support@greenrouteorbit.com</a><br>
+                <a href="mailto:support@greenroute.co.tz"><i class="bi bi-envelope me-2"></i>support@greenroute.co.tz</a><br>
                 <a href="tel:+255123456789"><i class="bi bi-telephone me-2"></i>+255 123 456 789</a>
             </p>
         </div>

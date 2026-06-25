@@ -308,7 +308,7 @@
             locationMarker = L.marker([defaultLat, defaultLng], {
                 draggable: true,
                 title: 'Your Location'
-            }).addTo(mapCtx);
+            }).addTo(mapCtx.map);
             
             if (hasExistingCoords) {
                 document.getElementById('locationStatus').innerHTML = `📍 Existing coordinates loaded: ${defaultLat}, ${defaultLng}`;
@@ -325,7 +325,7 @@
             });
             
             // Map click handler to move marker
-            mapCtx.on('click', function (event) {
+            mapCtx.map.on('click', function (event) {
                 const clickedCoords = event.latlng;
                 locationMarker.setLatLng(clickedCoords);
                 updateInputs(clickedCoords.lat, clickedCoords.lng);
@@ -413,7 +413,7 @@
                 locationMarker.setLatLng([lat, lng]);
             }
             if (mapCtx) {
-                mapCtx.setView([lat, lng], 16);
+                mapCtx.map.setView([lat, lng], 16);
             }
             updateInputs(lat, lng);
         }

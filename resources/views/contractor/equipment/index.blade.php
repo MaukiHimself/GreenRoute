@@ -53,7 +53,7 @@
                                         @if($eq->image)
                                             <img src="{{ asset('storage/' . $eq->image) }}" class="rounded" width="50" height="50" style="object-fit: cover;" alt="{{ $eq->name }}">
                                         @else
-                                            <div class="rounded d-flex align-items-center justify-content-center text-white" style="width: 50px; height: 50px; background: linear-gradient(135deg, #055c5c, #0891b2);">
+                                            <div class="rounded d-flex align-items-center justify-content-center text-white" style="width: 50px; height: 50px; background: linear-gradient(135deg, #055c5c, #055c5c);">
                                                 <i class="bi bi-tools fs-4"></i>
                                             </div>
                                         @endif

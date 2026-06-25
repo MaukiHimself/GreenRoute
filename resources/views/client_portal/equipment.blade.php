@@ -71,7 +71,7 @@
 
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #055c5c 0%, #0d9488 50%, #0891b2 100%);">
+            <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #055c5c 0%, #055c5c 50%, #055c5c 100%);">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
@@ -109,7 +109,7 @@
                                         ];
                                         $icon = $icons[$product->category] ?? 'bi-tools';
                                     @endphp
-                                    <i class="bi {{ $icon }} display-4" style="color: #0891b2; opacity: 0.6;"></i>
+                                    <i class="bi {{ $icon }} display-4" style="color: #055c5c; opacity: 0.6;"></i>
                                 @endif
                             </div>
 

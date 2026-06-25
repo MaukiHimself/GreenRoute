@@ -13,7 +13,7 @@
                     <p class="text-gray-600 mt-2">Review and verify client payment submissions</p>
                 </div>
                 <div class="text-right">
-                    <div class="text-4xl font-bold text-blue-600">{{ $pendingCount }}</div>
+                    <div class="text-4xl font-bold" style="color:#055c5c">{{ $pendingCount }}</div>
                     <p class="text-gray-600 text-sm">Pending Approvals</p>
                 </div>
             </div>
@@ -29,7 +29,7 @@
             </div>
             <h3 class="text-2xl font-semibold text-gray-900 mb-2">All Caught Up!</h3>
             <p class="text-gray-600 mb-6">There are no pending payment submissions at this time.</p>
-            <a href="{{ route('dashboard.contractor') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            <a href="{{ route('dashboard.contractor') }}" class="font-medium" style="color:#055c5c">
                 ← Back to Dashboard
             </a>
         </div>
@@ -37,19 +37,19 @@
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #055c5c">
                 <p class="text-sm text-gray-600">Total Pending</p>
-                <p class="text-3xl font-bold text-blue-600 mt-1">{{ $pendingCount }}</p>
+                <p class="text-3xl font-bold mt-1" style="color:#055c5c">{{ $pendingCount }}</p>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #d97706">
                 <p class="text-sm text-gray-600">Total Amount</p>
                 <p class="text-3xl font-bold text-amber-600 mt-1">
                     TZS {{ number_format($submissions->sum('amount_submitted'), 2) }}
                 </p>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #2e7d32">
                 <p class="text-sm text-gray-600">Avg. Submission</p>
-                <p class="text-3xl font-bold text-purple-600 mt-1">
+                <p class="text-3xl font-bold mt-1" style="color:#2e7d32">
                     TZS {{ number_format($submissions->avg('amount_submitted'), 2) }}
                 </p>
             </div>
@@ -60,10 +60,13 @@
             <div class="flex gap-4">
                 <input type="text"
                        placeholder="Search by client name, payer name..."
-                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                       style="--tw-ring-color:#055c5c"
                        id="searchInput">
                 <button type="button"
-                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        class="px-6 py-2 text-white rounded-lg transition"
+                        style="background-color:#055c5c"
+                        onmouseover="this.style.backgroundColor='#023535'" onmouseout="this.style.backgroundColor='#055c5c'"
                         onclick="filterSubmissions()">
                     Search
                 </button>
@@ -131,7 +134,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 uppercase">Amount Submitted</p>
-                            <p class="text-xl font-bold text-blue-600 mt-1">
+                            <p class="text-xl font-bold mt-1" style="color:#055c5c">
                                 TZS {{ number_format($submission->amount_submitted, 2) }}
                             </p>
                         </div>
@@ -144,23 +147,23 @@
                     </div>
 
                     <!-- Invoice Balance Info -->
-                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="mb-6 p-4 rounded-lg" style="background-color:#e6f2f2; border:1px solid #b3d4d4">
                         <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <p class="text-xs text-blue-600">Invoice Total</p>
-                                <p class="text-lg font-bold text-blue-900">
+                                <p class="text-xs" style="color:#055c5c">Invoice Total</p>
+                                <p class="text-lg font-bold" style="color:#023535">
                                     TZS {{ number_format($submission->invoice->total_amount, 2) }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-blue-600">Balance Due</p>
-                                <p class="text-lg font-bold text-blue-900">
+                                <p class="text-xs" style="color:#055c5c">Balance Due</p>
+                                <p class="text-lg font-bold" style="color:#023535">
                                     TZS {{ number_format($submission->invoice->total_amount - $submission->invoice->amount_paid, 2) }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-blue-600">Status After Approval</p>
-                                <p class="text-lg font-bold text-blue-900">
+                                <p class="text-xs" style="color:#055c5c">Status After Approval</p>
+                                <p class="text-lg font-bold" style="color:#023535">
                                     @if ($submission->invoice->amount_paid + $submission->amount_submitted >= $submission->invoice->total_amount)
                                         Fully Paid
                                     @else

@@ -24,7 +24,7 @@
         }
         
         .legal-header {
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
             color: white;
             padding: 3rem 1.5rem;
             border-radius: 1rem;
@@ -40,7 +40,7 @@
         }
         
         .legal-content h2 {
-            color: #198754;
+            color: #2e7d32;
             margin-top: 2rem;
             margin-bottom: 1rem;
         }
@@ -59,7 +59,7 @@
         .back-link {
             display: inline-block;
             margin-bottom: 2rem;
-            color: #198754;
+            color: #2e7d32;
             text-decoration: none;
             font-weight: 500;
         }
@@ -149,7 +149,7 @@
             
             <h2>11. Contact Information</h2>
             <p>
-                For questions about these Terms of Service, please contact us at: <a href="mailto:legal@afiaorbit.com">legal@afiaorbit.com</a>
+                For questions about these Terms of Service, please contact us at: <a href="mailto:legal@greenroute.co.tz">legal@greenroute.co.tz</a>
             </p>
         </div>
     </div>

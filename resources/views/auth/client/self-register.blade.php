@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        :root { --teal: #055c5c; --red: #640404; }
+        :root { --teal: #055c5c; --red: #c0392b; }
         body { background: linear-gradient(135deg, #f0f9f9 0%, #e2e8f0 100%); min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
         .card { border: none; border-radius: 16px; box-shadow: 0 8px 30px rgba(5,92,92,.12); }
         .card-header { background: linear-gradient(135deg, var(--teal), #077777); color: white; border-radius: 16px 16px 0 0 !important; padding: 2rem; }

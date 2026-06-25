@@ -36,8 +36,8 @@
 
         .payment-card:hover,
         .payment-card.active {
-            border-color: #0d9488;
-            box-shadow: 0 10px 24px rgba(13, 148, 136, .12);
+            border-color: #055c5c;
+            box-shadow: 0 10px 24px rgba(5, 92, 92, .12);
             transform: translateY(-2px);
         }
 

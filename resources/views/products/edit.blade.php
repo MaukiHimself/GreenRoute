@@ -26,7 +26,7 @@
             <div class="header">
                 <div class="logo">
                     <span class="logo-icon"></span>
-                    <span>AFIA Terminal</span>
+                    <span>GreenRoute</span>
                 </div>
                 <p class="subtitle">Login to Your Account</p>
             </div>

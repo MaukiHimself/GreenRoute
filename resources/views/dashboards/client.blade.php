@@ -50,7 +50,7 @@
     <style>
         :root {
             --primary-color: #055c5c;
-            --secondary-color: #640404;
+            --secondary-color: #c0392b;
             --white-color: #ffffff;
             --light-bg: #f8f9fa;
             --border-color: #e2e8f0;

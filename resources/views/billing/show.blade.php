@@ -12,7 +12,7 @@
             background-color: rgba(5, 92, 92, 0.08);
             border-left: 4px solid #055c5c;
         }
-        .accent-color { color: #640404; }
+        .accent-color { color: #c0392b; }
         .btn-primary-custom {
             background-color: #055c5c;
             border-color: #055c5c;
@@ -23,8 +23,8 @@
             border-color: #044a4a;
         }
         .btn-accent {
-            background-color: #640404;
-            border-color: #640404;
+            background-color: #c0392b;
+            border-color: #c0392b;
             color: white;
         }
         .btn-accent:hover {
@@ -52,7 +52,7 @@
             margin-bottom: 20px;
             border: 1px solid rgba(5, 92, 92, 0.1);
         }
-        .badge-overdue { background-color: #640404; }
+        .badge-overdue { background-color: #c0392b; }
         .badge-pending { background-color: #055c5c; }
         .badge-paid { background-color: #28a745; }
     </style>

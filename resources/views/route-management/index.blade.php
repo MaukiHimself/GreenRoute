@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Routes Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary-teal: #055c5c;
-            --primary-red: #640404;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+@extends('layouts.contractor-sidebar')
+
+@section('title', 'Routes Management')
+
+@section('styles')
+<style>
+    :root {
+        --primary-teal: #055c5c;
+        --primary-red: #c0392b;
+    }
         
         .page-header {
             background: linear-gradient(135deg, var(--primary-teal), #077777);
@@ -121,23 +112,24 @@
             font-size: 0.875rem;
         }
     </style>
-</head>
-<body>
-    <div class="container-fluid p-4">
-        <!-- Header -->
-        <div class="page-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="mb-2">
-                        <i class="bi bi-signpost-split me-2"></i>Routes Management
-                    </h1>
-                    <p class="mb-0 opacity-90">Organize your clients into routes for efficient collection</p>
-                </div>
-                <a href="{{ route('route-management.create') }}" class="btn-create">
-                    <i class="bi bi-plus-circle me-2"></i>Create New Route
-                </a>
+@endsection
+
+@section('content')
+<div class="container-fluid p-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="bi bi-signpost-split me-2"></i>Routes Management
+                </h1>
+                <p class="mb-0 opacity-90">Organize your clients into routes for efficient collection</p>
             </div>
+            <a href="{{ route('route-management.create') }}" class="btn-create">
+                <i class="bi bi-plus-circle me-2"></i>Create New Route
+            </a>
         </div>
+    </div>
 
         <!-- Success Message -->
         @if(session('success'))
@@ -201,7 +193,7 @@
             </div>
         @endforelse
     </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@push('scripts')
+@endpush

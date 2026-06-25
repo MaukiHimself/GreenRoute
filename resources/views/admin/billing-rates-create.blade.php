@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Billing Rate - AFIA ORBIT Admin</title>
+    <title>Add Billing Rate - GreenRoute Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-red: #c0392b;
         }
         
         body {
@@ -192,11 +192,11 @@
         </div>
         
         <h1 class="page-title">Add New Billing Rate</h1>
-        <p class="page-description">Set collection fees based on AFIA ORBIT by-laws pricing structure</p>
+        <p class="page-description">Set collection fees based on GreenRoute by-laws pricing structure</p>
 
         <div class="info-box">
             <p><i class="bi bi-info-circle me-2"></i>
-                Create billing rates for different client categories and locations. Categories are based on the official AFIA ORBIT by-laws with default prices shown in TZS. You can adjust prices according to updates from the field.
+                Create billing rates for different client categories and locations. Categories are based on the official GreenRoute by-laws with default prices shown in TZS. You can adjust prices according to updates from the field.
             </p>
         </div>
 

@@ -125,7 +125,7 @@
                     
                     <div class="mb-3">
                         <h6 class="text-muted">Customer Support</h6>
-                        <p class="mb-1"><i class="bi bi-envelope me-2"></i>support@afiaorbit.com</p>
+                        <p class="mb-1"><i class="bi bi-envelope me-2"></i>support@greenroute.co.tz</p>
                         <p class="mb-1"><i class="bi bi-telephone me-2"></i>+1 (555) 987-6543</p>
                         <small class="text-muted">Mon-Fri: 8:00 AM - 6:00 PM</small>
                     </div>

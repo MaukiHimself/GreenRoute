@@ -44,7 +44,7 @@
                     </div>
 
                     @if($feedback->response)
-                        <div class="border rounded p-3 mb-4" style="background: #f0fdfa; border-color: #0d9488;">
+                        <div class="border rounded p-3 mb-4" style="background: #f0fdfa; border-color: #055c5c;">
                             <h6 class="fw-semibold mb-2" style="color: #055c5c;">Your Response</h6>
                             <p class="mb-0" style="white-space: pre-line;">{{ $feedback->response }}</p>
                             @if($feedback->responded_at)

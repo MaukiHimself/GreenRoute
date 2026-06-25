@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Route</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary-teal: #055c5c;
-            --primary-red: #640404;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+@extends('layouts.contractor-sidebar')
+
+@section('title', 'Create New Route')
+
+@section('styles')
+<style>
+    :root {
+        --primary-teal: #055c5c;
+        --primary-red: #c0392b;
+    }
         
         .page-header {
             background: linear-gradient(135deg, var(--primary-teal), #077777);
@@ -79,23 +70,24 @@
             border-bottom: none;
         }
     </style>
-</head>
-<body>
-    <div class="container-fluid p-4">
-        <!-- Header -->
-        <div class="page-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="mb-2">
-                        <i class="bi bi-plus-circle me-2"></i>Create New Route
-                    </h1>
-                    <p class="mb-0 opacity-90">Define a new route and assign clients to it</p>
-                </div>
-                <a href="{{ route('route-management.index') }}" class="btn btn-light">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Routes
-                </a>
+@endsection
+
+@section('content')
+<div class="container-fluid p-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Route
+                </h1>
+                <p class="mb-0 opacity-90">Define a new route and assign clients to it</p>
             </div>
+            <a href="{{ route('route-management.index') }}" class="btn btn-light">
+                <i class="bi bi-arrow-left me-2"></i>Back to Routes
+            </a>
         </div>
+    </div>
 
         <!-- Form -->
         <div class="form-card">
@@ -404,9 +396,11 @@
                     .catch(error => console.error('Error loading streets:', error));
             }
         }
-        
+
         // Initialize count
         updateCount();
     </script>
-</body>
-</html>
+@endsection
+
+@push('scripts')
+@endpush

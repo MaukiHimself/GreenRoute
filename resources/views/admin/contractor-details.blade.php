@@ -10,7 +10,7 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-red: #c0392b;
             --white: #ffffff;
             --light-bg: #f8f9fa;
             --border-color: #e0e0e0;

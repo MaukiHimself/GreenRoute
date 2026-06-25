@@ -12,7 +12,7 @@
             background-color: rgba(5, 92, 92, 0.08);
             border-left: 4px solid #055c5c;
         }
-        .accent-color { color: #640404; }
+        .accent-color { color: #c0392b; }
         .btn-primary-custom {
             background-color: #055c5c;
             border-color: #055c5c;
@@ -45,8 +45,8 @@
         }
         .alert-danger-custom {
             background-color: rgba(100, 4, 4, 0.1);
-            border-color: #640404;
-            color: #640404;
+            border-color: #c0392b;
+            color: #c0392b;
         }
         .form-section {
             background: white;
@@ -92,14 +92,14 @@
         .location-tag .remove-tag {
             cursor: pointer;
             font-weight: bold;
-            color: #640404;
+            color: #c0392b;
             padding: 0 4px;
             border-radius: 50%;
             transition: all 0.2s;
         }
         
         .location-tag .remove-tag:hover {
-            background: #640404;
+            background: #c0392b;
             color: white;
         }
         

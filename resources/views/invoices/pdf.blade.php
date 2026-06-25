@@ -20,7 +20,7 @@
             padding: 32px;
         }
         .brand-banner {
-            background: linear-gradient(135deg, #055c5c 0%, #0d9488 40%, #0891b2 100%);
+            background: linear-gradient(135deg, #055c5c 0%, #0a6e4e 45%, #2e7d32 100%);
             border-radius: 16px 16px 0 0;
             padding: 28px 36px;
             color: #ffffff;
@@ -145,7 +145,7 @@
         .status-cancelled { background: #fee2e2; color: #7f1d1d; }
         .section-divider {
             height: 3px;
-            background: linear-gradient(90deg, #055c5c, #0891b2);
+            background: linear-gradient(90deg, #055c5c, #2e7d32);
             border-radius: 2px;
             margin: 22px 0 18px;
             width: 60px;
@@ -167,7 +167,7 @@
             margin-bottom: 6px;
         }
         .service-table thead th {
-            background: linear-gradient(135deg, #055c5c, #0d9488);
+            background: linear-gradient(135deg, #055c5c, #2e7d32);
             color: #ffffff;
             padding: 11px 14px;
             text-align: left;
@@ -225,8 +225,8 @@
             color: #055c5c;
         }
         .info-card {
-            background: #f0fdfa;
-            border-left: 4px solid #0d9488;
+            background: #f1f8f2;
+            border-left: 4px solid #2e7d32;
             border-radius: 0 10px 10px 0;
             padding: 16px 20px;
             margin-top: 22px;

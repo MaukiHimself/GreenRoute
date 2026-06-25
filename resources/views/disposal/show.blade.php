@@ -8,7 +8,7 @@
     <style>
         .primary-dark { color: #055c5c; }
         .primary-light { color: #055c5c; background-color: rgba(5, 92, 92, 0.1); }
-        .accent-color { color: #640404; }
+        .accent-color { color: #c0392b; }
         .section-header { 
             border-bottom: 2px solid #055c5c; 
             padding-bottom: 8px;
@@ -31,8 +31,8 @@
             border-color: #044a4a;
         }
         .btn-accent {
-            background-color: #640404;
-            border-color: #640404;
+            background-color: #c0392b;
+            border-color: #c0392b;
             color: white;
         }
         .btn-accent:hover {

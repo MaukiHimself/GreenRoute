@@ -1,4 +1,4 @@
-@extends('layouts.contractor-simple')
+@extends('layouts.contractor-sidebar')
 
 @section('title', 'Create Schedule')
 
@@ -6,7 +6,7 @@
 <style>
     :root {
         --primary-teal: #055c5c;
-        --primary-red: #640404;
+        --primary-red: #c0392b;
         --white: #ffffff;
     }
 
@@ -348,16 +348,12 @@
         </div>
     </div>
 </div>
+@endsection
 
 @section('scripts')
 <script>
 const allClientsData = @json($clients);
-const allRoutesData  = @json($routes);
-const billingRates = @json($billingRates->map(fn($rate) => [
-    'id' => $rate->id,
-    'fee' => (float) $rate->collection_fee,
-    'label' => $rate->label,
-]));
+const billingRates = @json($billingRatesData);
 
 const autocompleteInput = document.getElementById('locationAutocomplete');
 const dropdown          = document.getElementById('locationDropdown');
@@ -507,8 +503,8 @@ function renderClients(clients, labelHtml, isFiltered = false) {
             <div class="text-center py-4 text-muted">
                 <i class="bi bi-person-x fs-3 d-block mb-2"></i>
                 ${isFiltered
-                    ? 'No clients in this location. <a href="javascript:showAllClients()" class="text-primary">Show all clients</a> or <a href="{{ route('contractor.clients.create') }}" class="text-primary">add a new client</a>.'
-                    : 'No clients yet. <a href="{{ route('contractor.clients.create') }}" class="text-primary">Add your first client</a>.'}
+                    ? 'No clients in this location. <a href="javascript:showAllClients()" class="text-primary">Show all clients</a> or <a href="{{ route("contractor.clients.create") }}" class="text-primary">add a new client</a>.'
+                    : 'No clients yet. <a href="{{ route("contractor.clients.create") }}" class="text-primary">Add your first client</a>.'}
             </div>`;
         updateCount();
         return;
@@ -572,4 +568,3 @@ document.getElementById('scheduleForm').addEventListener('submit', function (e) 
     }
 });
 </script>
-@endsection

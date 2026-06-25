@@ -75,7 +75,7 @@
                         <h6 class="mb-0"><i class="bi bi-telephone me-2" style="color:#055c5c"></i>Contact</h6>
                     </div>
                     <div class="card-body">
-                        <p class="mb-1 text-muted">Email: support@greenrouteorbit.com</p>
+                        <p class="mb-1 text-muted">Email: support@greenroute.co.tz</p>
                         <p class="mb-1 text-muted">Phone: +255 000 000 000</p>
                         <p class="mb-0 text-muted">Hours: Mon–Fri, 9:00–17:00</p>
                     </div>

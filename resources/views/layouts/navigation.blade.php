@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-afia-orbit-logo class="block h-9 w-auto" />
+                        <x-greenroute-logo size="sm" class="block w-auto" />
                     </a>
                 </div>
 

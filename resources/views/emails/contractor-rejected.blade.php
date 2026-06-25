@@ -20,7 +20,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .email-header {
-            background: linear-gradient(135deg, #640404, #7c0505);
+            background: linear-gradient(135deg, #c0392b, #a93226);
             color: #ffffff;
             padding: 40px 30px;
             text-align: center;
@@ -63,7 +63,7 @@
         }
         .application-details {
             background: #f8f9fa;
-            border-left: 4px solid #640404;
+            border-left: 4px solid #c0392b;
             padding: 20px;
             margin: 25px 0;
             border-radius: 8px;
@@ -73,7 +73,7 @@
             color: #333;
         }
         .application-details strong {
-            color: #640404;
+            color: #c0392b;
         }
         .reasons-box {
             background: #fef2f2;
@@ -166,7 +166,7 @@
 
             <p>Dear {{ $contractor->name }},</p>
 
-            <p>Thank you for your interest in joining AFIA ORBIT as a waste management contractor. After careful review of your application, we regret to inform you that we are unable to approve your contractor account at this time.</p>
+            <p>Thank you for your interest in joining GreenRoute as a waste management contractor. After careful review of your application, we regret to inform you that we are unable to approve your contractor account at this time.</p>
 
             <div class="application-details">
                 <p><strong>Application Details:</strong></p>
@@ -198,21 +198,21 @@
                 </ul>
             </div>
 
-            <a href="mailto:support@greenrouteorbit.com" class="cta-button">
+            <a href="mailto:support@greenroute.co.tz" class="cta-button">
                 Contact Support
             </a>
 
             <p style="margin-top: 30px; font-size: 14px; color: #999;">
-                We appreciate your understanding and interest in GreenRoute ORBIT. If you have any questions about this decision or need clarification, please don't hesitate to reach out to our support team.
+                We appreciate your understanding and interest in GreenRoute. If you have any questions about this decision or need clarification, please don't hesitate to reach out to our support team.
             </p>
         </div>
 
         <div class="email-footer">
-            <p><strong>GreenRoute ORBIT</strong> - Waste Management System</p>
+            <p><strong>GreenRoute</strong> - Waste Management System</p>
             <p>This is an automated message. Please do not reply to this email.</p>
             <p>
                 <a href="{{ url('/') }}">Visit Website</a> |
-                <a href="mailto:support@greenrouteorbit.com">Support</a>
+                <a href="mailto:support@greenroute.co.tz">Support</a>
             </p>
         </div>
     </div>

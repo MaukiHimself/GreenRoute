@@ -578,7 +578,26 @@ class ClientPortalController extends Controller
         $client = $this->resolveClient();
         abort_unless($client, 404);
 
-        return view('client_portal.location', compact('client'));
+        // Get route information if client is assigned to a route
+        $routeClients = collect();
+        $contractorRoute = null;
+
+        if ($client->route && $client->contractor_id) {
+            $contractorRoute = \App\Models\ContractorRoute::where('contractor_id', $client->contractor_id)
+                ->where('route_name', $client->route)
+                ->first();
+
+            if ($contractorRoute) {
+                $routeClients = Client::where('contractor_id', $client->contractor_id)
+                    ->where('route', $client->route)
+                    ->whereNotNull('latitude')
+                    ->whereNotNull('longitude')
+                    ->select('id', 'name', 'latitude', 'longitude', 'address', 'city', 'phone')
+                    ->get();
+            }
+        }
+
+        return view('client_portal.location', compact('client', 'routeClients', 'contractorRoute'));
     }
 
     public function updateLocation(Request $request)

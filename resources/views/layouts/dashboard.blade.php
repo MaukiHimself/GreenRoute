@@ -17,11 +17,15 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --afia-teal: #0d9488;
-            --afia-cyan: #0891b2;
+            /* GreenRoute unified palette — teal chrome + green eco accent */
+            --afia-teal: #055c5c;   /* primary (teal) */
+            --afia-cyan: #0d9488;   /* teal-green gradient partner */
+            --afia-green: #2e7d32;  /* eco / success accent */
+            --afia-green-light: #4caf50;
+            --afia-dark: #023535;   /* deep teal */
             --afia-red: #dc2626;
             --afia-gray: #6b7280;
-            --afia-light: #f8fafc;
+            --afia-light: #f4f9f6;  /* app background */
         }
 
         body {
@@ -67,7 +71,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+            box-shadow: 0 8px 20px rgba(5, 92, 92, 0.3);
         }
 
         .badge {
@@ -173,7 +177,10 @@
 
                     <!-- Page Content -->
                     <div class="p-4">
-                        {{ $slot }}
+                        @yield('content')
+                        @isset($slot)
+                            {{ $slot }}
+                        @endisset
                     </div>
 
                     <x-footer />

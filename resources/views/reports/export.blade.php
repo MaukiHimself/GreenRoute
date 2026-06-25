@@ -8,7 +8,7 @@
         .section { margin-bottom: 25px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .stat-box { border: 1px solid #ddd; padding: 15px; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: bold; color: #198754; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #2e7d32; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f8f9fa; }

@@ -49,7 +49,7 @@
                                         @if($req->product?->image)
                                             <img src="{{ asset('storage/' . $req->product->image) }}" class="rounded" width="44" height="44" style="object-fit:cover;" alt="{{ $req->product->name }}">
                                         @else
-                                            <div class="rounded d-flex align-items-center justify-content-center text-white" style="width:44px;height:44px;background:linear-gradient(135deg,#055c5c,#0891b2);">
+                                            <div class="rounded d-flex align-items-center justify-content-center text-white" style="width:44px;height:44px;background:linear-gradient(135deg,#055c5c,#055c5c);">
                                                 <i class="bi bi-tools"></i>
                                             </div>
                                         @endif

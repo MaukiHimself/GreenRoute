@@ -9,7 +9,7 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-red: #c0392b;
             --light-teal: rgba(5, 92, 92, 0.1);
             --dark-teal: #044a4a;
         }

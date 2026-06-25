@@ -9,7 +9,7 @@
     <style>
         :root {
             --primary-color: #055c5c;
-            --secondary-color: #640404;
+            --secondary-color: #c0392b;
             --white-color: #ffffff;
             --light-bg: #f8f9fa;
             --border-color: #e2e8f0;
@@ -549,7 +549,7 @@
                 labelElement.textContent = "Credit Surplus:";
                 displayElement.textContent = "TZS " + Math.abs(difference).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 displayElement.className = "text-success fw-bold";
-                displayElement.style.color = "#198754"; // Bootstrap success color
+                displayElement.style.color = "#2e7d32"; // Bootstrap success color
             } else {
                 // Remaining Balance
                 labelElement.textContent = "Remaining Balance:";

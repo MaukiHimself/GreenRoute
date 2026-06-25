@@ -41,7 +41,7 @@
         .success-icon {
             width: 80px;
             height: 80px;
-            background: #10b981;
+            background: #2e7d32;
             border-radius: 50%;
             margin: 0 auto 30px;
             display: flex;
@@ -159,7 +159,7 @@
                 @else
                 <p><strong>Password:</strong> Use the password you created when you registered.</p>
                 @endif
-                <p><strong>Status:</strong> <span style="color: #10b981;">✓ Approved</span></p>
+                <p><strong>Status:</strong> <span style="color: #2e7d32;">✓ Approved</span></p>
                 <p><strong>Account Type:</strong> Waste Contractor</p>
             </div>
 
@@ -184,11 +184,11 @@
         </div>
 
         <div class="email-footer">
-            <p><strong>GreenRoute ORBIT</strong> - Waste Management System</p>
+            <p><strong>GreenRoute</strong> - Waste Management System</p>
             <p>This is an automated message. Please do not reply to this email.</p>
             <p>
                 <a href="{{ url('/') }}">Visit Website</a> |
-                <a href="mailto:support@greenrouteorbit.com">Support</a>
+                <a href="mailto:support@greenroute.co.tz">Support</a>
             </p>
         </div>
     </div>

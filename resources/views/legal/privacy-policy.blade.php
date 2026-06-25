@@ -24,7 +24,7 @@
         }
         
         .legal-header {
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
             color: white;
             padding: 3rem 1.5rem;
             border-radius: 1rem;
@@ -40,7 +40,7 @@
         }
         
         .legal-content h2 {
-            color: #198754;
+            color: #2e7d32;
             margin-top: 2rem;
             margin-bottom: 1rem;
         }
@@ -64,7 +64,7 @@
         .back-link {
             display: inline-block;
             margin-bottom: 2rem;
-            color: #198754;
+            color: #2e7d32;
             text-decoration: none;
             font-weight: 500;
         }
@@ -190,7 +190,7 @@
             <h2>11. Contact Us</h2>
             <p>
                 If you have questions about this Privacy Policy, please contact us at: 
-                <a href="mailto:privacy@afiaorbit.com">privacy@afiaorbit.com</a>
+                <a href="mailto:privacy@greenroute.co.tz">privacy@greenroute.co.tz</a>
             </p>
         </div>
     </div>

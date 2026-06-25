@@ -107,7 +107,7 @@
 
         .amount-section {
             background-color: #f0fdf4;
-            border: 2px solid #22c55e;
+            border: 2px solid #2e7d32;
             padding: 15px;
             border-radius: 4px;
             margin: 15px 0;
@@ -121,12 +121,12 @@
         }
 
         .amount-row.total {
-            border-top: 2px solid #22c55e;
+            border-top: 2px solid #2e7d32;
             padding-top: 12px;
             margin-top: 12px;
             font-size: 18px;
             font-weight: bold;
-            color: #22c55e;
+            color: #2e7d32;
         }
 
         .status {
@@ -203,7 +203,7 @@
         .badge {
             display: inline-block;
             padding: 4px 8px;
-            background-color: #22c55e;
+            background-color: #2e7d32;
             color: white;
             border-radius: 4px;
             font-size: 11px;
@@ -306,11 +306,11 @@
             </div>
             <div class="amount-row">
                 <span class="info-label">This Payment:</span>
-                <span class="info-value" style="color: #22c55e; font-weight: bold;">+ TZS {{ number_format($submission->amount_submitted, 2) }}</span>
+                <span class="info-value" style="color: #2e7d32; font-weight: bold;">+ TZS {{ number_format($submission->amount_submitted, 2) }}</span>
             </div>
             <div class="amount-row total">
                 <span>Total Paid:</span>
-                <span style="color: #22c55e;">TZS {{ number_format($invoice->amount_paid, 2) }}</span>
+                <span style="color: #2e7d32;">TZS {{ number_format($invoice->amount_paid, 2) }}</span>
             </div>
             <div class="amount-row" style="margin-top: 10px;">
                 <span class="info-label">Remaining Balance:</span>

@@ -16,7 +16,8 @@
     <style>
         :root {
             --primary-color: #055c5c;
-            --secondary-color: #640404;
+            --accent-green: #2e7d32;
+            --secondary-color: #c0392b;
         }
         
         body {

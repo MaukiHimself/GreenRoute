@@ -11,7 +11,8 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-green: #2e7d32;
+            --primary-red: #c0392b;
             --white: #ffffff;
             --light-bg: #f8f9fa;
             --border-color: #e2e8f0;
@@ -210,7 +211,10 @@
                     </div>
                 @endif
 
-                {{ $slot }}
+                @yield('content')
+                @isset($slot)
+                    {{ $slot }}
+                @endisset
             </div>
 
             <!-- Footer -->

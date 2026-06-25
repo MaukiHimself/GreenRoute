@@ -10,8 +10,10 @@
     <style>
         :root {
             --primary-teal: #055c5c;
-            --primary-red: #640404;
+            --primary-green: #2e7d32;
+            --primary-red: #c0392b;
             --light-teal: #e6f2f2;
+            --light-green: #e8f5e9;
             --light-red: #f9eaea;
         }
 
@@ -168,7 +170,7 @@
     @stack('head-scripts')
 </head>
 <body class="has-portal-sidebar" @if(Auth::user()->dark_mode) style="background-color: #1a1d23;" @endif>
-    <x-portal-sidebar portal="contractor" />
+    <x-portal-sidebar portal="contractor" :tabbed="true" />
 
     <div class="main-content portal-main">
             <!-- Header -->
@@ -235,7 +237,10 @@
                     </div>
                 @endif
 
-                {{ $slot }}
+                @yield('content')
+                @isset($slot)
+                    {{ $slot }}
+                @endisset
             </div>
     </div>
 

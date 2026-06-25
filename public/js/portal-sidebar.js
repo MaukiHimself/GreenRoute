@@ -121,9 +121,13 @@
 
     sidebar.querySelectorAll('.portal-sidebar__link[data-tab]').forEach(function (link) {
         link.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (!sidebar.classList.contains('is-expanded') && !sidebar.classList.contains('is-mobile-open')) {
-                openSidebar();
+            // Only suppress navigation when this link points to the current URL
+            // (i.e. it's meant to switch an in-page tab). Otherwise let the browser navigate.
+            if (link.getAttribute('data-tab') === window.location.pathname) {
+                e.preventDefault();
+                if (!sidebar.classList.contains('is-expanded') && !sidebar.classList.contains('is-mobile-open')) {
+                    openSidebar();
+                }
             }
         });
     });

@@ -59,10 +59,18 @@ class ScheduleController extends Controller
                 ->orderBy('frequency')
                 ->get();
 
+            $billingRatesData = $billingRates->map(function($rate) {
+                return [
+                    'id' => $rate->id,
+                    'fee' => (float) $rate->collection_fee,
+                    'label' => $rate->label,
+                ];
+            })->all();
+
             $siteLocations = collect([]);
             $assignedClient = $clients->first();
 
-            return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient', 'regions', 'routes', 'siteLocations', 'billingRates'));
+            return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient', 'regions', 'routes', 'siteLocations', 'billingRates', 'billingRatesData'));
         }
 
         $regions = collect([]);

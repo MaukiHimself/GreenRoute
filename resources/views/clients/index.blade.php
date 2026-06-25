@@ -1,48 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clients Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --primary-color: #055c5c;
-            --secondary-color: #640404;
-            --white-color: #ffffff;
-            --light-bg: #f8f9fa;
-            --border-color: #e2e8f0;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .container-fluid {
-            padding: 2rem;
-            max-width: 1400px;
-        }
-        
-        /* Header Section */
-        .page-header {
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .page-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 0;
-        }
+@extends('layouts.contractor-sidebar')
+
+@section('title', 'Clients Management')
+
+@section('styles')
+<style>
+    :root {
+        --primary-color: #055c5c;
+        --secondary-color: #c0392b;
+        --white-color: #ffffff;
+        --light-bg: #f8f9fa;
+        --border-color: #e2e8f0;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+    }
         
         /* Success Alert */
         .alert-success {
@@ -418,16 +388,14 @@
             }
         }
     </style>
-</head>
-<body>
-    <div class="container-fluid">
-        <!-- Page Header -->
-        <div class="page-header d-flex justify-content-between align-items-center">
-            <h1 class="page-title">Client Database</h1>
-            <a href="{{ route('dashboard.contractor') }}" class="btn btn-outline-dark d-flex align-items-center gap-2" style="border-color: #cbd5e1;" target="_parent">
-                <i class="bi bi-house-door-fill" style="color: var(--primary-color);"></i> Home
-            </a>
-        </div>
+@endsection
+
+@section('content')
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h1 class="page-title">Client Database</h1>
+    </div>
 
         <!-- Success Message -->
         @if(session('success'))
@@ -622,7 +590,7 @@
                     }
                 });
             });
-            
+
             // Sort button functionality
             const sortButtons = document.querySelectorAll('.sort-btn');
             sortButtons.forEach(button => {
@@ -633,5 +601,7 @@
             });
         });
     </script>
-</body>
-</html>
+@endsection
+
+@push('scripts')
+@endpush

@@ -60,7 +60,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h1 class="h3 mb-2 text-dark">Welcome, {{ Auth::user()->name }}!</h1>
-                            <p class="text-muted mb-0">Monitor and manage the entire AFIA ORBIT waste management system.</p>
+                            <p class="text-muted mb-0">Monitor and manage the entire GreenRoute waste management system.</p>
                         </div>
                         <div class="col-md-4 text-end">
                             <div class="d-flex justify-content-end">

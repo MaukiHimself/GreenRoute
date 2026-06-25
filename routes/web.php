@@ -332,11 +332,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Contractor routes
 Route::middleware(['auth'])->prefix('contractor')->group(function () {
      Route::get('/clients/locations', [App\Http\Controllers\ContractorController::class, 'getAssignedClients'])->name('contractor.clients.locations');
-     Route::get('/dashboard-stats', [App\Http\Controllers\ContractorController::class, 'getDashboardStats']);
-     Route::get('/recent-invoices', [App\Http\Controllers\ContractorController::class, 'getRecentInvoices']);
-     Route::get('/recent-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPayments'])->name('contractor.recent-payments');
-     Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules']);
-     Route::get('/recent-pending-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPendingPayments'])->name('contractor.recent-pending-payments');
+      Route::get('/dashboard-stats', [App\Http\Controllers\ContractorController::class, 'getDashboardStats'])->name('contractor.dashboard-stats');
+      Route::get('/recent-invoices', [App\Http\Controllers\ContractorController::class, 'getRecentInvoices'])->name('contractor.recent-invoices');
+      Route::get('/recent-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPayments'])->name('contractor.recent-payments');
+      Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules'])->name('contractor.upcoming-schedules');
+      Route::get('/recent-pending-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPendingPayments'])->name('contractor.recent-pending-payments');
     Route::get('/clients/{client}', [ClientController::class, 'show']);
     Route::get('/clients/{client}/edit', [ClientController::class, 'edit']);
 });

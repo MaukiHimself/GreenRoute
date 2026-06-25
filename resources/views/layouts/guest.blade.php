@@ -17,7 +17,7 @@
         <style>
             body {
                 font-family: 'Inter', sans-serif;
-                background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 50%, #e0f2fe 100%);
+                background: linear-gradient(135deg, #e6f2f2 0%, #f4f9f6 50%, #e8f5e9 100%);
                 min-height: 100vh;
             }
 
@@ -37,7 +37,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23198754" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23198754" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23055c5c" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23055c5c" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
                 z-index: 0;
             }
 
@@ -50,7 +50,7 @@
                 border-radius: 20px;
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
                 padding: 3rem 2.5rem;
-                border-top: 4px solid #198754;
+                border-top: 4px solid #055c5c;
             }
 
             .logo-section {
@@ -61,7 +61,7 @@
             .logo {
                 font-size: 2.5rem;
                 font-weight: 700;
-                background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+                background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
@@ -75,12 +75,12 @@
             }
 
             .form-control:focus {
-                border-color: #198754;
-                box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+                border-color: #055c5c;
+                box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.2);
             }
 
             .btn-success {
-                background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+                background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
                 border: none;
                 padding: 12px 24px;
                 font-weight: 500;
@@ -89,9 +89,9 @@
             }
 
             .btn-success:hover {
-                background: linear-gradient(135deg, #157347 0%, #1aa179 100%);
+                background: linear-gradient(135deg, #023535 0%, #1b5e20 100%);
                 transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(25, 135, 84, 0.3);
+                box-shadow: 0 8px 20px rgba(5, 92, 92, 0.3);
             }
 
             .icon-circle {

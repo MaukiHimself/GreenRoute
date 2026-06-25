@@ -3,19 +3,40 @@
 <head>
     <title>Collection Schedule - {{ $schedule->pickup_location }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .info { margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 24px; color: #1e293b; }
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
+            color: #ffffff;
+        }
+        .header .brand { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; margin-bottom: 4px; }
+        .header h2 { margin: 0 0 6px; font-size: 24px; font-weight: 700; }
+        .header h3 { margin: 0; font-size: 16px; font-weight: 500; opacity: 0.95; }
+        .header p { margin: 6px 0 0; font-size: 13px; opacity: 0.9; }
+        .info {
+            margin-bottom: 20px;
+            background: #f1f8f2;
+            border-left: 4px solid #2e7d32;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            font-size: 14px;
+        }
+        .info p { margin: 4px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #000; display: inline-block; }
+        th, td { border: 1px solid #e2e8f0; padding: 9px 10px; text-align: left; font-size: 13px; }
+        thead th { background-color: #055c5c; color: #ffffff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; }
+        tbody tr:nth-child(even) td { background-color: #f8fafc; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid #055c5c; border-radius: 4px; display: inline-block; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>AFIA ORBIT - Collection Schedule</h2>
+        <div class="brand">GreenRoute &bull; Waste Management</div>
+        <h2>Collection Schedule</h2>
         <h3>Route: {{ $schedule->pickup_location }}</h3>
         <p>Date: {{ $schedule->pickup_date->format('l, F d, Y') }}</p>
     </div>

@@ -37,6 +37,14 @@
                     <p class="mb-0 mt-1">Providing your exact GPS coordinates helps your contractor plan efficient pickup routes and schedule visits at the right time. This is optional but highly recommended.</p>
                 </div>
 
+                @if($client->route)
+                    <div class="alert alert-success mb-4">
+                        <i class="bi bi-signpost-split me-2"></i>
+                        <strong>You are on route: {{ $client->route }}</strong>
+                        <p class="mb-0 mt-1">Your location will be shown alongside other clients on your route below.</p>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('client.location.update') }}">
                     @csrf
                     @method('PUT')
@@ -69,7 +77,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <div id="map" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                        <div id="map" style="height: 400px; width: 100%; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
                     </div>
 
                     <div class="d-grid">
@@ -82,6 +90,46 @@
         </div>
 
         <div class="col-lg-5">
+            @if($routeClients->count() > 0)
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="bi bi-signpost-split me-2"></i>Your Route: {{ $client->route }}</h2>
+                </div>
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Route Overview</strong>
+                    <p class="mb-0 mt-1">There are <strong>{{ $routeClients->count() }}</strong> clients on your route. The map shows all client locations for route planning.</p>
+                </div>
+                <div class="mb-3">
+                    <strong>Route Distance:</strong>
+                    <span id="routeDistance" class="badge bg-primary ms-2">Calculating...</span>
+                </div>
+                <div class="list-group">
+                    @foreach($routeClients as $rc)
+                    <div class="list-group-item @if($rc->id === $client->id) list-group-item-success @endif">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ $rc->name }}</strong>
+                                @if($rc->id === $client->id)
+                                    <span class="badge bg-success ms-2">You</span>
+                                @endif
+                                <div class="small text-muted">{{ $rc->address }}</div>
+                                @if($rc->phone)
+                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ $rc->phone }}</div>
+                                @endif
+                            </div>
+                            @if($rc->latitude && $rc->longitude)
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="panToClient({{ $rc->latitude }}, {{ $rc->longitude }})">
+                                    <i class="bi bi-geo-alt"></i>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <div class="content-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="bi bi-lightbulb me-2"></i>Benefits</h2>
@@ -112,6 +160,8 @@
         let mapCtx, locationMarker;
         const existingLat = {{ $client->latitude ?? 'null' }};
         const existingLng = {{ $client->longitude ?? 'null' }};
+        const routeClients = @json($routeClients);
+        const routeColor = "{{ $contractorRoute->color ?? '#055c5c' }}";
 
         GreenRouteMap.whenReady(function () {
             let defaultLat = -3.3731;
@@ -122,19 +172,19 @@
                 defaultLng = parseFloat(existingLng);
             }
 
-            mapCtx = GreenRouteMap.createMap('map', { lat: defaultLat, lng: defaultLng, zoom: existingLat ? 16 : 12 });
+            mapCtx = GreenRouteMap.createMap('map', { lat: defaultLat, lng: defaultLng, zoom: existingLat ? 14 : 12 });
 
             if (existingLat && existingLng) {
                 locationMarker = L.marker([defaultLat, defaultLng], {
                     draggable: true,
                     title: 'Your Location'
-                }).addTo(mapCtx);
+                }).addTo(mapCtx.map);
                 document.getElementById('locationStatus').innerHTML = `📍 Existing location loaded: ${defaultLat.toFixed(6)}, ${defaultLng.toFixed(6)}. Drag marker to adjust or click "Detect My GPS Coordinates".`;
             } else {
                 document.getElementById('locationStatus').innerHTML = '📍 No location set. Click "Detect My GPS Coordinates" or drag the marker to your exact location.';
             }
 
-            mapCtx.on('click', function (event) {
+            mapCtx.map.on('click', function (event) {
                 const pos = event.latlng;
                 setLocation(pos.lat, pos.lng);
             });
@@ -144,6 +194,69 @@
                     const pos = event.target.getLatLng();
                     setLocation(pos.lat, pos.lng);
                 });
+            }
+
+            // Add route clients to map
+            if (routeClients.length > 0) {
+                const routeCoordinates = [];
+                routeClients.forEach(client => {
+                    if (client.latitude && client.longitude) {
+                        const lat = parseFloat(client.latitude);
+                        const lng = parseFloat(client.longitude);
+                        routeCoordinates.push({ lat, lng });
+
+                        const isYou = client.id === {{ $client->id }};
+                        const markerColor = isYou ? '#10b981' : routeColor;
+                        const markerIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: `<div style="background: ${markerColor}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        });
+
+                        L.marker([lat, lng], { icon: markerIcon })
+                            .addTo(mapCtx.map)
+                            .bindPopup(`<strong>${client.name}</strong>${isYou ? ' <span class="badge bg-success">You</span>' : ''}<br>${client.address}`);
+                    }
+                });
+
+                // Fit bounds to show all route clients
+                if (routeCoordinates.length > 0) {
+                    const bounds = L.latLngBounds(routeCoordinates.map(c => [c.lat, c.lng]));
+                    mapCtx.map.fitBounds(bounds, { padding: [50, 50] });
+
+                    // Calculate and draw driving road route
+                    const token = "{{ config('services.heigit.api_key') }}";
+                    if (routeCoordinates.length >= 2) {
+                        GreenRouteMap.drawRoadRoute(mapCtx, routeCoordinates, token).then(summary => {
+                            if (summary) {
+                                document.getElementById('routeDistance').textContent = `${summary.distance.toFixed(1)} km`;
+                            } else {
+                                // Fallback to direct polyline
+                                L.polyline(routeCoordinates.map(c => [c.lat, c.lng]), {
+                                    color: routeColor,
+                                    weight: 3,
+                                    opacity: 0.7,
+                                    dashArray: '10, 10'
+                                }).addTo(mapCtx.map);
+                                const totalDistance = calculateRouteDistance(routeCoordinates);
+                                document.getElementById('routeDistance').textContent = `${totalDistance.toFixed(1)} km (direct)`;
+                            }
+                        }).catch(err => {
+                            console.error('Error drawing road route:', err);
+                            L.polyline(routeCoordinates.map(c => [c.lat, c.lng]), {
+                                color: routeColor,
+                                weight: 3,
+                                opacity: 0.7,
+                                dashArray: '10, 10'
+                            }).addTo(mapCtx.map);
+                            const totalDistance = calculateRouteDistance(routeCoordinates);
+                            document.getElementById('routeDistance').textContent = `${totalDistance.toFixed(1)} km (direct)`;
+                        });
+                    } else {
+                        document.getElementById('routeDistance').textContent = '0 km';
+                    }
+                }
             }
 
             document.getElementById('watchLocation').addEventListener('click', watchPreciseLocation);
@@ -156,14 +269,44 @@
             if (locationMarker) {
                 locationMarker.setLatLng([lat, lng]);
             } else if (mapCtx) {
-                locationMarker = L.marker([lat, lng], { draggable: true, title: 'Your Location' }).addTo(mapCtx);
+                locationMarker = L.marker([lat, lng], { draggable: true, title: 'Your Location' }).addTo(mapCtx.map);
                 locationMarker.on('dragend', function (event) {
                     const pos = event.target.getLatLng();
                     setLocation(pos.lat, pos.lng);
                 });
             }
-            if (mapCtx) mapCtx.setView([lat, lng], 16);
+            if (mapCtx) mapCtx.map.setView([lat, lng], 16);
             document.getElementById('locationStatus').innerHTML = `📍 Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
+
+        function panToClient(lat, lng) {
+            if (mapCtx) {
+                mapCtx.map.setView([lat, lng], 16);
+            }
+        }
+
+        function calculateRouteDistance(coordinates) {
+            let totalDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                totalDistance += haversineDistance(
+                    coordinates[i - 1].lat,
+                    coordinates[i - 1].lng,
+                    coordinates[i].lat,
+                    coordinates[i].lng
+                );
+            }
+            return totalDistance;
+        }
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
 
         let watchId = null;

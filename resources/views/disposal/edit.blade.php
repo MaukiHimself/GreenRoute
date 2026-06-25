@@ -15,7 +15,7 @@
             border-left: 4px solid #055c5c;
         }
         .accent-color { 
-            color: #640404; 
+            color: #c0392b; 
         }
         .btn-primary-custom {
             background-color: #055c5c;

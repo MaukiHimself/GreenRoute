@@ -12,7 +12,7 @@
             background-color: rgba(5, 92, 92, 0.08);
             border-left: 4px solid #055c5c;
         }
-        .accent-color { color: #640404; }
+        .accent-color { color: #c0392b; }
         .btn-primary-custom {
             background-color: #055c5c;
             border-color: #055c5c;
