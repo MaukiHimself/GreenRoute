@@ -8,14 +8,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        :root { --teal: #055c5c; --red: #c0392b; }
+        :root { --teal: #047857; --red: #c0392b; }
         body { background: linear-gradient(135deg, #f0f9f9 0%, #e2e8f0 100%); min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
         .card { border: none; border-radius: 16px; box-shadow: 0 8px 30px rgba(5,92,92,.12); }
-        .card-header { background: linear-gradient(135deg, var(--teal), #077777); color: white; border-radius: 16px 16px 0 0 !important; padding: 2rem; }
+        .card-header { background: linear-gradient(135deg, var(--teal), #059669); color: white; border-radius: 16px 16px 0 0 !important; padding: 2rem; }
         .form-control, .form-select { border: 2px solid #e2e8f0; border-radius: 10px; padding: .75rem 1rem; }
         .form-control:focus, .form-select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(5,92,92,.1); }
         .btn-teal { background: var(--teal); color: white; border: none; border-radius: 10px; padding: .85rem 2rem; font-weight: 600; }
-        .btn-teal:hover { background: #044a4a; color: white; }
+        .btn-teal:hover { background: #065f46; color: white; }
         .step-badge { background: rgba(255,255,255,.2); border-radius: 50px; padding: .25rem 1rem; font-size: .85rem; }
         .section-label { color: var(--teal); font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: .5rem; margin-bottom: 1.25rem; }
         #routeLoadingSpinner { display: none; }

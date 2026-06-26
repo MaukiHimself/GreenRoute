@@ -20,19 +20,19 @@
             margin: 20px auto;
             background-color: white;
             padding: 40px;
-            border: 2px solid #055c5c;
+            border: 2px solid #047857;
             border-radius: 8px;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #055c5c;
+            border-bottom: 2px solid #047857;
             padding-bottom: 20px;
         }
 
         .header h1 {
-            color: #055c5c;
+            color: #047857;
             font-size: 28px;
             margin-bottom: 10px;
         }
@@ -60,7 +60,7 @@
         .receipt-number .value {
             font-size: 18px;
             font-weight: bold;
-            color: #055c5c;
+            color: #047857;
             font-family: 'Courier New', monospace;
         }
 
@@ -69,7 +69,7 @@
         }
 
         .section-title {
-            background-color: #055c5c;
+            background-color: #047857;
             color: white;
             padding: 8px 12px;
             font-size: 14px;
@@ -130,9 +130,9 @@
         }
 
         .status {
-            background-color: #dbeafe;
-            border: 2px solid #3b82f6;
-            color: #1e40af;
+            background-color: #dcfce7;
+            border: 2px solid #22c55e;
+            color: #15803d;
             padding: 12px;
             border-radius: 4px;
             text-align: center;

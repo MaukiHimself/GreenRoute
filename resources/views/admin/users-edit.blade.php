@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
         
@@ -140,7 +140,7 @@
         }
         
         .btn-submit:hover {
-            background: #044a4a;
+            background: #065f46;
         }
         
         .btn-cancel {

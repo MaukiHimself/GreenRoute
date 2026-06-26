@@ -99,7 +99,7 @@
             margin: 25px 0;
         }
         .reapply-box h3 {
-            color: #055c5c;
+            color: #047857;
             font-size: 18px;
             margin: 0 0 15px;
         }
@@ -121,7 +121,7 @@
             width: fit-content;
             margin: 30px auto;
             padding: 15px 40px;
-            background: #055c5c;
+            background: #047857;
             color: #ffffff;
             text-decoration: none;
             border-radius: 8px;
@@ -131,7 +131,7 @@
             box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);
         }
         .cta-button:hover {
-            background: #044a4a;
+            background: #065f46;
         }
         .email-footer {
             background: #f8f9fa;
@@ -145,7 +145,7 @@
             margin: 5px 0;
         }
         .email-footer a {
-            color: #055c5c;
+            color: #047857;
             text-decoration: none;
         }
     </style>

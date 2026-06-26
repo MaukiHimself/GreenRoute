@@ -10,7 +10,7 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-green: #2e7d32;
             --primary-red: #c0392b;
             --white: #ffffff;
@@ -139,9 +139,9 @@
         }
 
         /* Custom Styles Slot */
-        @yield('styles')
     </style>
 
+    @yield('styles')
     @stack('head-scripts')
 </head>
 <body class="has-portal-sidebar">

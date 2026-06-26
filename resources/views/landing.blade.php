@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --light-teal: rgba(5, 92, 92, 0.1);
-            --dark-teal: #044a4a;
+            --dark-teal: #065f46;
         }
 
         * {

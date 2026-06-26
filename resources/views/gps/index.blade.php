@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-color: #055c5c;
+        --primary-color: #047857;
         --primary-light: #088b8b;
         --primary-trans: rgba(5, 92, 92, 0.08);
         --secondary-color: #c0392b;
@@ -595,7 +595,7 @@
         const lng = parseFloat(truck.current_longitude);
         const popup = `
             <div style="min-width: 200px;">
-                <div style="font-weight: 700; color: #055c5c; margin-bottom: 0.5rem;">${truck.plate_number}</div>
+                <div style="font-weight: 700; color: #047857; margin-bottom: 0.5rem;">${truck.plate_number}</div>
                 <div><strong>Driver:</strong> ${truck.driver_name}</div>
                 <div><strong>Phone:</strong> ${truck.driver_phone}</div>
                 <div><strong>Distance Today:</strong> ${parseFloat(truck.daily_distance).toFixed(2)} km</div>

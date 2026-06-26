@@ -10,9 +10,9 @@
         body { background: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .container { max-width: 1200px; margin: 3rem auto; padding: 0 2rem; }
         .back-link { margin-bottom: 2rem; }
-        .back-link a { color: #055c5c; text-decoration: none; font-weight: 500; }
+        .back-link a { color: #047857; text-decoration: none; font-weight: 500; }
         .back-link a:hover { text-decoration: underline; }
-        .page-title { font-size: 2rem; font-weight: 600; color: #055c5c; margin-bottom: 0.5rem; }
+        .page-title { font-size: 2rem; font-weight: 600; color: #047857; margin-bottom: 0.5rem; }
         .page-description { color: #666; margin-bottom: 2rem; }
         .empty-state { background: #ffffff; border-radius: 12px; padding: 4rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .empty-state i { font-size: 4rem; color: #d1d5db; margin-bottom: 1rem; }

@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
         
@@ -74,7 +74,7 @@
         }
         
         .stat-card.blue {
-            border-left-color: #3b82f6;
+            border-left-color: #22c55e;
         }
         
         .stat-card.orange {
@@ -162,8 +162,8 @@
         }
         
         .badge-commercial {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #dcfce7;
+            color: #15803d;
         }
         
         .badge-active {
@@ -190,7 +190,7 @@
         }
         
         .action-btn:hover {
-            background: #044a4a;
+            background: #065f46;
             color: white;
         }
         
@@ -226,7 +226,7 @@
                 <a href="{{ route('admin.clients.create') }}" class="btn-primary" style="display: inline-block; padding: 12px 24px; background: var(--primary-teal); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
                     <i class="bi bi-plus-circle me-2"></i>Register New Client
                 </a>
-                <a href="{{ route('admin.sms.campaign') }}" class="btn-secondary" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-left: 10px;">
+                <a href="{{ route('admin.sms.campaign') }}" class="btn-secondary" style="display: inline-block; padding: 12px 24px; background: #22c55e; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-left: 10px;">
                     <i class="bi bi-chat-dots me-2"></i>SMS Campaign
                 </a>
             </div>

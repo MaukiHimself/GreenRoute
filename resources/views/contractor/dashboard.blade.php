@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-color: #055c5c;
+        --primary-color: #047857;
         --secondary-color: #c0392b;
         --white-color: #ffffff;
         --light-bg: #f8f9fa;
@@ -52,7 +52,7 @@
     }
 
     .btn-primary:hover {
-        background: #044a4a;
+        background: #065f46;
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(5, 92, 92, 0.3);
         color: white;
@@ -269,7 +269,7 @@
                         title: client.name,
                         popup: `
                             <div style="min-width: 200px;">
-                                <strong style="color: #055c5c;">${client.name}</strong>
+                                <strong style="color: #047857;">${client.name}</strong>
                                 <p class="mb-0 mt-1">${client.address || ''}</p>
                                 <p class="mb-0">${client.phone || ''}</p>
                             </div>`,

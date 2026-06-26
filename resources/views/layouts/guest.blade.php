@@ -50,7 +50,7 @@
                 border-radius: 20px;
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
                 padding: 3rem 2.5rem;
-                border-top: 4px solid #055c5c;
+                border-top: 4px solid #047857;
             }
 
             .logo-section {
@@ -61,7 +61,7 @@
             .logo {
                 font-size: 2.5rem;
                 font-weight: 700;
-                background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
+                background: linear-gradient(135deg, #047857 0%, #2e7d32 100%);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
@@ -75,12 +75,12 @@
             }
 
             .form-control:focus {
-                border-color: #055c5c;
+                border-color: #047857;
                 box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.2);
             }
 
             .btn-success {
-                background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
+                background: linear-gradient(135deg, #047857 0%, #2e7d32 100%);
                 border: none;
                 padding: 12px 24px;
                 font-weight: 500;
@@ -89,7 +89,7 @@
             }
 
             .btn-success:hover {
-                background: linear-gradient(135deg, #023535 0%, #1b5e20 100%);
+                background: linear-gradient(135deg, #064e3b 0%, #1b5e20 100%);
                 transform: translateY(-2px);
                 box-shadow: 0 8px 20px rgba(5, 92, 92, 0.3);
             }

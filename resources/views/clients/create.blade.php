@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-color: #055c5c;
+        --primary-color: #047857;
         --secondary-color: #c0392b;
         --white-color: #ffffff;
         --light-bg: #f8f9fa;
@@ -113,7 +113,7 @@
         }
         
         .btn-primary:hover {
-            background: #044a4a;
+            background: #065f46;
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(5, 92, 92, 0.3);
             color: white;
@@ -153,7 +153,7 @@
         }
         
         .btn-info:hover {
-            background: #044a4a;
+            background: #065f46;
             transform: translateY(-2px);
             color: white;
         }
@@ -776,7 +776,7 @@
             const errorCallback = function(error) {
                 // If high accuracy failed, try low accuracy
                 if (options.enableHighAccuracy) {
-                    statusDiv.innerHTML = '<div class="alert alert-info" style="background: #cff4fc; color: #055160; padding: 1rem; border-radius: 8px;"><i class="bi bi-arrow-repeat me-2"></i>High accuracy failed. Trying simpler location method...</div>';
+                    statusDiv.innerHTML = '<div class="alert alert-info" style="background: #cff4fc; color: #047857; padding: 1rem; border-radius: 8px;"><i class="bi bi-arrow-repeat me-2"></i>High accuracy failed. Trying simpler location method...</div>';
                     
                     navigator.geolocation.getCurrentPosition(
                         successCallback,

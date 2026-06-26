@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
 
@@ -145,7 +145,7 @@
         }
 
         .btn-primary:hover {
-            background: #044a4a;
+            background: #065f46;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);

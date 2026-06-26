@@ -39,7 +39,7 @@
                 <!-- Status -->
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                         <option value="draft" {{ old('status', $invoice->status) == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="sent" {{ old('status', $invoice->status) == 'sent' ? 'selected' : '' }}>Sent</option>
                         <option value="paid" {{ old('status', $invoice->status) == 'paid' ? 'selected' : '' }}>Paid</option>
@@ -51,7 +51,7 @@
                 <!-- Client Selection -->
                 <div>
                     <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Client *</label>
-                    <select name="client_id" id="client_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <select name="client_id" id="client_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                         <option value="">Select a client</option>
                         @foreach($clients as $client)
                             <option value="{{ $client->id }}" {{ old('client_id', $invoice->client_id) == $client->id ? 'selected' : '' }}>
@@ -64,7 +64,7 @@
                 <!-- Schedule Selection (Optional) -->
                 <div>
                     <label for="schedule_id" class="block text-sm font-medium text-gray-700 mb-2">Related Schedule</label>
-                    <select name="schedule_id" id="schedule_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="schedule_id" id="schedule_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                         <option value="">No related schedule</option>
                         @foreach($schedules as $schedule)
                             <option value="{{ $schedule->id }}" {{ old('schedule_id', $invoice->schedule_id) == $schedule->id ? 'selected' : '' }}>
@@ -77,19 +77,19 @@
                 <!-- Invoice Date -->
                 <div>
                     <label for="invoice_date" class="block text-sm font-medium text-gray-700 mb-2">Invoice Date *</label>
-                    <input type="date" name="invoice_date" id="invoice_date" value="{{ old('invoice_date', $invoice->invoice_date->format('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="date" name="invoice_date" id="invoice_date" value="{{ old('invoice_date', $invoice->invoice_date->format('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
 
                 <!-- Due Date -->
                 <div>
                     <label for="due_date" class="block text-sm font-medium text-gray-700 mb-2">Due Date *</label>
-                    <input type="date" name="due_date" id="due_date" value="{{ old('due_date', $invoice->due_date->format('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="date" name="due_date" id="due_date" value="{{ old('due_date', $invoice->due_date->format('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
 
                 <!-- Service Type -->
                 <div>
                     <label for="service_type" class="block text-sm font-medium text-gray-700 mb-2">Service Type *</label>
-                    <select name="service_type" id="service_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <select name="service_type" id="service_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                         <option value="">Select service type</option>
                         <option value="Waste Collection" {{ old('service_type', $invoice->service_type) == 'Waste Collection' ? 'selected' : '' }}>Waste Collection</option>
                         <option value="Recycling" {{ old('service_type', $invoice->service_type) == 'Recycling' ? 'selected' : '' }}>Recycling</option>
@@ -102,26 +102,26 @@
                 <!-- Subtotal -->
                 <div>
                     <label for="subtotal" class="block text-sm font-medium text-gray-700 mb-2">Subtotal ($) *</label>
-                    <input type="number" name="subtotal" id="subtotal" step="0.01" min="0" value="{{ old('subtotal', $invoice->subtotal) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="number" name="subtotal" id="subtotal" step="0.01" min="0" value="{{ old('subtotal', $invoice->subtotal) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
 
                 <!-- Tax Rate -->
                 <div>
                     <label for="tax_rate" class="block text-sm font-medium text-gray-700 mb-2">Tax Rate (%) *</label>
-                    <input type="number" name="tax_rate" id="tax_rate" step="0.01" min="0" max="100" value="{{ old('tax_rate', $invoice->tax_rate) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="number" name="tax_rate" id="tax_rate" step="0.01" min="0" max="100" value="{{ old('tax_rate', $invoice->tax_rate) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
             </div>
 
             <!-- Description -->
             <div class="mt-6">
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea name="description" id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Detailed description of services provided...">{{ old('description', $invoice->description) }}</textarea>
+                <textarea name="description" id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Detailed description of services provided...">{{ old('description', $invoice->description) }}</textarea>
             </div>
 
             <!-- Notes -->
             <div class="mt-6">
                 <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                <textarea name="notes" id="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Additional notes or payment terms...">{{ old('notes', $invoice->notes) }}</textarea>
+                <textarea name="notes" id="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Additional notes or payment terms...">{{ old('notes', $invoice->notes) }}</textarea>
             </div>
 
             <!-- Current Financial Summary -->
@@ -148,20 +148,20 @@
             </div>
 
             <!-- New Total Calculation Display -->
-            <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 class="font-medium text-blue-800 mb-3">Updated Calculation</h3>
+            <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                <h3 class="font-medium text-green-800 mb-3">Updated Calculation</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                        <span class="font-medium text-blue-700">New Subtotal:</span>
-                        <span id="display-subtotal" class="block text-lg text-blue-800">${{ number_format($invoice->subtotal, 2) }}</span>
+                        <span class="font-medium text-green-700">New Subtotal:</span>
+                        <span id="display-subtotal" class="block text-lg text-green-800">${{ number_format($invoice->subtotal, 2) }}</span>
                     </div>
                     <div>
-                        <span class="font-medium text-blue-700">New Tax:</span>
-                        <span id="display-tax" class="block text-lg text-blue-800">${{ number_format($invoice->tax_amount, 2) }}</span>
+                        <span class="font-medium text-green-700">New Tax:</span>
+                        <span id="display-tax" class="block text-lg text-green-800">${{ number_format($invoice->tax_amount, 2) }}</span>
                     </div>
                     <div>
-                        <span class="font-medium text-blue-700">New Total:</span>
-                        <span id="display-total" class="block text-lg font-bold text-blue-800">${{ number_format($invoice->total_amount, 2) }}</span>
+                        <span class="font-medium text-green-700">New Total:</span>
+                        <span id="display-total" class="block text-lg font-bold text-green-800">${{ number_format($invoice->total_amount, 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -171,7 +171,7 @@
                 <a href="{{ route('invoices.show', $invoice) }}" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
                     Cancel
                 </a>
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">
                     <i class="fas fa-save mr-2"></i>Update Invoice
                 </button>
             </div>

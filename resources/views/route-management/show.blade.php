@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
     }
         
@@ -218,7 +218,7 @@
     <script>
         let mapCtx;
         const clients = @json($clients);
-        const routeColor = "{{ $contractorRoute->color ?? '#055c5c' }}";
+        const routeColor = "{{ $contractorRoute->color ?? '#047857' }}";
         const token = "{{ config('services.heigit.api_key') }}";
         const markerEntries = {};
         let routeCoordinates = [];

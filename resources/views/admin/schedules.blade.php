@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
         
@@ -78,7 +78,7 @@
         }
         
         .stat-card.blue {
-            border-left-color: #3b82f6;
+            border-left-color: #22c55e;
         }
         
         .stat-label {
@@ -167,8 +167,8 @@
         }
         
         .badge-scheduled {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #dcfce7;
+            color: #15803d;
         }
         
         .badge-cancelled {
@@ -195,7 +195,7 @@
         }
         
         .action-btn:hover {
-            background: #044a4a;
+            background: #065f46;
             color: white;
         }
         

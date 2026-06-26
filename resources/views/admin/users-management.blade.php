@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
         
@@ -67,7 +67,7 @@
         }
         
         .stat-card.orange { border-left-color: #f59e0b; }
-        .stat-card.blue { border-left-color: #3b82f6; }
+        .stat-card.blue { border-left-color: #22c55e; }
         .stat-card.purple { border-left-color: #8b5cf6; }
         .stat-card.green { border-left-color: #10b981; }
         .stat-card.yellow { border-left-color: #eab308; }
@@ -131,7 +131,7 @@
         }
         
         .btn-filter:hover {
-            background: #044a4a;
+            background: #065f46;
         }
         
         .btn-reset {
@@ -193,7 +193,7 @@
         }
         
         .badge-admin { background: #fef3c7; color: #92400e; }
-        .badge-contractor { background: #dbeafe; color: #1e40af; }
+        .badge-contractor { background: #dcfce7; color: #15803d; }
         .badge-client { background: #e0e7ff; color: #4338ca; }
         .badge-approved { background: #d1fae5; color: #065f46; }
         .badge-pending { background: #fef3c7; color: #92400e; }
@@ -215,7 +215,7 @@
         }
         
         .action-btn:hover {
-            background: #044a4a;
+            background: #065f46;
             color: white;
         }
         

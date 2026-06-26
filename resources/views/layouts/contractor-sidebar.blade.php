@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-green: #2e7d32;
             --primary-red: #c0392b;
             --light-teal: #e6f2f2;
@@ -46,6 +46,74 @@
             color: var(--primary-teal);
             font-weight: 500;
         }
+
+        /* ===== GreenRoute brand overrides (make teal/green actually visible) ===== */
+        .btn-primary {
+            --bs-btn-bg: var(--primary-teal);
+            --bs-btn-border-color: var(--primary-teal);
+            --bs-btn-hover-bg: #064e3b;
+            --bs-btn-hover-border-color: #064e3b;
+            --bs-btn-active-bg: #064e3b;
+            --bs-btn-active-border-color: #064e3b;
+            --bs-btn-disabled-bg: var(--primary-teal);
+            --bs-btn-disabled-border-color: var(--primary-teal);
+        }
+        .btn-success {
+            --bs-btn-bg: var(--primary-green);
+            --bs-btn-border-color: var(--primary-green);
+            --bs-btn-hover-bg: #1b5e20;
+            --bs-btn-hover-border-color: #1b5e20;
+            --bs-btn-active-bg: #1b5e20;
+            --bs-btn-active-border-color: #1b5e20;
+        }
+        .btn-outline-primary {
+            --bs-btn-color: var(--primary-teal);
+            --bs-btn-border-color: var(--primary-teal);
+            --bs-btn-hover-bg: var(--primary-teal);
+            --bs-btn-hover-border-color: var(--primary-teal);
+            --bs-btn-active-bg: var(--primary-teal);
+            --bs-btn-active-border-color: var(--primary-teal);
+        }
+        .text-primary { color: var(--primary-teal) !important; }
+        .bg-primary { background-color: var(--primary-teal) !important; }
+        .border-primary { border-color: var(--primary-teal) !important; }
+        .badge.bg-primary { background-color: var(--primary-teal) !important; }
+        .badge.text-bg-primary { background-color: var(--primary-teal) !important; color: #fff !important; }
+        a { color: var(--primary-teal); }
+        a:hover { color: #064e3b; }
+        .nav-link { color: var(--primary-teal); }
+        .nav-pills .nav-link.active,
+        .nav-pills .show > .nav-link { background-color: var(--primary-teal); }
+        .page-link { color: var(--primary-teal); }
+        .page-item.active .page-link {
+            background-color: var(--primary-teal);
+            border-color: var(--primary-teal);
+        }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-teal);
+            box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.2);
+        }
+        .form-check-input:checked {
+            background-color: var(--primary-teal);
+            border-color: var(--primary-teal);
+        }
+        .table thead th {
+            background-color: var(--light-teal);
+            color: var(--primary-teal);
+        }
+        .card-header {
+            background-color: var(--light-teal);
+            color: var(--primary-teal);
+            font-weight: 600;
+        }
+        .alert-success {
+            background-color: var(--light-green);
+            border-color: var(--primary-green);
+            color: #1b5e20;
+        }
+        .spinner-border.text-primary,
+        .text-info { color: var(--primary-teal) !important; }
 
         @if(Auth::user()->dark_mode)
         body.dark-mode-active {
@@ -121,7 +189,7 @@
         }
         body.dark-mode-active .alert-success {
             background: rgba(5, 92, 92, 0.2);
-            border-color: #055c5c;
+            border-color: #047857;
             color: #8bb8b8;
         }
         body.dark-mode-active .input-group-text {
@@ -130,7 +198,7 @@
             color: #adb5bd !important;
         }
         body.dark-mode-active .btn-outline-primary {
-            border-color: #055c5c !important;
+            border-color: #047857 !important;
             color: #8bb8b8 !important;
         }
         body.dark-mode-active .text-muted {
@@ -164,9 +232,9 @@
             background: var(--primary-teal);
             color: white;
         }
-
-        @yield('styles')
     </style>
+
+    @yield('styles')
     @stack('head-scripts')
 </head>
 <body class="has-portal-sidebar" @if(Auth::user()->dark_mode) style="background-color: #1a1d23;" @endif>

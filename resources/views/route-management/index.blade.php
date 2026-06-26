@@ -5,12 +5,12 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
     }
         
         .page-header {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: white;
             padding: 2rem;
             border-radius: 12px;

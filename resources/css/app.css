@@ -9,3 +9,57 @@ img[src$="result.png"] {
 	object-fit: contain !important;
 	display: inline-block;
 }
+
+@layer base {
+    :root {
+        /* GreenRoute — dark-teal primary, with bright-green accent */
+        --gr-primary:        #047857;   /* main dark-teal (the main color) */
+        --gr-primary-600:    #0a6e6e;
+        --gr-primary-700:    #0a5a5a;
+        --gr-primary-800:    #084848;
+        --gr-primary-50:     #e6f4f4;
+        --gr-primary-100:    #cfe9e9;
+        --gr-accent:         #22c55e;   /* bright green accent */
+        --gr-accent-600:     #16a34a;
+        --gr-accent-700:     #15803d;
+        --gr-dark:           #063232;   /* deepest teal */
+        --gr-red:            #dc2626;
+        --gr-gray:           #6b7280;
+        --gr-light:          #eef7f7;   /* light teal-tinted background */
+        --gr-white:          #ffffff;
+    }
+}
+
+@layer components {
+    /* Buttons — dark-teal primary, bright-green hover/accent */
+    .btn-brand {
+        background: linear-gradient(135deg, #047857 0%, #0a6e6e 100%);
+        color: #fff;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 6px rgba(5, 92, 92, 0.25);
+    }
+    .btn-brand:hover {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35);
+    }
+    .btn-outline-brand {
+        background: transparent;
+        color: var(--gr-primary);
+        border: 1.5px solid var(--gr-primary);
+        border-radius: 0.5rem;
+        padding: 0.55rem 1.15rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+    }
+    .btn-outline-brand:hover {
+        background: var(--gr-accent);
+        border-color: var(--gr-accent);
+        color: #fff;
+    }
+}

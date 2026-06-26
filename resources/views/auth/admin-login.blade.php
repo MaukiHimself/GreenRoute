@@ -9,13 +9,13 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --white: #ffffff;
         }
 
         body {
-            background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 50%, var(--primary-red) 100%);
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #059669 50%, var(--primary-red) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -140,7 +140,7 @@
         }
 
         .btn-login {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: var(--white);
             border: none;
             border-radius: 10px;
@@ -153,7 +153,7 @@
         }
 
         .btn-login:hover {
-            background: linear-gradient(135deg, #044a4a, var(--primary-teal));
+            background: linear-gradient(135deg, #065f46, var(--primary-teal));
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(5, 92, 92, 0.4);
         }

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #055c5c;
+            --primary-color: #047857;
             --secondary-color: #c0392b;
             --white-color: #ffffff;
             --light-bg: #f8f9fa;
@@ -53,7 +53,7 @@
         }
         
         .btn-primary:hover {
-            background: #044a4a !important;
+            background: #065f46 !important;
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(5, 92, 92, 0.4);
         }

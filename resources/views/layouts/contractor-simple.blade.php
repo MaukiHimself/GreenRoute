@@ -15,7 +15,7 @@
     
     <style>
         :root {
-            --primary-color: #055c5c;
+            --primary-color: #047857;
             --accent-green: #2e7d32;
             --secondary-color: #c0392b;
         }
@@ -31,8 +31,8 @@
         }
         
         .btn-primary:hover {
-            background-color: #044a4a;
-            border-color: #044a4a;
+            background-color: #065f46;
+            border-color: #065f46;
         }
         
         .text-primary {

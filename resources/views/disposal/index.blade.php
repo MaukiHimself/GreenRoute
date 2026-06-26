@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-color: #055c5c;
+        --primary-color: #047857;
         --secondary-color: #c0392b;
         --white-color: #ffffff;
         --light-bg: #f8f9fa;

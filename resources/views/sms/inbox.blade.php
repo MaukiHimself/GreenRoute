@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
         --white: #ffffff;
     }
@@ -24,7 +24,7 @@
 
     /* Header */
     .page-header {
-        background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 100%);
+        background: linear-gradient(135deg, var(--primary-teal) 0%, #059669 100%);
         color: var(--white);
         padding: 2rem;
         border-radius: 12px;
@@ -71,7 +71,7 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-teal), #077777);
+        background: linear-gradient(135deg, var(--primary-teal), #059669);
         color: var(--white);
         display: flex;
         align-items: center;

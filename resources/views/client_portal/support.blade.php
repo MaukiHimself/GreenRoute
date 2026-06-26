@@ -32,7 +32,7 @@
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 py-3">
-                        <h5 class="mb-0" style="color:#055c5c"><i class="bi bi-life-preserver me-2"></i>How can we help you?</h5>
+                        <h5 class="mb-0" style="color:#047857"><i class="bi bi-life-preserver me-2"></i>How can we help you?</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('client.support.submit') }}">
@@ -48,7 +48,7 @@
                                 @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn text-white" style="background:#055c5c">
+                                <button type="submit" class="btn text-white" style="background:#047857">
                                     <i class="bi bi-send me-1"></i> Submit Ticket
                                 </button>
                             </div>
@@ -72,7 +72,7 @@
                 </div>
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 py-3">
-                        <h6 class="mb-0"><i class="bi bi-telephone me-2" style="color:#055c5c"></i>Contact</h6>
+                        <h6 class="mb-0"><i class="bi bi-telephone me-2" style="color:#047857"></i>Contact</h6>
                     </div>
                     <div class="card-body">
                         <p class="mb-1 text-muted">Email: support@greenroute.co.tz</p>

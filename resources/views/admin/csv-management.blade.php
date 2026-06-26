@@ -11,9 +11,9 @@
 
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="statsContainer">
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="text-blue-600 text-sm font-semibold">Locations</div>
-            <div class="text-2xl font-bold text-blue-900" id="stat-locations">-</div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="text-green-600 text-sm font-semibold">Locations</div>
+            <div class="text-2xl font-bold text-green-900" id="stat-locations">-</div>
         </div>
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <div class="text-green-600 text-sm font-semibold">Users</div>
@@ -33,7 +33,7 @@
         <!-- Import Section -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
                 Import Data
@@ -44,7 +44,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Select Import Type</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button class="import-btn p-3 border-2 border-blue-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition" data-type="locations">
+                        <button class="import-btn p-3 border-2 border-green-200 rounded-lg hover:border-green-600 hover:bg-green-50 transition" data-type="locations">
                             <div class="text-sm font-semibold text-gray-700">📍 Locations</div>
                         </button>
                         <button class="import-btn p-3 border-2 border-green-200 rounded-lg hover:border-green-600 hover:bg-green-50 transition" data-type="users">
@@ -62,7 +62,7 @@
                 <!-- File Upload -->
                 <div id="uploadSection" style="display: none;">
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Choose CSV File</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer" id="dropZone">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-500 transition cursor-pointer" id="dropZone">
                         <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
                         </svg>
@@ -87,7 +87,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex gap-3" id="actionButtons" style="display: none;">
-                    <button id="importBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                    <button id="importBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">
                         Import Data
                     </button>
                     <button id="resetBtn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition">
@@ -112,7 +112,7 @@
             <div class="space-y-3">
                 <p class="text-sm text-gray-600 mb-4">Download your data as CSV files for backup or analysis</p>
                 
-                <button class="export-btn w-full p-4 border-2 border-blue-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition text-left" data-type="locations">
+                <button class="export-btn w-full p-4 border-2 border-green-200 rounded-lg hover:border-green-600 hover:bg-green-50 transition text-left" data-type="locations">
                     <div class="font-semibold text-gray-700">📍 Export Locations</div>
                     <div class="text-xs text-gray-500">Download all locations data</div>
                 </button>
@@ -224,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Drag and drop
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = '#3b82f6';
-        dropZone.style.backgroundColor = '#eff6ff';
+        dropZone.style.borderColor = '#22c55e';
+        dropZone.style.backgroundColor = '#f0fdf4';
     });
 
     dropZone.addEventListener('dragleave', () => {
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('type', selectedType);
 
         try {
-            statusMessage.innerHTML = '<div class="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded">Loading preview...</div>';
+            statusMessage.innerHTML = '<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded">Loading preview...</div>';
 
             const response = await fetch('/api/csv/preview', {
                 method: 'POST',
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = `/api/csv/import/${endpoint}`;
 
         try {
-            statusMessage.innerHTML = '<div class="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded">Importing... This may take a few minutes.</div>';
+            statusMessage.innerHTML = '<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded">Importing... This may take a few minutes.</div>';
             this.disabled = true;
 
             const response = await fetch(url, {
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const exportStatus = document.getElementById('exportStatus');
             
             try {
-                exportStatus.innerHTML = '<div class="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded mt-3">Generating export...</div>';
+                exportStatus.innerHTML = '<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded mt-3">Generating export...</div>';
                 
                 const response = await fetch(`/api/csv/export/${type}`, {
                     method: 'GET',

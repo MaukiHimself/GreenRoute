@@ -6,29 +6,29 @@
     <title>Disposal Record</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .primary-dark { color: #055c5c; }
-        .primary-light { color: #055c5c; background-color: rgba(5, 92, 92, 0.1); }
+        .primary-dark { color: #047857; }
+        .primary-light { color: #047857; background-color: rgba(5, 92, 92, 0.1); }
         .accent-color { color: #c0392b; }
         .section-header { 
-            border-bottom: 2px solid #055c5c; 
+            border-bottom: 2px solid #047857; 
             padding-bottom: 8px;
             margin-bottom: 15px;
         }
         .info-card {
-            border-left: 4px solid #055c5c;
+            border-left: 4px solid #047857;
             background-color: white;
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 0 4px 4px 0;
         }
         .btn-primary-custom {
-            background-color: #055c5c;
-            border-color: #055c5c;
+            background-color: #047857;
+            border-color: #047857;
             color: white;
         }
         .btn-primary-custom:hover {
-            background-color: #044a4a;
-            border-color: #044a4a;
+            background-color: #065f46;
+            border-color: #065f46;
         }
         .btn-accent {
             background-color: #c0392b;
@@ -40,7 +40,7 @@
             border-color: #530303;
         }
         .empty-state {
-            border: 1px dashed #055c5c;
+            border: 1px dashed #047857;
             background-color: rgba(5, 92, 92, 0.05);
             padding: 20px;
             text-align: center;

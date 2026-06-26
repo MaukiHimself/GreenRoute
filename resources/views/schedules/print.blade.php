@@ -9,7 +9,7 @@
             margin-bottom: 28px;
             padding: 20px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #055c5c 0%, #2e7d32 100%);
+            background: linear-gradient(135deg, #047857 0%, #2e7d32 100%);
             color: #ffffff;
         }
         .header .brand { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; margin-bottom: 4px; }
@@ -27,9 +27,9 @@
         .info p { margin: 4px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #e2e8f0; padding: 9px 10px; text-align: left; font-size: 13px; }
-        thead th { background-color: #055c5c; color: #ffffff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; }
+        thead th { background-color: #047857; color: #ffffff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; }
         tbody tr:nth-child(even) td { background-color: #f8fafc; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #055c5c; border-radius: 4px; display: inline-block; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid #047857; border-radius: 4px; display: inline-block; }
         @media print { .no-print { display: none; } }
     </style>
 </head>

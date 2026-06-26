@@ -7,31 +7,31 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .primary-dark { color: #055c5c; }
+        .primary-dark { color: #047857; }
         .primary-light { 
             background-color: rgba(5, 92, 92, 0.08);
-            border-left: 4px solid #055c5c;
+            border-left: 4px solid #047857;
         }
         .accent-color { color: #c0392b; }
         .btn-primary-custom {
-            background-color: #055c5c;
-            border-color: #055c5c;
+            background-color: #047857;
+            border-color: #047857;
             color: white;
         }
         .btn-primary-custom:hover {
-            background-color: #044a4a;
-            border-color: #044a4a;
+            background-color: #065f46;
+            border-color: #065f46;
         }
         .btn-outline-custom {
-            border-color: #055c5c;
-            color: #055c5c;
+            border-color: #047857;
+            color: #047857;
         }
         .btn-outline-custom:hover {
-            background-color: #055c5c;
+            background-color: #047857;
             color: white;
         }
         .form-control:focus, .form-select:focus {
-            border-color: #055c5c;
+            border-color: #047857;
             box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.25);
         }
         .info-card {
@@ -46,7 +46,7 @@
             position: absolute;
             z-index: 1000;
             background: white;
-            border: 2px solid #055c5c;
+            border: 2px solid #047857;
             border-top: none;
             border-radius: 0 0 8px 8px;
             max-height: 300px;
@@ -72,12 +72,12 @@
         
         .autocomplete-item:hover {
             background: #f0f9f9;
-            color: #055c5c;
+            color: #047857;
             font-weight: 600;
         }
         
         .autocomplete-item.active {
-            background: #055c5c;
+            background: #047857;
             color: white;
             font-weight: 600;
         }

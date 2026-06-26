@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-green: #2e7d32;
         --primary-red: #c0392b;
         --light-teal: #e6f2f2;
@@ -35,7 +35,7 @@
     }
 
     .stat-card.invoices {
-        background: linear-gradient(135deg, #0a7c7c, var(--primary-green));
+        background: linear-gradient(135deg, #059669, var(--primary-green));
     }
 
     .stat-card.payments {
@@ -43,7 +43,7 @@
     }
 
     .stat-card.routes {
-        background: linear-gradient(135deg, #0a7c7c, var(--primary-teal));
+        background: linear-gradient(135deg, #059669, var(--primary-teal));
     }
 
     .stat-card h3 {
@@ -64,7 +64,7 @@
     }
 
     .btn-teal:hover {
-        background-color: #044a4a;
+        background-color: #065f46;
         color: white;
     }
 

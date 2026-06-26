@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --dark-slate: #0f172a;
         }
 
@@ -68,7 +68,7 @@
         .btn-track:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(5, 92, 92, 0.4);
-            background-color: #044a4a;
+            background-color: #065f46;
         }
 
         .btn-track.active {

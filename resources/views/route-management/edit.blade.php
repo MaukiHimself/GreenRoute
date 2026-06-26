@@ -5,12 +5,12 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
     }
         
         .page-header {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: white;
             padding: 2rem;
             border-radius: 12px;
@@ -110,7 +110,7 @@
                         <input type="hidden" name="color" id="selectedColor" value="{{ old('color', $contractorRoute->color) }}">
                         <div class="color-picker-container">
                             @php
-                                $colors = ['#055c5c', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
+                                $colors = ['#047857', '#22c55e', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
                             @endphp
                             @foreach($colors as $color)
                                 <div class="color-option {{ $contractorRoute->color == $color ? 'selected' : '' }}" 

@@ -20,7 +20,7 @@
             padding: 32px;
         }
         .brand-banner {
-            background: linear-gradient(135deg, #055c5c 0%, #0a6e4e 45%, #2e7d32 100%);
+            background: linear-gradient(135deg, #047857 0%, #059669 45%, #2e7d32 100%);
             border-radius: 16px 16px 0 0;
             padding: 28px 36px;
             color: #ffffff;
@@ -110,7 +110,7 @@
         .meta-block .company-name {
             font-size: 16px;
             font-weight: 700;
-            color: #055c5c;
+            color: #047857;
             margin-bottom: 2px;
         }
         .meta-block .company-detail {
@@ -139,13 +139,13 @@
             letter-spacing: 0.5px;
         }
         .status-paid { background: #dcfce7; color: #166534; }
-        .status-sent { background: #dbeafe; color: #1e40af; }
+        .status-sent { background: #dcfce7; color: #15803d; }
         .status-draft { background: #f1f5f9; color: #475569; }
         .status-overdue { background: #fee2e2; color: #991b1b; }
         .status-cancelled { background: #fee2e2; color: #7f1d1d; }
         .section-divider {
             height: 3px;
-            background: linear-gradient(90deg, #055c5c, #2e7d32);
+            background: linear-gradient(90deg, #047857, #2e7d32);
             border-radius: 2px;
             margin: 22px 0 18px;
             width: 60px;
@@ -155,7 +155,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #055c5c;
+            color: #047857;
             margin: 0 0 12px;
         }
         table.service-table {
@@ -167,7 +167,7 @@
             margin-bottom: 6px;
         }
         .service-table thead th {
-            background: linear-gradient(135deg, #055c5c, #2e7d32);
+            background: linear-gradient(135deg, #047857, #2e7d32);
             color: #ffffff;
             padding: 11px 14px;
             text-align: left;
@@ -217,12 +217,12 @@
         .totals-table .label-col { text-align: right; font-weight: 500; }
         .totals-table .amount-col { text-align: right; font-weight: 500; }
         .totals-table .grand-total td {
-            border-top: 2px solid #055c5c;
-            border-bottom: 3px solid #055c5c;
+            border-top: 2px solid #047857;
+            border-bottom: 3px solid #047857;
             padding: 12px 14px;
             font-size: 16px;
             font-weight: 700;
-            color: #055c5c;
+            color: #047857;
         }
         .info-card {
             background: #f1f8f2;
@@ -236,7 +236,7 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #055c5c;
+            color: #047857;
             margin-bottom: 8px;
         }
         .info-card p {
@@ -287,7 +287,7 @@
         }
         .pdf-footer .footer-brand {
             font-weight: 700;
-            color: #055c5c;
+            color: #047857;
             font-size: 12px;
             letter-spacing: 0.5px;
         }

@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        :root { --teal: #055c5c; }
+        :root { --teal: #047857; }
         body { background: linear-gradient(135deg, #f0f9f9, #e2e8f0); min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
         .icon-circle { width: 100px; height: 100px; background: rgba(5,92,92,.1); border: 3px solid var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 2.5rem; color: var(--teal); }
     </style>

@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --white: #ffffff;
         }
@@ -28,7 +28,7 @@
         
         /* Header Section */
         .page-header {
-            background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 100%);
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #059669 100%);
             color: var(--white);
             padding: 2rem;
             border-radius: 12px;

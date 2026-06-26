@@ -6,40 +6,55 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
+        <div class="mb-8 rounded-2xl shadow-lg overflow-hidden"
+             style="background: linear-gradient(135deg, #047857 0%, #059669 100%);">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 sm:p-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Pending Payment Approvals</h1>
-                    <p class="text-gray-600 mt-2">Review and verify client payment submissions</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Pending Payment Approvals</h1>
+                    </div>
+                    <p class="text-white/80 mt-2">Review and verify client payment submissions</p>
                 </div>
-                <div class="text-right">
-                    <div class="text-4xl font-bold" style="color:#055c5c">{{ $pendingCount }}</div>
-                    <p class="text-gray-600 text-sm">Pending Approvals</p>
+                <div class="text-center bg-white/15 rounded-xl px-6 py-3 backdrop-blur">
+                    <div class="text-4xl font-bold text-white leading-none">{{ $pendingCount }}</div>
+                    <p class="text-white/80 text-xs mt-1 uppercase tracking-wide">Pending</p>
                 </div>
             </div>
         </div>
 
         @if ($submissions->isEmpty())
         <!-- Empty State -->
-        <div class="bg-white rounded-lg shadow-md p-12 text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        <div class="bg-white rounded-2xl shadow-md p-16 text-center border border-gray-100">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
+                 style="background:#d1fae5;">
+                <svg class="w-10 h-10" style="color:#047857" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
-            <h3 class="text-2xl font-semibold text-gray-900 mb-2">All Caught Up!</h3>
-            <p class="text-gray-600 mb-6">There are no pending payment submissions at this time.</p>
-            <a href="{{ route('dashboard.contractor') }}" class="font-medium" style="color:#055c5c">
-                ← Back to Dashboard
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">All Caught Up!</h3>
+            <p class="text-gray-500 mb-8 max-w-md mx-auto">There are no pending payment submissions to review right now. New submissions from clients will appear here.</p>
+            <a href="{{ route('dashboard.contractor') }}"
+               class="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold shadow-sm transition"
+               style="background:#047857;"
+               onmouseover="this.style.background='#064e3b'" onmouseout="this.style.background='#047857'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Dashboard
             </a>
         </div>
         @else
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #055c5c">
+            <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #047857">
                 <p class="text-sm text-gray-600">Total Pending</p>
-                <p class="text-3xl font-bold mt-1" style="color:#055c5c">{{ $pendingCount }}</p>
+                <p class="text-3xl font-bold mt-1" style="color:#047857">{{ $pendingCount }}</p>
             </div>
             <div class="bg-white rounded-lg shadow p-4" style="border-left:4px solid #d97706">
                 <p class="text-sm text-gray-600">Total Amount</p>
@@ -61,12 +76,12 @@
                 <input type="text"
                        placeholder="Search by client name, payer name..."
                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color:#055c5c"
+                       style="--tw-ring-color:#047857"
                        id="searchInput">
                 <button type="button"
                         class="px-6 py-2 text-white rounded-lg transition"
-                        style="background-color:#055c5c"
-                        onmouseover="this.style.backgroundColor='#023535'" onmouseout="this.style.backgroundColor='#055c5c'"
+                        style="background-color:#047857"
+                        onmouseover="this.style.backgroundColor='#064e3b'" onmouseout="this.style.backgroundColor='#047857'"
                         onclick="filterSubmissions()">
                     Search
                 </button>
@@ -134,7 +149,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 uppercase">Amount Submitted</p>
-                            <p class="text-xl font-bold mt-1" style="color:#055c5c">
+                            <p class="text-xl font-bold mt-1" style="color:#047857">
                                 TZS {{ number_format($submission->amount_submitted, 2) }}
                             </p>
                         </div>
@@ -150,20 +165,20 @@
                     <div class="mb-6 p-4 rounded-lg" style="background-color:#e6f2f2; border:1px solid #b3d4d4">
                         <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <p class="text-xs" style="color:#055c5c">Invoice Total</p>
-                                <p class="text-lg font-bold" style="color:#023535">
+                                <p class="text-xs" style="color:#047857">Invoice Total</p>
+                                <p class="text-lg font-bold" style="color:#064e3b">
                                     TZS {{ number_format($submission->invoice->total_amount, 2) }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs" style="color:#055c5c">Balance Due</p>
-                                <p class="text-lg font-bold" style="color:#023535">
+                                <p class="text-xs" style="color:#047857">Balance Due</p>
+                                <p class="text-lg font-bold" style="color:#064e3b">
                                     TZS {{ number_format($submission->invoice->total_amount - $submission->invoice->amount_paid, 2) }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs" style="color:#055c5c">Status After Approval</p>
-                                <p class="text-lg font-bold" style="color:#023535">
+                                <p class="text-xs" style="color:#047857">Status After Approval</p>
+                                <p class="text-lg font-bold" style="color:#064e3b">
                                     @if ($submission->invoice->amount_paid + $submission->amount_submitted >= $submission->invoice->total_amount)
                                         Fully Paid
                                     @else

@@ -8,7 +8,7 @@
             <a href="{{ route('invoices.pdf', $invoice) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200" target="_blank">
                 <i class="fas fa-file-pdf mr-2"></i>Download PDF
             </a>
-            <a href="{{ route('invoices.edit', $invoice) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+            <a href="{{ route('invoices.edit', $invoice) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
                 <i class="fas fa-edit mr-2"></i>Edit
             </a>
             <a href="{{ route('invoices.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200">
@@ -37,7 +37,7 @@
                         @php
                             $statusColors = [
                                 'draft' => 'bg-gray-100 text-gray-800',
-                                'sent' => 'bg-blue-100 text-blue-800',
+                                'sent' => 'bg-green-100 text-green-800',
                                 'paid' => 'bg-green-100 text-green-800',
                                 'overdue' => 'bg-red-100 text-red-800',
                                 'cancelled' => 'bg-red-100 text-red-800'
@@ -78,7 +78,7 @@
                                 <div>
                                     <p class="text-sm text-gray-600">Related Schedule</p>
                                     <p class="font-medium">
-                                        <a href="{{ route('schedules.show', $invoice->schedule) }}" class="text-blue-600 hover:text-blue-800">
+                                        <a href="{{ route('schedules.show', $invoice->schedule) }}" class="text-green-600 hover:text-green-800">
                                             {{ $invoice->schedule->pickup_date->format('M d, Y') }} - {{ $invoice->schedule->pickup_time }}
                                         </a>
                                         @if($invoice->schedule->displayed_price !== null)
@@ -166,7 +166,7 @@
                             @csrf
                             @method('PATCH')
                             <div class="mb-3">
-                                <input type="text" name="payment_method" placeholder="Payment method (optional)" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" name="payment_method" placeholder="Payment method (optional)" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
                             <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200" onclick="return confirm('Mark this invoice as paid?')">
                                 <i class="fas fa-check mr-2"></i>Mark as Paid
@@ -180,10 +180,10 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                 <div class="space-y-3">
-                    <a href="{{ route('invoices.pdf', $invoice) }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 block text-center" target="_blank">
+                    <a href="{{ route('invoices.pdf', $invoice) }}" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200 block text-center" target="_blank">
                         <i class="fas fa-download mr-2"></i>Download PDF
                     </a>
-                    <a href="{{ route('invoices.edit', $invoice) }}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 block text-center">
+                    <a href="{{ route('invoices.edit', $invoice) }}" class="w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg transition duration-200 block text-center">
                         <i class="fas fa-edit mr-2"></i>Edit Invoice
                     </a>
                     @if($invoice->client)

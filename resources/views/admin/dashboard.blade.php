@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --white: #ffffff;
             --light-bg: #f8f9fa;
@@ -245,7 +245,7 @@
         }
 
         .btn-view:hover {
-            background: #044a4a;
+            background: #065f46;
         }
 
         .badge-count {

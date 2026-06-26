@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --white: #ffffff;
             --light-bg: #f8f9fa;
@@ -50,8 +50,8 @@
         }
 
         .btn-primary-custom:hover {
-            background-color: #044545;
-            border-color: #044545;
+            background-color: #065f46;
+            border-color: #065f46;
             color: white;
         }
 

@@ -5,12 +5,12 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
     }
         
         .page-header {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: white;
             padding: 2rem;
             border-radius: 12px;
@@ -106,10 +106,10 @@
                     
                     <div class="col-md-6 mb-4">
                         <label class="form-label fw-bold">Route Color</label>
-                        <input type="hidden" name="color" id="selectedColor" value="#055c5c">
+                        <input type="hidden" name="color" id="selectedColor" value="#047857">
                         <div class="color-picker-container">
-                            <div class="color-option selected" style="background-color: #055c5c" onclick="selectColor('#055c5c')"></div>
-                            <div class="color-option" style="background-color: #3b82f6" onclick="selectColor('#3b82f6')"></div>
+                            <div class="color-option selected" style="background-color: #047857" onclick="selectColor('#047857')"></div>
+                            <div class="color-option" style="background-color: #22c55e" onclick="selectColor('#22c55e')"></div>
                             <div class="color-option" style="background-color: #10b981" onclick="selectColor('#10b981')"></div>
                             <div class="color-option" style="background-color: #f59e0b" onclick="selectColor('#f59e0b')"></div>
                             <div class="color-option" style="background-color: #ef4444" onclick="selectColor('#ef4444')"></div>

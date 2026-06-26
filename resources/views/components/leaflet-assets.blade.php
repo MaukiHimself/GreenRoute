@@ -11,7 +11,7 @@
     .leaflet-container { font-family: inherit; z-index: 1; }
     .gr-map-number-marker { background: transparent !important; border: none !important; }
     .gr-map-number-badge {
-        background: #055c5c;
+        background: #047857;
         color: #fff;
         width: 28px;
         height: 28px;

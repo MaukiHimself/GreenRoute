@@ -9,7 +9,7 @@
 
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h2 class="fw-bold mb-1" style="color:#055c5c;"><i class="bi bi-person-check me-2"></i>Pending Client Approvals</h2>
+                    <h2 class="fw-bold mb-1" style="color:#047857;"><i class="bi bi-person-check me-2"></i>Pending Client Approvals</h2>
                     <p class="text-muted mb-0">Clients who self-registered and are awaiting your verification</p>
                 </div>
                 <a href="{{ route('contractor.clients.index') }}" class="btn btn-outline-secondary btn-sm">

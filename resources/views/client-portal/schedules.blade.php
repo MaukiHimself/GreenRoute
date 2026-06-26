@@ -20,7 +20,7 @@
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-600">Upcoming</div>
-                <div class="mt-2 text-3xl font-bold text-blue-600">{{ $stats['upcoming'] }}</div>
+                <div class="mt-2 text-3xl font-bold text-green-600">{{ $stats['upcoming'] }}</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-600">Completed</div>
@@ -40,7 +40,7 @@
                 </select>
                 <input type="date" name="from_date" value="{{ request('from_date') }}" class="rounded-md border-gray-300" placeholder="From Date">
                 <input type="date" name="to_date" value="{{ request('to_date') }}" class="rounded-md border-gray-300" placeholder="To Date">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                     Filter
                 </button>
             </form>
@@ -59,7 +59,7 @@
                         <div>
                             @switch($schedule->status)
                                 @case('scheduled')
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
                                         Scheduled
                                     </span>
                                     @break
@@ -113,7 +113,7 @@
                         <div class="text-sm text-gray-600">
                             Contractor: <span class="font-medium text-gray-900">{{ $schedule->contractor->name ?? 'N/A' }}</span>
                         </div>
-                        <a href="{{ route('client.schedules.show', $schedule->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                        <a href="{{ route('client.schedules.show', $schedule->id) }}" class="text-green-600 hover:text-green-800 font-medium text-sm">
                             View Details →
                         </a>
                     </div>

@@ -7,23 +7,23 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .primary-dark { color: #055c5c; }
+        .primary-dark { color: #047857; }
         .primary-light { 
             background-color: rgba(5, 92, 92, 0.08);
-            border-left: 4px solid #055c5c;
+            border-left: 4px solid #047857;
         }
         .accent-color { color: #c0392b; }
         .btn-primary-custom {
-            background-color: #055c5c;
-            border-color: #055c5c;
+            background-color: #047857;
+            border-color: #047857;
             color: white;
         }
         .btn-primary-custom:hover {
-            background-color: #044a4a;
-            border-color: #044a4a;
+            background-color: #065f46;
+            border-color: #065f46;
         }
         .form-control:focus, .form-select:focus {
-            border-color: #055c5c;
+            border-color: #047857;
             box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.25);
         }
         .icon-circle {
@@ -36,12 +36,12 @@
             justify-content: center;
             margin: 0 auto 1.5rem;
             font-size: 2rem;
-            color: #055c5c;
+            color: #047857;
         }
         .alert-success-custom {
             background-color: rgba(5, 92, 92, 0.1);
-            border-color: #055c5c;
-            color: #055c5c;
+            border-color: #047857;
+            color: #047857;
         }
         .alert-danger-custom {
             background-color: rgba(100, 4, 4, 0.1);
@@ -83,10 +83,10 @@
             gap: 6px;
             padding: 6px 12px;
             background: rgba(5, 92, 92, 0.1);
-            border: 1px solid #055c5c;
+            border: 1px solid #047857;
             border-radius: 20px;
             font-size: 14px;
-            color: #055c5c;
+            color: #047857;
         }
         
         .location-tag .remove-tag {

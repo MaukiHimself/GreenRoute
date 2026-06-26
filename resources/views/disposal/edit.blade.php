@@ -8,41 +8,41 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .primary-dark { 
-            color: #055c5c; 
+            color: #047857; 
         }
         .primary-light { 
             background-color: rgba(5, 92, 92, 0.08);
-            border-left: 4px solid #055c5c;
+            border-left: 4px solid #047857;
         }
         .accent-color { 
             color: #c0392b; 
         }
         .btn-primary-custom {
-            background-color: #055c5c;
-            border-color: #055c5c;
+            background-color: #047857;
+            border-color: #047857;
             color: white;
         }
         .btn-primary-custom:hover {
-            background-color: #044a4a;
-            border-color: #044a4a;
+            background-color: #065f46;
+            border-color: #065f46;
         }
         .btn-outline-custom {
-            border-color: #055c5c;
-            color: #055c5c;
+            border-color: #047857;
+            color: #047857;
         }
         .btn-outline-custom:hover {
-            background-color: #055c5c;
+            background-color: #047857;
             color: white;
         }
         .section-header {
-            border-bottom: 2px solid #055c5c;
+            border-bottom: 2px solid #047857;
             padding-bottom: 8px;
             margin-bottom: 20px;
-            color: #055c5c;
+            color: #047857;
         }
         .form-label {
             font-weight: 600;
-            color: #055c5c;
+            color: #047857;
             margin-bottom: 8px;
         }
         .info-card {
@@ -53,7 +53,7 @@
             border: 1px solid rgba(5, 92, 92, 0.1);
         }
         .form-control:focus, .form-select:focus {
-            border-color: #055c5c;
+            border-color: #047857;
             box-shadow: 0 0 0 0.2rem rgba(5, 92, 92, 0.25);
         }
     </style>

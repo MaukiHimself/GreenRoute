@@ -59,11 +59,11 @@
                             <div class="space-y-2">
                                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                                     <span>Route A - Downtown</span>
-                                    <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Update</button>
+                                    <button class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Update</button>
                                 </div>
                                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                                     <span>Route B - Suburbs</span>
-                                    <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Update</button>
+                                    <button class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Update</button>
                                 </div>
                             </div>
                         </div>
@@ -84,9 +84,9 @@
                     <div id="map" style="height: 500px; width: 100%; border-radius: 8px;"></div>
                     
                     <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h3 class="font-semibold text-blue-800">Active Contractors</h3>
-                            <p class="text-2xl font-bold text-blue-600" id="activeContractors">0</p>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-800">Active Contractors</h3>
+                            <p class="text-2xl font-bold text-green-600" id="activeContractors">0</p>
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg">
                             <h3 class="font-semibold text-green-800">Total Locations</h3>

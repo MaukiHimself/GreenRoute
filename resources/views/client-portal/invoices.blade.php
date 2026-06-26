@@ -20,7 +20,7 @@
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-600">Total Amount</div>
-                <div class="mt-2 text-3xl font-bold text-blue-600">${{ number_format($stats['total_amount'], 2) }}</div>
+                <div class="mt-2 text-3xl font-bold text-green-600">${{ number_format($stats['total_amount'], 2) }}</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-600">Paid</div>
@@ -42,7 +42,7 @@
                     <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
                     <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
                 </select>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                     Filter
                 </button>
             </form>
@@ -93,7 +93,7 @@
                                     </span>
                                     @break
                                 @case('sent')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Sent
                                     </span>
                                     @break
@@ -104,14 +104,14 @@
                             @endswitch
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <a href="{{ route('client.invoices.show', $invoice->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <a href="{{ route('client.invoices.show', $invoice->id) }}" class="text-green-600 hover:text-green-900 mr-3">
                                 View
                             </a>
                             <a href="{{ route('client.invoices.download', $invoice->id) }}" class="text-green-600 hover:text-green-900 mr-3">
                                 Download
                             </a>
                             @if($invoice->status !== 'paid')
-                                <a href="{{ route('client.payment-methods', $invoice) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs font-semibold">
+                                <a href="{{ route('client.payment-methods', $invoice) }}" class="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs font-semibold">
                                     Pay Now
                                 </a>
                             @endif

@@ -5,13 +5,13 @@
 @section('styles')
 <style>
     :root {
-        --primary-teal: #055c5c;
+        --primary-teal: #047857;
         --primary-red: #c0392b;
         --white: #ffffff;
     }
         
         .page-header {
-            background: linear-gradient(135deg, var(--primary-teal) 0%, #077777 100%);
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #059669 100%);
             color: var(--white);
             padding: 2rem;
             border-radius: 12px 12px 0 0;
@@ -61,7 +61,7 @@
         }
         
         .btn-primary-custom:hover {
-            background: #044a4a;
+            background: #065f46;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);
         }

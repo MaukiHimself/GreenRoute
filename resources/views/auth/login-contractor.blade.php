@@ -8,10 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
             --light-teal: rgba(5, 92, 92, 0.1);
-            --dark-teal: #044a4a;
+            --dark-teal: #065f46;
         }
         
         body {

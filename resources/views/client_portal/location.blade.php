@@ -161,7 +161,7 @@
         const existingLat = {{ $client->latitude ?? 'null' }};
         const existingLng = {{ $client->longitude ?? 'null' }};
         const routeClients = @json($routeClients);
-        const routeColor = "{{ $contractorRoute->color ?? '#055c5c' }}";
+        const routeColor = "{{ $contractorRoute->color ?? '#047857' }}";
 
         GreenRouteMap.whenReady(function () {
             let defaultLat = -3.3731;

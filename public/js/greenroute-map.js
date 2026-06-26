@@ -3,7 +3,7 @@
  */
 (function (global) {
     const DEFAULT = { lat: -6.7924, lng: 39.2083, zoom: 12 };
-    const BRAND = '#055c5c';
+    const BRAND = '#047857';
 
     function createMap(containerId, options = {}) {
         const el = typeof containerId === 'string'
@@ -285,7 +285,7 @@
                 apiKey: apiKey,
                 styleFn: function (value, intervalType) {
                     return {
-                        color: intervalType === 'time' ? '#22c55e' : '#3b82f6', // Green for Time, Blue for Distance
+                        color: intervalType === 'time' ? '#22c55e' : '#22c55e', // Green for Time, Blue for Distance
                         weight: 2,
                         opacity: 0.7,
                         fillOpacity: 0.15

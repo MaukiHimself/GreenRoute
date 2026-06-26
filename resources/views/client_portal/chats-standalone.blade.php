@@ -7,7 +7,7 @@
 
     <style>
         :root {
-            --primary-teal: #055c5c;
+            --primary-teal: #047857;
             --primary-red: #c0392b;
         }
         
@@ -22,7 +22,7 @@
         }
         
         .chat-header {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: white;
             padding: 1.5rem;
             border-radius: 12px 12px 0 0;
@@ -79,7 +79,7 @@
         }
         
         .message.client .message-bubble {
-            background: linear-gradient(135deg, var(--primary-teal), #077777);
+            background: linear-gradient(135deg, var(--primary-teal), #059669);
             color: white;
             border-bottom-right-radius: 4px;
         }
@@ -145,7 +145,7 @@
         }
         
         .btn-send:hover {
-            background: #044a4a;
+            background: #065f46;
             transform: scale(1.1);
         }
         

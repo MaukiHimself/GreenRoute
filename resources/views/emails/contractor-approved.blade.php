@@ -20,7 +20,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .email-header {
-            background: linear-gradient(135deg, #055c5c, #077777);
+            background: linear-gradient(135deg, #047857, #059669);
             color: #ffffff;
             padding: 40px 30px;
             text-align: center;
@@ -51,7 +51,7 @@
             color: #ffffff;
         }
         .email-body h2 {
-            color: #055c5c;
+            color: #047857;
             font-size: 24px;
             margin: 0 0 20px;
             text-align: center;
@@ -63,7 +63,7 @@
         }
         .contractor-details {
             background: #f8f9fa;
-            border-left: 4px solid #055c5c;
+            border-left: 4px solid #047857;
             padding: 20px;
             margin: 25px 0;
             border-radius: 8px;
@@ -73,7 +73,7 @@
             color: #333;
         }
         .contractor-details strong {
-            color: #055c5c;
+            color: #047857;
         }
         .next-steps {
             background: #e6f2f2;
@@ -82,7 +82,7 @@
             margin: 25px 0;
         }
         .next-steps h3 {
-            color: #055c5c;
+            color: #047857;
             font-size: 18px;
             margin: 0 0 15px;
         }
@@ -100,7 +100,7 @@
             width: fit-content;
             margin: 30px auto;
             padding: 15px 40px;
-            background: #055c5c;
+            background: #047857;
             color: #ffffff;
             text-decoration: none;
             border-radius: 8px;
@@ -110,7 +110,7 @@
             box-shadow: 0 4px 12px rgba(5, 92, 92, 0.3);
         }
         .cta-button:hover {
-            background: #044a4a;
+            background: #065f46;
         }
         .email-footer {
             background: #f8f9fa;
@@ -124,7 +124,7 @@
             margin: 5px 0;
         }
         .email-footer a {
-            color: #055c5c;
+            color: #047857;
             text-decoration: none;
         }
     </style>

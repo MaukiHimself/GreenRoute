@@ -51,7 +51,7 @@
         }
         
         .footer-link:hover {
-            color: #055c5c;
+            color: #047857;
             text-decoration: underline;
         }
         
