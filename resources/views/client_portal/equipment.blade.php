@@ -90,7 +90,10 @@
     <div class="row g-4">
         @if($products->count() > 0)
             @foreach($products as $product)
-                @php $alreadyRequested = in_array($product->id, $requestedIds); @endphp
+                @php
+                    $isPending = in_array($product->id, $pendingIds);
+                    $isApproved = in_array($product->id, $approvedIds);
+                @endphp
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm product-card d-flex flex-column">
                         <div class="card-body p-0 d-flex flex-column">
@@ -147,18 +150,23 @@
 
                                 {{-- Request button --}}
                                 @if($product->is_available)
-                                    @if($alreadyRequested)
+                                    @if($isPending)
                                         <button class="btn btn-sm btn-secondary mt-3 w-100" disabled>
                                             <i class="bi bi-clock me-1"></i>Request Sent
                                         </button>
                                     @else
+                                        @if($isApproved)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-3">
+                                                <i class="bi bi-check-circle me-1"></i>Previous request approved
+                                            </span>
+                                        @endif
                                         <button class="btn btn-sm btn-primary mt-3 w-100"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#requestModal"
                                                 data-product-id="{{ $product->id }}"
                                                 data-product-name="{{ $product->name }}"
                                                 data-product-price="{{ $product->price ? 'TZS ' . number_format($product->price, 2) . ($product->unit ? ' / ' . $product->unit : '') : 'Price on request' }}">
-                                            <i class="bi bi-cart-plus me-1"></i>Request This Equipment
+                                            <i class="bi bi-cart-plus me-1"></i>{{ $isApproved ? 'Request Again' : 'Request This Equipment' }}
                                         </button>
                                     @endif
                                 @endif

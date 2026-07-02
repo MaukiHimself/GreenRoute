@@ -2,7 +2,7 @@
     <x-slot name="sidebar">
         <ul class="nav nav-pills flex-column">
             <li class="nav-item"><a class="nav-link active" href="{{ route('client.schedules') }}"><i class="bi bi-calendar3 me-2"></i>Schedules</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('client.billing-rates') }}"><i class="bi bi-currency-dollar me-2"></i>Billing Rates</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('client.pricing') }}"><i class="bi bi-currency-dollar me-2"></i>Pricing</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('client.invoices') }}"><i class="bi bi-receipt me-2"></i>Invoices</a></li>
         </ul>
     </x-slot>

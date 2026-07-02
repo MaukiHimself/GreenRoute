@@ -42,21 +42,21 @@
     <span class="portal-sidebar__label">Chats</span>
 </a>
 
-<div class="portal-sidebar__group {{ request()->routeIs('client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'is-open' : '' }}">
+<div class="portal-sidebar__group {{ request()->routeIs('client.pricing', 'client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'is-open' : '' }}">
     <button type="button"
-            class="portal-sidebar__parent {{ request()->routeIs('client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'active' : '' }}"
+            class="portal-sidebar__parent {{ request()->routeIs('client.pricing', 'client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'active' : '' }}"
             data-tooltip="Services"
-            aria-expanded="{{ request()->routeIs('client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'true' : 'false' }}">
+            aria-expanded="{{ request()->routeIs('client.pricing', 'client.request*', 'client.equipment', 'client.contractor*', 'client.feedback*') ? 'true' : 'false' }}">
         <i class="bi bi-grid"></i>
         <span class="portal-sidebar__label">Services</span>
         <i class="bi bi-chevron-down portal-sidebar__chevron"></i>
     </button>
     <div class="portal-sidebar__submenu">
-        <a href="{{ route('client.billing-rates') }}"
-           class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('client.billing-rates') ? 'active' : '' }}"
-           data-tooltip="Billing rates">
+        <a href="{{ route('client.pricing') }}"
+           class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('client.pricing') ? 'active' : '' }}"
+           data-tooltip="Pricing">
             <i class="bi bi-currency-dollar"></i>
-            <span class="portal-sidebar__label">Billing rates</span>
+            <span class="portal-sidebar__label">Pricing</span>
         </a>
         <a href="{{ route('client.request.service') }}"
            class="portal-sidebar__link portal-sidebar__sublink {{ request()->routeIs('client.request*') ? 'active' : '' }}"

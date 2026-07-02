@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('profile/picture', [ProfileController::class, 'uploadPicture'])->name('client.profile.picture');
         Route::post('profile/dark-mode', [ProfileController::class, 'toggleDarkMode'])->name('client.profile.dark-mode');
         Route::post('profile/password', [ProfileController::class, 'updatePassword'])->name('client.profile.password');
-        Route::get('billing-rates', [ClientPortalController::class, 'billingRates'])->name('client.billing-rates');
+        Route::get('pricing', [\App\Http\Controllers\ContractorServicePricingController::class, 'clientView'])->name('client.pricing');
         Route::get('schedules', [ClientPortalController::class, 'schedules'])->name('client.schedules');
         Route::get('request-service', [ClientPortalController::class, 'requestService'])->name('client.request.service');
         Route::post('request-service', [ClientPortalController::class, 'storeServiceRequest'])->name('client.request.service.store');

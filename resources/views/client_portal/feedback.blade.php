@@ -172,6 +172,9 @@
                                                     @case('in_progress')
                                                         <span class="badge bg-info">In Progress</span>
                                                         @break
+                                                    @case('responded')
+                                                        <span class="badge bg-primary">Responded</span>
+                                                        @break
                                                     @case('resolved')
                                                         <span class="badge bg-success">Resolved</span>
                                                         @break
@@ -186,6 +189,11 @@
                                                 <button class="btn btn-sm btn-outline-primary" onclick="viewFeedback({{ $feedback->id }})">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                                @if($feedback->response)
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">
+                                                        <i class="bi bi-reply-fill me-1"></i>Reply
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -255,6 +263,19 @@
                             ${feedback.message}
                         </div>
                     </div>
+                    ${feedback.response ? `
+                        <div class="mb-1">
+                            <strong><i class="bi bi-reply-fill text-success me-1"></i>Contractor Response:</strong>
+                            ${feedback.responded_at ? `<small class="text-muted ms-2">${new Date(feedback.responded_at).toLocaleString()}</small>` : ''}
+                            <div class="mt-2 p-3 border-start border-4 border-success bg-success-subtle rounded">
+                                ${feedback.response}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="text-muted fst-italic">
+                            <i class="bi bi-clock-history me-1"></i>No response from your contractor yet.
+                        </div>
+                    `}
                 `;
             }
             

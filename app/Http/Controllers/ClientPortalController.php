@@ -262,20 +262,6 @@ class ClientPortalController extends Controller
         return view('client_portal.schedules', compact('client', 'schedules'));
     }
 
-    public function billingRates()
-    {
-        $client = $this->resolveClient();
-        abort_unless($client, 404);
-
-        $rates = BillingRate::where('is_active', true)
-            ->orderBy('category')
-            ->orderBy('location')
-            ->orderBy('frequency')
-            ->paginate(50);
-
-        return view('client_portal.billing-rates', compact('client', 'rates'));
-    }
-
     public function requestService()
     {
         $client = $this->resolveClient();
@@ -383,13 +369,19 @@ class ClientPortalController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        // Load the client's existing pending requests so we can show "Requested" state
-        $requestedIds = EquipmentRequest::where('client_id', $client->id)
-            ->whereIn('status', ['pending', 'approved'])
+        // Only pending requests block re-requesting (awaiting contractor response).
+        $pendingIds = EquipmentRequest::where('client_id', $client->id)
+            ->where('status', 'pending')
             ->pluck('product_id')
             ->toArray();
 
-        return view('client_portal.equipment', compact('client', 'products', 'requestedIds'));
+        // Approved requests are shown so the client can request the equipment again.
+        $approvedIds = EquipmentRequest::where('client_id', $client->id)
+            ->where('status', 'approved')
+            ->pluck('product_id')
+            ->toArray();
+
+        return view('client_portal.equipment', compact('client', 'products', 'pendingIds', 'approvedIds'));
     }
 
     public function requestEquipment(Request $request, Product $product)
@@ -405,14 +397,15 @@ class ClientPortalController extends Controller
             'notes'    => 'nullable|string|max:1000',
         ]);
 
-        // Prevent duplicate pending requests for the same product
+        // Prevent duplicate requests only while one is still pending a response.
+        // Once a request is approved (or rejected), the client may request again.
         $exists = EquipmentRequest::where('client_id', $client->id)
             ->where('product_id', $product->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->where('status', 'pending')
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'You already have an active request for this equipment.');
+            return back()->with('error', 'You already have a pending request for this equipment awaiting a response.');
         }
 
         EquipmentRequest::create([

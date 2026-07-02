@@ -346,6 +346,19 @@
 @endsection
 
 @section('scripts')
+<script>
+    // Route URLs and CSRF token compiled by Blade (the main script block below is
+    // wrapped in @verbatim, so route()/url()/@csrf cannot be used inside it).
+    window.GR_ROUTES = {
+        dashboardStats: @json(route('contractor.dashboard-stats')),
+        recentInvoices: @json(route('contractor.recent-invoices')),
+        upcomingSchedules: @json(route('contractor.upcoming-schedules')),
+        recentPendingPayments: @json(route('contractor.recent-pending-payments')),
+        clientsLocations: @json(route('contractor.clients.locations')),
+        clientBase: @json(url('dashboard/contractor/clients')),
+    };
+    window.GR_CSRF = @json(csrf_token());
+</script>
 @verbatim
 <script>
     function showTab(tabName) {
@@ -411,7 +424,7 @@
     })();
 
     function loadDashboardData() {
-        fetch('{{ route("contractor.dashboard-stats") }}')
+        fetch(GR_ROUTES.dashboardStats)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('totalClients').textContent = data.total_clients || 0;
@@ -427,7 +440,7 @@
                 console.log('Dashboard stats not available');
             });
 
-        fetch('{{ route("contractor.recent-invoices") }}')
+        fetch(GR_ROUTES.recentInvoices)
             .then(response => response.json())
             .then(invoices => {
                 const container = document.getElementById('recentInvoices');
@@ -455,7 +468,7 @@
                 document.getElementById('recentInvoices').innerHTML = '<p class="text-muted">Unable to load invoices</p>';
             });
 
-        fetch('{{ route("contractor.upcoming-schedules") }}')
+        fetch(GR_ROUTES.upcomingSchedules)
             .then(response => response.json())
             .then(schedules => {
                 const container = document.getElementById('upcomingSchedules');
@@ -479,7 +492,7 @@
                 document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
             });
 
-        fetch('{{ route("contractor.recent-pending-payments") }}')
+        fetch(GR_ROUTES.recentPendingPayments)
             .then(response => response.json())
             .then(payments => {
                 const container = document.getElementById('recentPaymentSubmissions');
@@ -521,7 +534,7 @@
         if (location) params.append('location', location);
         if (regNumber) params.append('registration_number', regNumber);
 
-        fetch(`{{ route('contractor.clients.locations') }}?${params.toString()}`)
+        fetch(`${GR_ROUTES.clientsLocations}?${params.toString()}`)
             .then(response => response.json())
             .then(clients => {
                 const tbody = document.getElementById('clientsTable');
@@ -541,15 +554,15 @@
                         : '';
                     const actionButtons = isPending
                         ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}?')">
-                               @csrf
+                               <input type="hidden" name="_token" value="${GR_CSRF}">
                                <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
                            </form>
                            <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
-                               @csrf
+                               <input type="hidden" name="_token" value="${GR_CSRF}">
                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
                            </form>`
-                        : `<a href="{{ url('dashboard/contractor/clients/' + client.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                           <a href="{{ url('dashboard/contractor/clients/' + client.id + '/edit') }}" class="btn btn-sm btn-outline-warning">Edit</a>`;
+                        : `<a href="${GR_ROUTES.clientBase}/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                           <a href="${GR_ROUTES.clientBase}/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
                     tbody.innerHTML += `
                         <tr style="${rowBg}">
                             <td>${client.registration_number || 'N/A'}</td>
@@ -579,7 +592,7 @@
     }
 
     function loadClientsTable() {
-        fetch('{{ route('contractor.clients.locations') }}')
+        fetch(GR_ROUTES.clientsLocations)
             .then(response => response.json())
             .then(clients => {
                 const tbody = document.getElementById('clientsTable');
@@ -599,15 +612,15 @@
                         : '';
                     const actionButtons = isPending
                         ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}? They will receive login credentials by email.')">
-                               @csrf
+                               <input type="hidden" name="_token" value="${GR_CSRF}">
                                <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
                            </form>
                            <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
-                               @csrf
+                               <input type="hidden" name="_token" value="${GR_CSRF}">
                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
                            </form>`
-                        : `<a href="{{ url('dashboard/contractor/clients/' + client.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                           <a href="{{ url('dashboard/contractor/clients/' + client.id + '/edit') }}" class="btn btn-sm btn-outline-warning">Edit</a>`;
+                        : `<a href="${GR_ROUTES.clientBase}/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
+                           <a href="${GR_ROUTES.clientBase}/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
                     tbody.innerHTML += `
                         <tr style="${rowBg}">
                             <td>${client.registration_number || 'N/A'}</td>

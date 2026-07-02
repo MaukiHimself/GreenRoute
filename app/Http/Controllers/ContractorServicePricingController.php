@@ -10,7 +10,10 @@ class ContractorServicePricingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'verified.contractor']);
+        $this->middleware('auth');
+        // Contractor management actions require a verified contractor; the
+        // read-only clientView is open to authenticated clients.
+        $this->middleware('verified.contractor')->except('clientView');
     }
 
     public function index()
