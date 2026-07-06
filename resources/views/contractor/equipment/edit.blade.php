@@ -79,13 +79,9 @@
                         </div>
 
                         <div class="d-flex justify-content-between pt-2 border-top">
-                            <form method="POST" action="{{ route('contractor.equipment.destroy', $equipment) }}"
-                                  onsubmit="return confirm('Delete this equipment permanently?');" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="bi bi-trash me-1"></i> Delete
-                                </button>
-                            </form>
+                            <button type="submit" form="deleteEquipmentForm" class="btn btn-outline-danger">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
                             <div class="d-flex gap-3">
                                 <a href="{{ route('contractor.equipment.index') }}" class="btn btn-light">Cancel</a>
                                 <button type="submit" class="btn btn-primary">
@@ -93,6 +89,13 @@
                                 </button>
                             </div>
                         </div>
+                    </form>
+
+                    {{-- Delete form kept separate — nesting it inside the update form
+                         made the "Update" button submit the DELETE request. --}}
+                    <form method="POST" id="deleteEquipmentForm" action="{{ route('contractor.equipment.destroy', $equipment) }}"
+                          onsubmit="return confirm('Delete this equipment permanently?');">
+                        @csrf @method('DELETE')
                     </form>
                 </div>
             </div>

@@ -131,7 +131,7 @@
 
             @if($invoices->hasPages())
             <div class="px-6 py-4 border-t border-gray-200">
-                {{ $invoices->links() }}
+                {{ $invoices->links('pagination::tailwind') }}
             </div>
             @endif
         </div>

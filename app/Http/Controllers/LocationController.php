@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Location;
 use App\Services\LocationService;
 use App\Http\Resources\LocationResource;
@@ -407,5 +408,98 @@ class LocationController extends Controller
             'success' => true,
             'exists' => $exists
         ]);
+    }
+
+    /**
+     * Geocode an address query using Nominatim
+     */
+    /**
+     * Save the authenticated contractor's home/base location. This is used as
+     * the START point of an optimised route (base -> clients -> dumping site).
+     */
+    public function updateContractorLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        $user->latitude = $request->latitude;
+        $user->longitude = $request->longitude;
+        if ($request->filled('address')) {
+            $user->location_address = $request->address;
+        }
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Base location saved.',
+            'latitude' => (float) $user->latitude,
+            'longitude' => (float) $user->longitude,
+            'address' => $user->location_address,
+        ]);
+    }
+
+    public function geocodeAddress(Request $request)
+    {
+        $request->validate([
+            'address' => 'required|string|min:3'
+        ]);
+
+        $address = $request->address;
+
+        // Bias results toward Tanzania / Dar es Salaam so local place names resolve.
+        $country = config('services.openstreetmap.country', 'tz');
+        // Dar es Salaam bounding box (lon_min, lat_max, lon_max, lat_min) — soft preference, not a hard limit.
+        $viewbox = config('services.openstreetmap.viewbox', '38.95,-6.55,39.55,-7.15');
+
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'User-Agent' => config('services.openstreetmap.nominatim_user_agent', 'GreenRoute/1.0'),
+                    'Accept' => 'application/json',
+                ])
+                ->get('https://nominatim.openstreetmap.org/search', [
+                    'q' => $address,
+                    'format' => 'json',
+                    'limit' => 6,
+                    'addressdetails' => 1,
+                    'countrycodes' => $country,
+                    'viewbox' => $viewbox,
+                    // bounded=0 keeps the viewbox as a preference; results outside it are still allowed.
+                    'bounded' => 0,
+                ]);
+
+            if ($response->successful()) {
+                $results = collect($response->json())
+                    ->map(fn ($r) => [
+                        'latitude' => (float) $r['lat'],
+                        'longitude' => (float) $r['lon'],
+                        'display_name' => $r['display_name'],
+                        'type' => $r['type'] ?? ($r['class'] ?? null),
+                    ])
+                    ->values();
+
+                if ($results->isNotEmpty()) {
+                    return response()->json([
+                        'success' => true,
+                        'results' => $results,
+                        // Backward-compatible single-result fields (first/best match).
+                        'latitude' => $results[0]['latitude'],
+                        'longitude' => $results[0]['longitude'],
+                        'display_name' => $results[0]['display_name'],
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Geocoding address failed: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Could not find that address in Tanzania. Try adding the district or region (e.g. "Mlimani City, Ubungo"), or drop a pin on the map instead.'
+        ], 422);
     }
 }

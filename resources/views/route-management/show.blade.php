@@ -202,9 +202,34 @@
                         </h4>
                         <span class="badge" id="route-distance-badge" style="background-color: {{ $contractorRoute->color }}; color: white; padding: 0.5rem 1rem;">Distance: Calculating...</span>
                     </div>
+                    {{-- Base location control --}}
+                    <div id="baseLocationBar" class="alert d-flex align-items-center justify-content-between py-2 px-3 mb-3"
+                         style="{{ Auth::user()->latitude ? 'background:#ecfdf5;border:1px solid #a7f3d0;' : 'background:#fffbeb;border:1px solid #fde68a;' }}">
+                        <div class="small">
+                            <i class="bi bi-house-door-fill me-1" style="color:#047857;"></i>
+                            <span id="baseLocationText">
+                                @if(Auth::user()->latitude)
+                                    <strong>Your base:</strong> {{ Auth::user()->location_address ?? (number_format(Auth::user()->latitude,5).', '.number_format(Auth::user()->longitude,5)) }}
+                                @else
+                                    <strong>No base location set.</strong> The route can't start from your yard until you set it.
+                                @endif
+                            </span>
+                        </div>
+                        <button type="button" id="setBaseBtn" class="btn btn-sm btn-outline-success text-nowrap">
+                            <i class="bi bi-geo-alt me-1"></i>{{ Auth::user()->latitude ? 'Update base' : 'Set my base' }}
+                        </button>
+                    </div>
+
                     <div id="map" style="height: 520px; border-radius: 8px; border: 1px solid #e2e8f0; z-index: 1;"></div>
-                    <div class="mt-3 text-muted small">
-                        <i class="bi bi-info-circle me-1"></i>Path calculated sequentially along official roads. Click client cards to locate on map.
+
+                    {{-- Legend --}}
+                    <div class="d-flex flex-wrap gap-3 mt-3 small">
+                        <span><i class="bi bi-house-door-fill" style="color:#2563eb;"></i> Base (start)</span>
+                        <span><i class="bi bi-circle-fill" style="color:{{ $contractorRoute->color }};"></i> Client stops</span>
+                        <span><i class="bi bi-trash3-fill" style="color:#c0392b;"></i> Dumping site (end)</span>
+                    </div>
+                    <div class="mt-2 text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>Path calculated sequentially along official roads: base → clients → dumping site. Click client cards to locate on map.
                     </div>
                 </div>
             </div>
@@ -222,6 +247,18 @@
         const token = "{{ config('services.heigit.api_key') }}";
         const markerEntries = {};
         let routeCoordinates = [];
+
+        // Contractor base (start) and the route's dumping site (end).
+        @php
+            $u = Auth::user();
+            $baseLoc = ($u->latitude && $u->longitude)
+                ? ['lat' => (float) $u->latitude, 'lng' => (float) $u->longitude, 'address' => $u->location_address]
+                : null;
+        @endphp
+        let contractorBase = @json($baseLoc);
+        const dumpingSite = @json($dumpingSite ? ['name' => $dumpingSite['name'], 'lat' => (float) $dumpingSite['latitude'], 'lng' => (float) $dumpingSite['longitude']] : null);
+        const saveBaseUrl = "{{ route('location.update') }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
         GreenRouteMap.whenReady(async function () {
             const mapEl = document.getElementById('map');
@@ -262,19 +299,33 @@
                 });
             });
 
-            // Optimize route using nearest-neighbor
-            const optimizedRoute = optimizeRoute(routeCoordinates);
+            // Optimize clients using nearest-neighbor, seeded from the base if we have one.
+            const optimizedRoute = optimizeRoute(routeCoordinates, contractorBase);
 
-            // Create map
-            mapCtx = GreenRouteMap.createMap('map', { 
-                lat: optimizedRoute[0].lat, 
-                lng: optimizedRoute[0].lng, 
-                zoom: 13 
-            });
+            // Create map centred on the base (or first stop).
+            const center = contractorBase || optimizedRoute[0];
+            mapCtx = GreenRouteMap.createMap('map', { lat: center.lat, lng: center.lng, zoom: 13 });
 
             if (!mapCtx) return;
 
-            // Plot optimized markers with sequence numbers
+            // Full path drawn on the map: base -> clients -> dumping site.
+            const fullPath = [];
+
+            // Base marker (start).
+            if (contractorBase) {
+                GreenRouteMap.addMarker(mapCtx, contractorBase.lat, contractorBase.lng, {
+                    title: 'Your base',
+                    icon: L.divIcon({
+                        className: 'gr-endpoint-marker',
+                        html: `<div style="background:#2563eb;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><i class="bi bi-house-door-fill" style="transform:rotate(45deg);color:#fff;font-size:14px;"></i></div>`,
+                        iconSize: [30, 30], iconAnchor: [15, 28],
+                    }),
+                    popup: `<strong>Start: Your base</strong><br>${contractorBase.address || ''}`,
+                });
+                fullPath.push({ lat: contractorBase.lat, lng: contractorBase.lng });
+            }
+
+            // Plot optimized client markers with sequence numbers.
             optimizedRoute.forEach((point, i) => {
                 point.index = i + 1;
                 const markerEntry = GreenRouteMap.addNumberedMarker(mapCtx, point.lat, point.lng, point.index, {
@@ -282,18 +333,33 @@
                     popup: `<strong>Stop ${point.index}: ${point.name}</strong><br>${point.address || ''}`,
                 });
                 markerEntries[point.id] = markerEntry;
+                fullPath.push({ lat: point.lat, lng: point.lng });
             });
 
-            GreenRouteMap.fitBounds(mapCtx, optimizedRoute);
+            // Dumping site marker (end).
+            if (dumpingSite) {
+                GreenRouteMap.addMarker(mapCtx, dumpingSite.lat, dumpingSite.lng, {
+                    title: dumpingSite.name,
+                    icon: L.divIcon({
+                        className: 'gr-endpoint-marker',
+                        html: `<div style="background:#c0392b;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><i class="bi bi-trash3-fill" style="transform:rotate(45deg);color:#fff;font-size:14px;"></i></div>`,
+                        iconSize: [30, 30], iconAnchor: [15, 28],
+                    }),
+                    popup: `<strong>End: ${dumpingSite.name}</strong><br>Dumping / disposal site`,
+                });
+                fullPath.push({ lat: dumpingSite.lat, lng: dumpingSite.lng });
+            }
 
-            // Draw driving route
-            if (optimizedRoute.length >= 2) {
-                const summary = await GreenRouteMap.drawRoadRoute(mapCtx, optimizedRoute, token);
+            GreenRouteMap.fitBounds(mapCtx, fullPath);
+
+            // Draw driving route along the full path.
+            if (fullPath.length >= 2) {
+                const summary = await GreenRouteMap.drawRoadRoute(mapCtx, fullPath, token);
                 if (summary) {
                     document.getElementById('route-distance-badge').textContent = `Distance: ${summary.distance.toFixed(1)} km`;
                 } else {
-                    GreenRouteMap.drawPolyline(mapCtx, optimizedRoute, { color: routeColor });
-                    const distance = calculateDirectDistance(optimizedRoute);
+                    GreenRouteMap.drawPolyline(mapCtx, fullPath, { color: routeColor });
+                    const distance = calculateDirectDistance(fullPath);
                     document.getElementById('route-distance-badge').textContent = `Distance: ${distance} km (direct)`;
                 }
             } else {
@@ -417,17 +483,25 @@
             return results;
         }
 
-        function optimizeRoute(coordinates) {
+        function optimizeRoute(coordinates, startPoint = null) {
             // Filter out any entries with invalid coordinates
-            const valid = coordinates.filter(c => c.lat && c.lng && 
+            const valid = coordinates.filter(c => c.lat && c.lng &&
                 !isNaN(parseFloat(c.lat)) && !isNaN(parseFloat(c.lng)));
-            
+
             if (valid.length <= 1) return valid;
 
             const optimized = [];
             const used = new Set();
 
+            // Seed from the client nearest to the base (if set), else the first client.
             let current = valid[0];
+            if (startPoint && startPoint.lat && startPoint.lng) {
+                let seedDist = Infinity;
+                valid.forEach(c => {
+                    const d = GreenRouteMap.haversineKm(startPoint.lat, startPoint.lng, c.lat, c.lng);
+                    if (d < seedDist) { seedDist = d; current = c; }
+                });
+            }
             optimized.push(current);
             used.add(current.id);
 
@@ -471,6 +545,60 @@
                 );
             }
             return totalDistance.toFixed(1);
+        }
+
+        // --- Set / update the contractor's base (start) location via device GPS ---
+        const setBaseBtn = document.getElementById('setBaseBtn');
+        if (setBaseBtn) {
+            setBaseBtn.addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    alert('Geolocation is not supported by this browser.');
+                    return;
+                }
+                const original = setBaseBtn.innerHTML;
+                setBaseBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Locating...';
+                setBaseBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const accuracy = Math.round(pos.coords.accuracy);
+
+                        if (accuracy > 500 && !confirm(`GPS accuracy is low (±${accuracy}m) — you may be on a laptop/Wi-Fi. Save this as your base anyway?`)) {
+                            setBaseBtn.innerHTML = original;
+                            setBaseBtn.disabled = false;
+                            return;
+                        }
+
+                        fetch(saveBaseUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                            body: JSON.stringify({ latitude: lat, longitude: lng })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Reload so the route recalculates from the new base.
+                                location.reload();
+                            } else {
+                                throw new Error(data.message || 'Could not save base location.');
+                            }
+                        })
+                        .catch(err => {
+                            alert(err.message || 'Failed to save base location.');
+                            setBaseBtn.innerHTML = original;
+                            setBaseBtn.disabled = false;
+                        });
+                    },
+                    function () {
+                        alert('Could not get your location. Please allow location access and try again.');
+                        setBaseBtn.innerHTML = original;
+                        setBaseBtn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                );
+            });
         }
     </script>
 @endsection

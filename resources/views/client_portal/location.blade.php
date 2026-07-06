@@ -38,13 +38,25 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('client.location.update') }}">
+                <form id="locationForm" method="POST" action="{{ route('client.location.update') }}">
                     @csrf
                     @method('PUT')
 
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Your Current Address</label>
                         <input type="text" class="form-control" value="{{ $client->address ?? 'Not set' }}" readonly>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Search Address (Manual Lookup)</label>
+                        <div class="input-group">
+                            <input type="text" id="addressSearch" class="form-control" placeholder="Type address (e.g. Street Name, District, Region)...">
+                            <button type="button" id="btnGeocode" class="btn btn-outline-primary">
+                                <i class="bi bi-search me-1"></i>Search Address
+                            </button>
+                        </div>
+                        <small class="text-muted">Use this manual lookup if automatic GPS detection is inaccurate or unavailable.</small>
+                        <div id="searchResults" class="list-group mt-2" style="display:none;"></div>
                     </div>
 
                     <div class="row mb-4">
@@ -85,46 +97,139 @@
         </div>
 
         <div class="col-lg-5">
+
+            {{-- ── Route Summary Card (no other clients' personal info) ── --}}
             @if($routeClients->count() > 0)
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="bi bi-signpost-split me-2"></i>Route Clients ({{ $routeClients->count() }})</h2>
+                    <h2 class="section-title"><i class="bi bi-signpost-split me-2"></i>Your Collection Route</h2>
                 </div>
-                <div class="mb-3">
-                    <strong>Distance:</strong>
-                    <span id="routeDistance" class="badge bg-primary ms-2">Calculating...</span>
+
+                {{-- Route name / badge --}}
+                @php $myRouteClient = $routeClients->firstWhere('id', $client->id); @endphp
+                @if($client->route)
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge rounded-pill text-white px-3 py-2" style="background:{{ $contractorRoute->color ?? '#047857' }}; font-size:.85rem;">
+                        <i class="bi bi-map me-1"></i>{{ $client->route }}
+                    </span>
+                    <span class="text-muted small">— your assigned route</span>
                 </div>
-                <div class="list-group">
-                    @foreach($routeClients as $rc)
-                    <div class="list-group-item @if($rc->id === $client->id) list-group-item-success @endif">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ $rc->name }}</strong>
-                                @if($rc->id === $client->id)
-                                    <span class="badge bg-success ms-2">You</span>
-                                @endif
-                                <div class="small text-muted">{{ $rc->address }}</div>
-                            </div>
-                            @if($rc->latitude && $rc->longitude)
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="panToClient({{ $rc->latitude }}, {{ $rc->longitude }})">
-                                    <i class="bi bi-geo-alt"></i>
-                                </button>
-                            @endif
+                @endif
+
+                {{-- Your position on the route --}}
+                @if($client->route_sequence)
+                <div class="alert alert-success py-2 px-3 mb-3 small">
+                    <i class="bi bi-pin-map-fill me-2"></i>
+                    You are stop <strong>#{{ $client->route_sequence }}</strong> on this route.
+                </div>
+                @endif
+
+                {{-- Stats row --}}
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="border rounded-3 p-2 text-center">
+                            <div class="fw-bold fs-5 text-success" id="routeDistance">—</div>
+                            <div class="text-muted" style="font-size:.75rem;">Total route distance</div>
                         </div>
                     </div>
-                    @endforeach
+                    <div class="col-6">
+                        <div class="border rounded-3 p-2 text-center">
+                            <div class="fw-bold fs-5 text-primary">{{ $routeClients->count() }}</div>
+                            <div class="text-muted" style="font-size:.75rem;">Stops on your route</div>
+                        </div>
+                    </div>
                 </div>
+
+                {{-- Locate-me button --}}
+                @if($client->latitude && $client->longitude)
+                <button type="button" class="btn btn-sm btn-outline-success w-100 mb-1"
+                        onclick="panToClient({{ $client->latitude }}, {{ $client->longitude }})">
+                    <i class="bi bi-geo-alt-fill me-1"></i>Show my position on map
+                </button>
+                @endif
+
+                <p class="text-muted small mt-2 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    The map on the left shows all stops on your route. Other clients' names and addresses are kept private.
+                </p>
             </div>
             @endif
 
+            {{-- ── Location Tips Card ── --}}
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="bi bi-lightbulb me-2"></i>Location Tips</h2>
+                </div>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-phone me-2 text-success"></i>
+                        <strong>Best accuracy:</strong> use your smartphone with GPS switched on.
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-wifi me-2 text-warning"></i>
+                        <strong>On a laptop/desktop?</strong> Wi-Fi positioning can be several kilometres off — use <em>Search Address</em> or drag the map pin instead.
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-repeat me-2 text-primary"></i>
+                        <strong>Moved house?</strong> Simply detect or search your new address and click <em>Save My Location</em>.
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-cloud-slash me-2 text-secondary"></i>
+                        <strong>No internet?</strong> Your location is saved on this device and synced automatically when you come back online.
+                    </li>
+                    <li>
+                        <i class="bi bi-cursor me-2 text-info"></i>
+                        <strong>Quick set:</strong> tap anywhere on the map to pin your location, or drag the marker to fine-tune.
+                    </li>
+                </ul>
+            </div>
+
+            {{-- ── Next Pickup Card ── --}}
+            @php
+                $nextSchedule = $client->schedules()
+                    ->where('status', '!=', 'cancelled')
+                    ->where('pickup_date', '>=', now()->toDateString())
+                    ->orderBy('pickup_date')
+                    ->first();
+            @endphp
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="bi bi-calendar-check me-2"></i>Next Pickup</h2>
+                </div>
+                @if($nextSchedule)
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 text-center p-2 text-white" style="background:{{ $contractorRoute->color ?? '#047857' }};min-width:54px;">
+                            <div class="fw-bold fs-5 lh-1">{{ \Carbon\Carbon::parse($nextSchedule->pickup_date)->format('d') }}</div>
+                            <div style="font-size:.7rem;">{{ \Carbon\Carbon::parse($nextSchedule->pickup_date)->format('M Y') }}</div>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">{{ ucfirst(str_replace('_', ' ', $nextSchedule->service_type ?? 'Collection')) }}</div>
+                            <div class="text-muted small">{{ \Carbon\Carbon::parse($nextSchedule->pickup_date)->diffForHumans() }}</div>
+                            @if($nextSchedule->notes)
+                                <div class="text-muted small">{{ Str::limit($nextSchedule->notes, 60) }}</div>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-calendar-x me-2"></i>No upcoming pickups scheduled. Contact your contractor to arrange a collection.
+                    </p>
+                @endif
+            </div>
+
+            {{-- ── Privacy Card ── --}}
             <div class="content-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="bi bi-shield-check me-2"></i>Privacy</h2>
                 </div>
-                <p class="text-muted small mb-0">
-                    Your GPS coordinates are stored securely and are only visible to your assigned waste contractor for route planning. We do not share your location with third parties.
-                </p>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li class="mb-2"><i class="bi bi-lock-fill me-2 text-success"></i>Your GPS coordinates are encrypted in transit and stored securely.</li>
+                    <li class="mb-2"><i class="bi bi-eye-slash me-2 text-primary"></i>Only your assigned waste contractor can see your location — for route planning only.</li>
+                    <li class="mb-2"><i class="bi bi-people-fill me-2 text-warning"></i>Other clients on your route <strong>cannot</strong> see your name, address, or position.</li>
+                    <li><i class="bi bi-share me-2 text-danger"></i>We never share your data with third parties.</li>
+                </ul>
             </div>
+
         </div>
     </div>
 
@@ -188,9 +293,14 @@
                             iconAnchor: [12, 12]
                         });
 
+                        // Only show full details for the current client; other stops are anonymous.
+                        const popupContent = isYou
+                            ? `<strong>📍 Your location</strong><br><small>${client.address || ''}</small>`
+                            : `<span class="text-muted small">Stop on your route</span>`;
+
                         L.marker([lat, lng], { icon: markerIcon })
                             .addTo(mapCtx.map)
-                            .bindPopup(`<strong>${client.name}</strong>${isYou ? ' <span class="badge bg-success">You</span>' : ''}<br>${client.address}`);
+                            .bindPopup(popupContent);
                     }
                 });
 
@@ -234,6 +344,7 @@
             }
 
             document.getElementById('watchLocation').addEventListener('click', watchPreciseLocation);
+            document.getElementById('btnGeocode').addEventListener('click', geocodeManualAddress);
         });
 
         function setLocation(lat, lng) {
@@ -337,11 +448,23 @@
                         navigator.geolocation.clearWatch(watchId);
                         watchId = null;
                         const finalAccuracy = bestPosition ? Math.round(bestPosition.coords.accuracy) : Math.round(accuracy);
-                        statusEl.className = 'alert alert-success py-3 mb-3';
-                        statusEl.innerHTML = `<i class="bi bi-check-circle me-2"></i>GPS captured! Accuracy: ±${finalAccuracy}m. Click "Save My Location" to confirm.`;
 
                         if (bestPosition && bestPosition !== position) {
                             setLocation(bestPosition.coords.latitude, bestPosition.coords.longitude);
+                        }
+
+                        // Accuracy > 500m almost always means a WiFi/IP-based fix (e.g. a laptop with no
+                        // GPS chip) — it can be several km off. Warn the user instead of trusting it blindly.
+                        if (finalAccuracy > 500) {
+                            statusEl.className = 'alert alert-warning py-3 mb-3';
+                            statusEl.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Low GPS accuracy (±${finalAccuracy}m).</strong> This is usually because you're on a
+                                laptop/desktop or Wi-Fi, which can place you several kilometres away.
+                                For a precise location, open this page on your <strong>phone with GPS on</strong>,
+                                or use <strong>Search Address</strong> above / <strong>drag the marker</strong> to your exact spot before saving.`;
+                        } else {
+                            statusEl.className = 'alert alert-success py-3 mb-3';
+                            statusEl.innerHTML = `<i class="bi bi-check-circle me-2"></i>GPS captured! Accuracy: ±${finalAccuracy}m. Drag the marker to fine-tune, then click "Save My Location".`;
                         }
                     }
                 },
@@ -360,6 +483,170 @@
                 },
                 { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
             );
+        }
+
+        function geocodeManualAddress() {
+            const query = document.getElementById('addressSearch').value.trim();
+            if (query.length < 3) {
+                alert('Please enter at least 3 characters to search.');
+                return;
+            }
+
+            const btn = document.getElementById('btnGeocode');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Searching...';
+            btn.disabled = true;
+
+            const resultsBox = document.getElementById('searchResults');
+            resultsBox.style.display = 'none';
+            resultsBox.innerHTML = '';
+
+            fetch('{{ route("location.geocode") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ address: query })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Geocoding failed'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                const results = data.results || (data.success ? [{ latitude: data.latitude, longitude: data.longitude, display_name: data.display_name }] : []);
+                if (!results.length) {
+                    throw new Error(data.message || 'Could not find location');
+                }
+
+                // Single match → select it directly.
+                if (results.length === 1) {
+                    selectSearchResult(results[0]);
+                    return;
+                }
+
+                // Multiple matches → let the user pick the correct one.
+                resultsBox.innerHTML = `<div class="list-group-item bg-light small fw-semibold text-muted">${results.length} matches found — pick the correct one:</div>`;
+                results.forEach(r => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `<i class="bi bi-geo-alt text-primary me-2"></i>${r.display_name}`;
+                    item.addEventListener('click', () => {
+                        selectSearchResult(r);
+                        resultsBox.style.display = 'none';
+                    });
+                    resultsBox.appendChild(item);
+                });
+                resultsBox.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Geocoding error:', error);
+                const statusEl = document.getElementById('locationStatus');
+                statusEl.className = 'alert alert-danger py-3 mb-3';
+                statusEl.innerHTML = `<i class="bi bi-x-circle me-2"></i>${error.message || 'Error occurred while searching address.'}`;
+            })
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+
+        function selectSearchResult(r) {
+            setLocation(r.latitude, r.longitude);
+            const statusEl = document.getElementById('locationStatus');
+            statusEl.className = 'alert alert-success py-3 mb-3';
+            statusEl.innerHTML = `<i class="bi bi-check-circle me-2"></i>Found: ${r.display_name}. Drag the marker to fine-tune, then click "Save My Location".`;
+        }
+
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered successfully with scope:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+
+        // Intercept form submission for offline storage
+        document.getElementById('locationForm').addEventListener('submit', function(e) {
+            if (!navigator.onLine) {
+                e.preventDefault();
+
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+
+                if (!lat || !lng) {
+                    alert('Please detect or choose your location first.');
+                    return;
+                }
+
+                const offlineLoc = { latitude: parseFloat(lat), longitude: parseFloat(lng), timestamp: Date.now() };
+                localStorage.setItem('pending_offline_location', JSON.stringify(offlineLoc));
+
+                const statusEl = document.getElementById('locationStatus');
+                if (statusEl) {
+                    statusEl.className = 'alert alert-warning py-3 mb-3';
+                    statusEl.innerHTML = `<i class="bi bi-cloud-slash me-2"></i><strong>Offline Mode:</strong> Your location coordinates (${offlineLoc.latitude.toFixed(6)}, ${offlineLoc.longitude.toFixed(6)}) have been saved locally on your device. They will be synchronized automatically with your contractor as soon as you reconnect to the internet.`;
+                }
+
+                alert('Offline Mode: Your location has been saved locally on this device. It will automatically sync once you go online.');
+            }
+        });
+
+        // Offline synchronization logic
+        window.addEventListener('online', syncOfflineLocation);
+        
+        // Check for offline updates on page load
+        if (navigator.onLine) {
+            syncOfflineLocation();
+        }
+
+        function syncOfflineLocation() {
+            const savedLoc = localStorage.getItem('pending_offline_location');
+            if (!savedLoc) return;
+
+            const parsed = JSON.parse(savedLoc);
+            const statusEl = document.getElementById('locationStatus');
+
+            if (statusEl) {
+                statusEl.className = 'alert alert-info py-3 mb-3';
+                statusEl.innerHTML = '<i class="bi bi-arrow-repeat spinner me-2"></i>Syncing offline GPS location coordinates with server...';
+            }
+
+            fetch('{{ route("client.location.update") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-HTTP-Method-Override': 'PUT'
+                },
+                body: JSON.stringify({
+                    latitude: parsed.latitude,
+                    longitude: parsed.longitude
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    localStorage.removeItem('pending_offline_location');
+                    if (statusEl) {
+                        statusEl.className = 'alert alert-success py-3 mb-3';
+                        statusEl.innerHTML = '<i class="bi bi-cloud-check me-2"></i>Offline GPS location synced successfully!';
+                    }
+                } else {
+                    throw new Error('Sync failed');
+                }
+            })
+            .catch(err => {
+                console.error('Offline location sync failed:', err);
+                if (statusEl) {
+                    statusEl.className = 'alert alert-danger py-3 mb-3';
+                    statusEl.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Failed to sync offline location. Will retry later.';
+                }
+            });
         }
     </script>
 </x-dashboard-layout>

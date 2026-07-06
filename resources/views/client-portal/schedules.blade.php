@@ -130,7 +130,7 @@
 
         @if($schedules->hasPages())
         <div class="mt-6">
-            {{ $schedules->links() }}
+            {{ $schedules->links('pagination::tailwind') }}
         </div>
         @endif
     </div>

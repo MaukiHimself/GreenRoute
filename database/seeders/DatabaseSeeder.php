@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CreateAdminSeeder::class,
             ClientContractorSeeder::class,
             BillingRateSeeder::class,
+            EquipmentSeeder::class,
         ]);
     }
 }

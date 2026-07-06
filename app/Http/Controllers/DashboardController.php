@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
+use App\Models\Invoice;
+use App\Models\PaymentSubmission;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,8 +65,54 @@ class DashboardController extends Controller
         if (Auth::user()->user_type !== 'contractor') {
             return redirect()->route('dashboard');
         }
-        
-        return view('contractor.mapping-dashboard');
+
+        $contractorId = Auth::id();
+
+        // Stats — loaded server-side so the page renders immediately
+        $stats = [
+            'total_clients'   => Client::where('contractor_id', $contractorId)->count(),
+            'active_clients'  => Client::where('contractor_id', $contractorId)->where('status', 'active')->count(),
+            'pending_clients' => Client::where('contractor_id', $contractorId)->where('status', 'pending')->where('self_registered', true)->count(),
+            'total_invoices'  => Invoice::where('contractor_id', $contractorId)->count(),
+            'pending_payments'=> Invoice::where('contractor_id', $contractorId)
+                ->whereIn('status', ['draft', 'sent', 'overdue', 'partially_paid'])
+                ->sum('remaining_balance') ?? 0,
+            'active_routes'   => Schedule::where('contractor_id', $contractorId)
+                ->where('pickup_date', '>=', now()->toDateString())
+                ->where('status', '!=', 'cancelled')
+                ->distinct('pickup_location')
+                ->count(),
+            'completed_jobs'  => Schedule::where('contractor_id', $contractorId)->where('status', 'completed')->count(),
+            'pending_approvals' => PaymentSubmission::where('contractor_id', $contractorId)
+                ->whereIn('status', ['pending', 'pending_approval'])
+                ->count(),
+        ];
+
+        // Recent invoices
+        $recentInvoices = Invoice::where('contractor_id', $contractorId)
+            ->with('client:id,name')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        // Upcoming schedules
+        $upcomingSchedules = Schedule::where('contractor_id', $contractorId)
+            ->with('client:id,name')
+            ->where('pickup_date', '>=', now()->toDateString())
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('pickup_date')
+            ->limit(5)
+            ->get();
+
+        // Recent pending payment submissions
+        $pendingPayments = PaymentSubmission::where('contractor_id', $contractorId)
+            ->where('status', 'pending_approval')
+            ->with(['invoice:id,invoice_number', 'client:id,name'])
+            ->orderByDesc('submitted_at')
+            ->limit(5)
+            ->get();
+
+        return view('contractor.mapping-dashboard', compact('stats', 'recentInvoices', 'upcomingSchedules', 'pendingPayments'));
     }
 
     /**

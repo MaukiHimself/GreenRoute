@@ -35,6 +35,9 @@ class User extends Authenticatable
         'remember_login',
         'profile_picture',
         'dark_mode',
+        'latitude',
+        'longitude',
+        'location_address',
     ];
 
     /**

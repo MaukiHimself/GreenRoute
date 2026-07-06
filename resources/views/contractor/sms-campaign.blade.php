@@ -435,31 +435,31 @@
                     <div class="template-text">Thank you for your continued partnership with GreenRoute. We appreciate your commitment to proper waste management!</div>
                 </div>
 
-                <h6 style="color: var(--primary-teal); margin: 1.5rem 0 0.75rem;">Swahili Templates (Vipengele vya Kiswahili)</h6>
-                
+                <h6 style="color: var(--primary-teal); margin: 1.5rem 0 0.75rem;">Swahili Templates (Violezo vya Kiswahili)</h6>
+
                 <div class="template-item" onclick="useTemplate(this)">
-                    <div class="template-title">📅 Kumbusho la Mkusanyiko</div>
-                    <div class="template-text">Kumbusho: Mkusanyiko wa taka yako umepangwa kwa wiki hii. Tafadhali hakikisha mabomba yamewekwa nje saa 7 asubuhi siku ya mkusanyiko. Asante!</div>
+                    <div class="template-title">📅 Kumbusho la Ukusanyaji</div>
+                    <div class="template-text">Kumbusho: Ukusanyaji wa taka zako umepangwa wiki hii. Tafadhali hakikisha mapipa ya taka yamewekwa nje kabla ya saa 1 asubuhi siku ya ukusanyaji. Asante!</div>
                 </div>
 
                 <div class="template-item" onclick="useTemplate(this)">
                     <div class="template-title">💳 Kumbusho la Malipo</div>
-                    <div class="template-text">Kumbusho la Malipo: Ankara yako inakaribia kuwa due. Tafadhali maliza malipo kuepuka kusitisha huduma. Wasiliana nasi ikiwa una maswali.</div>
+                    <div class="template-text">Kumbusho la Malipo: Ankara yako inakaribia muda wake wa mwisho. Tafadhali kamilisha malipo ili kuepuka kukatizwa kwa huduma. Wasiliana nasi kama una maswali.</div>
                 </div>
 
                 <div class="template-item" onclick="useTemplate(this)">
-                    <div class="template-title">♻️ Mbinu za Upandaji</div>
-                    <div class="template-text">Mbinu ya Upandaji: Tafadhali tengeneza vitu vinavyopandikwa na taka za kawaida. Plastiki, karatasi, bilauri, na chuma vinaweza kupandikwa. Asante kwa msaada wako!</div>
+                    <div class="template-title">♻️ Ushauri wa Kuchakata Taka</div>
+                    <div class="template-text">Ushauri: Tafadhali tenganisha taka zinazoweza kuchakatwa na taka za kawaida. Plastiki, karatasi, kioo, na chuma vinaweza kuchakatwa. Asante kwa kutunza mazingira!</div>
                 </div>
 
                 <div class="template-item" onclick="useTemplate(this)">
-                    <div class="template-title">🚯 Sasisho la Huduma</div>
-                    <div class="template-text">Sasisho la Huduma: Ratiba ya mkusanyiko imesasishwa. Tafadhali angalia dashibodi yako kwa tarehe mpya za mkusanyiko. Asante kwa ushirikiano wako!</div>
+                    <div class="template-title">🚯 Taarifa ya Huduma</div>
+                    <div class="template-text">Taarifa ya Huduma: Ratiba ya ukusanyaji imebadilishwa. Tafadhali angalia dashibodi yako ili kuona tarehe mpya za ukusanyaji. Asante kwa ushirikiano wako!</div>
                 </div>
 
                 <div class="template-item" onclick="useTemplate(this)">
                     <div class="template-title">🙏 Shukrani</div>
-                    <div class="template-text">Asante kwa ushirikiano wako wa kuendelea na GreenRoute. Tunathamahia ahadi yako katika usimamizi sahihi wa taka!</div>
+                    <div class="template-text">Asante kwa kuendelea kushirikiana nasi GreenRoute. Tunathamini ahadi yako katika usimamizi bora wa taka!</div>
                 </div>
             </div>
         </div>
@@ -468,7 +468,7 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     // Character counter
     const messageContent = document.getElementById('messageContent');
@@ -545,4 +545,4 @@
         });
     }
 </script>
-@endsection
+@endpush

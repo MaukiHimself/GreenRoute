@@ -26,10 +26,49 @@
         const map = L.map(el, { scrollWheelZoom: options.scrollWheelZoom !== false })
             .setView([lat, lng], zoom);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // --- Base layers (all free, no API key) ---
+        const osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+
+        // Modern, clean street map (CARTO Voyager) — used as the default look.
+        const streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            subdomains: 'abcd',
+            attribution: osmAttr + ' &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+        });
+
+        // Satellite imagery (Esri World Imagery) — good for spotting houses/compounds.
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20,
+            attribution: 'Imagery &copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics',
+        });
+
+        // Plain OpenStreetMap — kept as a fallback option.
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
-        }).addTo(map);
+            attribution: osmAttr + ' contributors',
+        });
+
+        // Street labels to overlay on top of satellite imagery.
+        const labels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            subdomains: 'abcd',
+            pane: 'overlayPane',
+        });
+
+        // Choose default base: 'satellite' | 'osm' | 'streets' (default).
+        const base = options.baseLayer === 'satellite' ? satellite
+            : options.baseLayer === 'osm' ? osm
+            : streets;
+        base.addTo(map);
+
+        // Layer switcher (hide with { layerControl: false }).
+        if (options.layerControl !== false) {
+            L.control.layers(
+                { 'Streets': streets, 'Satellite': satellite, 'OpenStreetMap': osm },
+                { 'Street labels': labels },
+                { position: 'topright', collapsed: true }
+            ).addTo(map);
+        }
 
         const markerLayer = L.layerGroup().addTo(map);
 

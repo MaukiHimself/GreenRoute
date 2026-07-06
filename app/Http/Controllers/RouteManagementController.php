@@ -71,24 +71,25 @@ class RouteManagementController extends Controller
             'route_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
+            'dumping_site' => 'nullable|string|max:255',
             'client_ids' => 'nullable|array',
             'client_ids.*' => 'exists:clients,id',
         ];
-        
+
         // Only require site_location if columns exist
         if ($hasLocationColumns) {
             $validationRules['site_location'] = 'required|string';
         }
-        
+
         $validated = $request->validate($validationRules);
 
         $contractorId = Auth::id();
-        
+
         // Check if route name already exists for this contractor
         $exists = ContractorRoute::where('contractor_id', $contractorId)
             ->where('route_name', $validated['route_name'])
             ->exists();
-        
+
         if ($exists) {
             return back()->withErrors(['route_name' => 'A route with this name already exists.'])->withInput();
         }
@@ -99,6 +100,7 @@ class RouteManagementController extends Controller
             'route_name' => $validated['route_name'],
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'] ?? '#055c5c',
+            'dumping_site' => $validated['dumping_site'] ?? null,
             'is_active' => true,
         ];
         
@@ -139,8 +141,15 @@ class RouteManagementController extends Controller
             ->where('route', $contractorRoute->route_name)
             ->orderBy('name')
             ->get();
-        
-        return view('route-management.show', compact('contractorRoute', 'clients'));
+
+        // Resolve the route's selected dumping site (coords) from config.
+        $dumpingSite = null;
+        if ($contractorRoute->dumping_site) {
+            $dumpingSite = collect(config('dumping_sites.sites', []))
+                ->firstWhere('name', $contractorRoute->dumping_site);
+        }
+
+        return view('route-management.show', compact('contractorRoute', 'clients', 'dumpingSite'));
     }
 
     /**
@@ -200,16 +209,17 @@ class RouteManagementController extends Controller
             'route_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
+            'dumping_site' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'client_ids' => 'nullable|array',
             'client_ids.*' => 'exists:clients,id',
         ];
-        
+
         // Only require site_location if columns exist
         if ($hasLocationColumns) {
             $validationRules['site_location'] = 'required|string';
         }
-        
+
         $validated = $request->validate($validationRules);
 
         $contractorId = Auth::id();
@@ -232,6 +242,7 @@ class RouteManagementController extends Controller
             'route_name' => $validated['route_name'],
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'] ?? '#055c5c',
+            'dumping_site' => $validated['dumping_site'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ];
         

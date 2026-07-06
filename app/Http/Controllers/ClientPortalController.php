@@ -605,6 +605,13 @@ class ClientPortalController extends Controller
 
         $client->update($validated);
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'GPS location updated successfully.'
+            ]);
+        }
+
         return redirect()->route('client.location')->with('success', 'GPS location updated successfully. Your contractor can now use this for route optimization and scheduling.');
     }
 }

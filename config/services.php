@@ -59,4 +59,8 @@ return [
         'api_key' => env('HEIGIT_API_KEY'),
     ],
 
+    'mapbox' => [
+        'token' => env('MAPBOX_TOKEN'),
+    ],
+
 ];

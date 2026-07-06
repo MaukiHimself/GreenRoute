@@ -7,8 +7,12 @@ use App\Models\Contractor;
 use App\Services\ClientInvitationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Notifications\ClientVerifiedNotification;
+use Illuminate\Support\Str;
 
 class ClientController extends Controller
 {
@@ -17,15 +21,43 @@ class ClientController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::where('contractor_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('clients.index', compact('clients'));
+        $query = Client::where('contractor_id', Auth::id());
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('registration_number', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort', 'created_at');
+        $sortOrder = $request->get('direction', 'desc');
+        if (in_array($sortBy, ['name', 'city', 'created_at'])) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $clients = $query->paginate(10)->withQueryString();
+
+        $routes = \App\Models\ContractorRoute::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('route_name')
+            ->get();
+
+        return view('clients.index', compact('clients', 'routes'));
     }
 
     /**
@@ -313,5 +345,82 @@ class ClientController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to reset password: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Bulk approve pending self-registered clients
+     */
+    public function bulkApprove(Request $request)
+    {
+        $request->validate([
+            'client_ids' => 'required|array',
+            'client_ids.*' => 'exists:clients,id',
+        ]);
+
+        $contractor = Contractor::where('user_id', Auth::id())->first();
+        if (!$contractor) {
+            return back()->with('error', 'Contractor profile not found.');
+        }
+
+        $approvedCount = 0;
+        foreach ($request->client_ids as $id) {
+            $client = Client::where('id', $id)
+                ->where('contractor_id', Auth::id())
+                ->where('status', 'pending')
+                ->first();
+
+            if ($client) {
+                // Generate a temporary password
+                $tempPassword = Str::random(10);
+
+                // Check if user already exists
+                $user = User::where('email', $client->email)->first();
+                if (!$user) {
+                    $user = User::create([
+                        'name'               => $client->name,
+                        'email'              => $client->email,
+                        'password'           => Hash::make($tempPassword),
+                        'user_type'          => 'client',
+                        'email_verified_at'  => now(),
+                    ]);
+                }
+
+                // Link and activate the client
+                $client->update([
+                    'user_id'     => $user->id,
+                    'status'      => 'active',
+                    'verified_at' => now(),
+                ]);
+
+                // Send approval email with credentials
+                try {
+                    $user->notify(new ClientVerifiedNotification($client, $contractor, $tempPassword));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send bulk client approval email for client ' . $client->id . ': ' . $e->getMessage());
+                }
+
+                $approvedCount++;
+            }
+        }
+
+        return back()->with('success', "Successfully approved {$approvedCount} client(s).");
+    }
+
+    /**
+     * Bulk assign selected clients to a route
+     */
+    public function bulkAssignRoute(Request $request)
+    {
+        $request->validate([
+            'client_ids' => 'required|array',
+            'client_ids.*' => 'exists:clients,id',
+            'route' => 'required|string',
+        ]);
+
+        $updatedCount = Client::whereIn('id', $request->client_ids)
+            ->where('contractor_id', Auth::id())
+            ->update(['route' => $request->route]);
+
+        return back()->with('success', "Successfully assigned {$updatedCount} client(s) to route '{$request->route}'.");
     }
 }

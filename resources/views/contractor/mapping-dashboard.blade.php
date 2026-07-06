@@ -1,753 +1,495 @@
 @extends('layouts.contractor-sidebar')
 
-@section('title', 'Contractor Dashboard')
+@section('title', 'Dashboard')
 
 @section('styles')
 <style>
     :root {
-        --primary-teal: #047857;
-        --primary-green: #2e7d32;
-        --primary-red: #c0392b;
-        --light-teal: #e6f2f2;
-        --light-green: #e8f5e9;
-        --light-red: #f9eaea;
+        --gr-green: #047857;
+        --gr-green-dark: #065f46;
+        --gr-green-light: #d1fae5;
+        --gr-red: #c0392b;
+        --gr-amber: #d97706;
+        --gr-blue: #2563eb;
+        --gr-border: #e2e8f0;
+        --gr-surface: #ffffff;
+        --gr-bg: #f1f5f9;
+        --gr-text: #1e293b;
+        --gr-muted: #64748b;
     }
 
-    .stat-card {
-        text-align: center;
-        padding: 20px 15px;
-        border-radius: 10px;
-        color: white;
+    /* welcome hero */
+    .welcome-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        padding: 1.9rem 2rem;
+        background: linear-gradient(120deg, #065f46 0%, #047857 45%, #0d9488 100%);
+        box-shadow: 0 12px 30px -8px rgba(4,120,87,.45);
+    }
+    .welcome-hero-content { position: relative; z-index: 2; }
+    .welcome-eyebrow {
+        display: inline-flex; align-items: center; gap: .4rem;
+        font-size: .78rem; font-weight: 600; letter-spacing: .03em;
+        color: #d1fae5; background: rgba(255,255,255,.12);
+        padding: .28rem .8rem; border-radius: 20px; margin-bottom: .7rem;
+    }
+    .welcome-title { color: #fff; font-weight: 800; font-size: 1.75rem; margin: 0; }
+    .welcome-sub   { color: rgba(255,255,255,.82); margin: .35rem 0 0; font-size: .95rem; }
+    .welcome-hero-glow {
+        position: absolute; top: -60%; right: -5%; width: 380px; height: 380px;
+        background: radial-gradient(circle, rgba(255,255,255,.18) 0%, transparent 68%);
+        z-index: 1; pointer-events: none;
     }
 
-    .stat-card {
-        box-shadow: 0 6px 18px rgba(2, 53, 53, 0.12);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
     }
 
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(2, 53, 53, 0.18);
+    .kpi-card {
+        position: relative;
+        background: var(--gr-surface);
+        border-radius: 14px;
+        padding: 1.5rem;
+        border: 1px solid var(--gr-border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        overflow: hidden;
+        transition: box-shadow .2s, transform .2s;
+    }
+    .kpi-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+        background: var(--accent, var(--gr-green));
+    }
+    .kpi-card:hover { box-shadow: 0 12px 26px -6px rgba(15,23,42,.16); transform: translateY(-3px); }
+
+    .kpi-card.accent-green  { --accent: #10b981; background: linear-gradient(135deg, #ffffff 60%, #ecfdf5 100%); }
+    .kpi-card.accent-blue   { --accent: #2563eb; background: linear-gradient(135deg, #ffffff 60%, #eff6ff 100%); }
+    .kpi-card.accent-amber  { --accent: #f59e0b; background: linear-gradient(135deg, #ffffff 60%, #fffbeb 100%); }
+    .kpi-card.accent-violet { --accent: #7c3aed; background: linear-gradient(135deg, #ffffff 60%, #f5f3ff 100%); }
+
+    .kpi-icon {
+        width: 52px; height: 52px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; flex-shrink: 0;
+        color: #fff;
+    }
+    .kpi-icon.green  { background: linear-gradient(135deg, #10b981, #059669); }
+    .kpi-icon.amber  { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+    .kpi-icon.red    { background: linear-gradient(135deg, #f87171, #ef4444); }
+    .kpi-icon.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .kpi-icon.violet { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+    .kpi-value { font-size: 1.9rem; font-weight: 800; color: var(--gr-text); line-height: 1; }
+    .kpi-label { font-size: .82rem; color: var(--gr-muted); font-weight: 500; margin-top: .25rem; }
+
+    /* alert kpi */
+    .kpi-card.alert-card {
+        border-color: #fbbf24;
+        background: #fffbeb;
     }
 
-    .stat-card.clients {
-        background: linear-gradient(135deg, var(--primary-teal), #088484);
-    }
+    /* two-column layout */
+    .main-row { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; }
 
-    .stat-card.invoices {
-        background: linear-gradient(135deg, #059669, var(--primary-green));
-    }
-
-    .stat-card.payments {
-        background: linear-gradient(135deg, var(--primary-green), #1b5e20);
-    }
-
-    .stat-card.routes {
-        background: linear-gradient(135deg, #059669, var(--primary-teal));
-    }
-
-    .stat-card h3 {
-        font-size: 2.2rem;
-        margin-bottom: 5px;
-        font-weight: 700;
-    }
-
-    .stat-card p {
-        margin-bottom: 0;
-        opacity: 0.9;
-    }
-
-    .btn-teal {
-        background-color: var(--primary-teal);
-        color: white;
-        border: none;
-    }
-
-    .btn-teal:hover {
-        background-color: #065f46;
-        color: white;
-    }
-
-    .btn-outline-teal {
-        border: 1px solid var(--primary-teal);
-        color: var(--primary-teal);
-    }
-
-    .btn-outline-teal:hover {
-        background-color: var(--primary-teal);
-        color: white;
-    }
-
-    .quick-action {
-        text-align: center;
-        padding: 20px 15px;
-        border-radius: 10px;
-        background-color: white;
-        transition: all 0.3s;
-        border: 1px solid #eee;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-
-    .quick-action:hover {
-        background-color: var(--light-teal);
-        transform: translateY(-5px);
-        color: inherit;
-    }
-
-    .quick-action i {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-        color: var(--primary-teal);
-    }
-
-    .table th {
-        background-color: var(--light-teal);
-        color: var(--primary-teal);
-        font-weight: 600;
-        border-top: none;
-    }
-
-    .map-container {
-        height: 400px;
-        border-radius: 10px;
+    .panel {
+        background: var(--gr-surface);
+        border-radius: 14px;
+        border: 1px solid var(--gr-border);
         overflow: hidden;
     }
+    .panel-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.1rem 1.4rem;
+        border-bottom: 1px solid var(--gr-border);
+    }
+    .panel-title {
+        font-size: 1rem; font-weight: 700; color: var(--gr-text);
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .panel-title i { color: var(--gr-green); }
+    .panel-body { padding: 1.25rem 1.4rem; }
 
-    .tab-content iframe {
-        border-radius: 0 0 10px 10px;
+    /* tables */
+    .mini-table { width: 100%; border-collapse: collapse; }
+    .mini-table th {
+        font-size: .78rem; font-weight: 600; color: var(--gr-muted);
+        text-transform: uppercase; letter-spacing: .04em;
+        padding: .5rem .75rem; border-bottom: 2px solid var(--gr-border);
+        background: #f8fafc;
+    }
+    .mini-table td {
+        padding: .75rem; font-size: .875rem; color: var(--gr-text);
+        border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+    }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .mini-table tr:hover td { background: #f8fafc; }
+
+    /* badges */
+    .badge-gr {
+        display: inline-block; padding: .25rem .7rem;
+        border-radius: 20px; font-size: .75rem; font-weight: 600;
+    }
+    .badge-gr.paid     { background: #d1fae5; color: #065f46; }
+    .badge-gr.pending  { background: #fef3c7; color: #92400e; }
+    .badge-gr.overdue  { background: #fee2e2; color: #991b1b; }
+    .badge-gr.sent     { background: #dbeafe; color: #1d4ed8; }
+    .badge-gr.draft    { background: #f1f5f9; color: #475569; }
+    .badge-gr.cancelled{ background: #f1f5f9; color: #64748b; }
+
+    /* quick actions */
+    .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .qa-btn {
+        display: flex; flex-direction: column; align-items: center; gap: .4rem;
+        padding: 1.1rem .75rem; border-radius: 12px;
+        border: 1.5px solid var(--gr-border);
+        background: #f8fafc; text-decoration: none; color: var(--gr-text);
+        font-size: .82rem; font-weight: 600; text-align: center;
+        transition: all .2s;
+    }
+    .qa-btn:hover { border-color: var(--qa, var(--gr-green)); background: #fff; color: var(--gr-text); transform: translateY(-2px); box-shadow: 0 8px 18px -6px rgba(15,23,42,.15); }
+    .qa-btn i { font-size: 1.5rem; color: var(--qa, var(--gr-green)); }
+    .qa-btn.qa-approve { --qa: #ef4444; }
+    .qa-btn.qa-invoice { --qa: #2563eb; }
+    .qa-btn.qa-schedule{ --qa: #f59e0b; }
+    .qa-btn.qa-map     { --qa: #0d9488; }
+    .qa-btn.qa-clients { --qa: #10b981; }
+    .qa-btn.qa-routes  { --qa: #7c3aed; }
+    .qa-btn.qa-reports { --qa: #db2777; }
+    .qa-btn.qa-equip   { --qa: #ea580c; }
+    .qa-btn.qa-sms     { --qa: #0891b2; }
+
+    /* payment submissions */
+    .pay-item {
+        display: flex; align-items: center; gap: .85rem;
+        padding: .8rem 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .pay-item:last-child { border-bottom: none; }
+    .pay-avatar {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: var(--gr-green-light); color: var(--gr-green);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .9rem; flex-shrink: 0;
+    }
+    .pay-name { font-weight: 600; font-size: .875rem; }
+    .pay-sub  { font-size: .78rem; color: var(--gr-muted); }
+    .pay-amount { margin-left: auto; font-weight: 700; font-size: .9rem; color: var(--gr-green); white-space: nowrap; }
+
+    /* schedules */
+    .sched-item {
+        display: flex; align-items: flex-start; gap: .85rem;
+        padding: .8rem 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .sched-item:last-child { border-bottom: none; }
+    .sched-date {
+        background: var(--gr-green); color: white;
+        border-radius: 10px; padding: .3rem .6rem;
+        font-size: .75rem; font-weight: 700; white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* empty state */
+    .empty-state { text-align: center; padding: 2rem; color: var(--gr-muted); }
+    .empty-state i { font-size: 2rem; display: block; margin-bottom: .5rem; opacity: .4; }
+
+    /* responsive */
+    @media (max-width: 1200px) {
+        .dash-grid { grid-template-columns: repeat(2, 1fr); }
+        .main-row  { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+        .dash-grid { grid-template-columns: 1fr; }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Dashboard Tab -->
-    <div id="dashboard-tab" class="tab-content">
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="stat-card clients">
-                    <h3 id="totalClients">0</h3>
-                    <p>Total Clients</p>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-card invoices">
-                    <h3 id="totalInvoices">0</h3>
-                    <p>Total Invoices</p>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-card payments">
-                    <h3 id="pendingPayments">TZS 0</h3>
-                    <p>Pending Payments</p>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-card routes">
-                    <h3 id="activeRoutes">0</h3>
-                    <p>Active Routes</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <a href="{{ route('billing.create') }}" class="quick-action d-block">
-                                    <i class="bi bi-receipt"></i>
-                                    <h6>Create Invoice</h6>
-                                </a>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <a href="{{ route('schedules.create') }}" class="quick-action d-block">
-                                    <i class="bi bi-calendar-plus"></i>
-                                    <h6>Schedule Collection</h6>
-                                </a>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <a href="{{ route('reports.index') }}" class="quick-action d-block">
-                                    <i class="bi bi-graph-up"></i>
-                                    <h6>View Reports</h6>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{{-- Welcome banner --}}
+<div class="welcome-hero mb-4">
+    <div class="welcome-hero-content">
+        <span class="welcome-eyebrow"><i class="bi bi-sun-fill"></i> {{ now()->format('l, F j, Y') }}</span>
+        <h2 class="welcome-title">Welcome back, {{ Auth::user()->name }}</h2>
+        <p class="welcome-sub">Here's what's happening across your collections today.</p>
+    </div>
+    <div class="welcome-hero-glow"></div>
+</div>
 
-        <!-- Recent Payment Submissions -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Payment Submissions</h5>
-                        <a href="{{ route('contractor.pending-payments') }}" class="btn btn-sm btn-outline-teal">View All</a>
-                    </div>
-                    <div class="card-body">
-                        <div id="recentPaymentSubmissions">
-                            <p class="text-muted">Loading recent payment submissions...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Invoices & Upcoming Collections -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Invoices</h5>
-                        <a href="{{ route('invoices.index') }}" class="btn btn-sm btn-outline-teal">View All</a>
-                    </div>
-                    <div class="card-body">
-                        <div id="recentInvoices">
-                            <p class="text-muted">Loading recent invoices...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Upcoming Collections</h5>
-                        <a href="{{ route('schedules.index') }}" class="btn btn-sm btn-outline-teal">View All</a>
-                    </div>
-                    <div class="card-body">
-                        <div id="upcomingSchedules">
-                            <p class="text-muted">Loading upcoming schedules...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance Metrics Section (New AI Feature) -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Performance Metrics</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <div class="text-center p-3 border rounded bg-light">
-                            <div class="h4 mb-1 text-primary" id="completionRate">0%</div>
-                            <small class="text-muted">Completion Rate</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="text-center p-3 border rounded bg-light">
-                            <div class="h4 mb-1 text-success" id="avgResponseTime">0h</div>
-                            <small class="text-muted">Avg Response Time</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="text-center p-3 border rounded bg-light">
-                            <div class="h4 mb-1 text-warning" id="clientSatisfaction">0%</div>
-                            <small class="text-muted">Client Satisfaction</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="text-center p-3 border rounded bg-light">
-                            <div class="h4 mb-1 text-info" id="efficiencyScore">0%</div>
-                            <small class="text-muted">Efficiency Score</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Tasks Section (New AI Feature) -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">Today's Tasks</h5>
-            </div>
-            <div class="card-body">
-                <div id="todayTasks">
-                    <p class="text-muted">Loading today's tasks...</p>
-                </div>
-            </div>
+{{-- KPI cards --}}
+<div class="dash-grid">
+    <div class="kpi-card accent-green">
+        <div class="kpi-icon green"><i class="bi bi-people-fill"></i></div>
+        <div>
+            <div class="kpi-value">{{ $stats['active_clients'] }}</div>
+            <div class="kpi-label">Active Clients</div>
         </div>
     </div>
 
-    <!-- Client Database Tab -->
-    <div id="clients-tab" class="tab-content" style="display: none;">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Search Client Database</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchName" placeholder="Search by name...">
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="searchCategory">
-                            <option value="">All Categories</option>
-                            <option value="residential">Residential</option>
-                            <option value="commercial">Commercial</option>
-                            <option value="industrial">Industrial</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchLocation" placeholder="Search by location...">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchRegNumber" placeholder="Registration number...">
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <button class="btn btn-teal" onclick="searchClients()">
-                            <i class="bi bi-search me-1"></i>Search
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="clearSearch()">
-                            <i class="bi bi-x-circle me-1"></i>Clear
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Client Database</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Reg. Number</th>
-                                <th>Name</th>
-                                <th>Contact</th>
-                                <th>Category</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Address</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clientsTable">
-                            <tr><td colspan="8" class="text-center">Loading clients...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="kpi-card accent-blue">
+        <div class="kpi-icon blue"><i class="bi bi-receipt-cutoff"></i></div>
+        <div>
+            <div class="kpi-value">{{ $stats['total_invoices'] }}</div>
+            <div class="kpi-label">Total Invoices</div>
         </div>
     </div>
 
-    <!-- Other tabs (simplified) -->
-    <div id="billing-tab" class="tab-content" style="display: none;">
-        <iframe src="{{ route('invoices.index') }}" width="100%" height="600" frameborder="0"></iframe>
+    <div class="kpi-card accent-amber">
+        <div class="kpi-icon amber"><i class="bi bi-wallet2"></i></div>
+        <div>
+            <div class="kpi-value">TZS {{ number_format($stats['pending_payments'], 0) }}</div>
+            <div class="kpi-label">Pending Payments</div>
+        </div>
     </div>
 
-    <div id="collection-tab" class="tab-content" style="display: none;">
-        <iframe src="{{ route('schedules.index') }}" width="100%" height="600" frameborder="0"></iframe>
+    <div class="kpi-card accent-violet">
+        <div class="kpi-icon violet"><i class="bi bi-calendar3-week"></i></div>
+        <div>
+            <div class="kpi-value">{{ $stats['active_routes'] }}</div>
+            <div class="kpi-label">Upcoming Collections</div>
+        </div>
     </div>
 
-    <div id="disposal-tab" class="tab-content" style="display: none;">
-        <iframe id="disposal-iframe" src="{{ route('disposal.index') }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
+    @if($stats['pending_clients'] > 0)
+    <div class="kpi-card alert-card" style="grid-column: span 2;">
+        <div class="kpi-icon amber"><i class="bi bi-person-exclamation"></i></div>
+        <div class="flex-grow-1">
+            <div class="kpi-value">{{ $stats['pending_clients'] }}</div>
+            <div class="kpi-label">Clients waiting for approval</div>
+        </div>
+        <a href="{{ route('contractor.clients.pending') }}" class="btn btn-sm" style="background:#f59e0b;color:white;border-radius:8px;white-space:nowrap;">
+            Review <i class="bi bi-arrow-right ms-1"></i>
+        </a>
     </div>
+    @endif
 
-    <div id="chats-tab" class="tab-content" style="display: none;">
-        <iframe id="chats-iframe" src="{{ route('sms.inbox') }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
+    @if($stats['pending_approvals'] > 0)
+    <div class="kpi-card alert-card" style="grid-column: span 2;">
+        <div class="kpi-icon red"><i class="bi bi-bell-fill"></i></div>
+        <div class="flex-grow-1">
+            <div class="kpi-value">{{ $stats['pending_approvals'] }}</div>
+            <div class="kpi-label">Payment submissions awaiting approval</div>
+        </div>
+        <a href="{{ route('contractor.pending-payments') }}" class="btn btn-sm" style="background:#ef4444;color:white;border-radius:8px;white-space:nowrap;">
+            Approve <i class="bi bi-arrow-right ms-1"></i>
+        </a>
     </div>
+    @endif
+</div>
 
-    <div id="route-management-tab" class="tab-content" style="display: none;">
-        <iframe id="route-management-iframe" src="{{ route('route-management.index') }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
-    </div>
+{{-- Main two-column layout --}}
+<div class="main-row">
 
-    <div id="route-optimization-tab" class="tab-content" style="display: none;">
-        <iframe src="{{ route('routes.index') }}" width="100%" height="600" frameborder="0"></iframe>
-    </div>
+    {{-- Left column --}}
+    <div class="d-flex flex-column gap-3">
 
-    <div id="gps-tab" class="tab-content" style="display: none;">
-        <iframe src="{{ route('trucks.index') }}" width="100%" height="600" frameborder="0"></iframe>
-    </div>
-
-    <div id="reports-tab" class="tab-content" style="display: none;">
-        <iframe src="{{ route('reports.index') }}" width="100%" height="600" frameborder="0"></iframe>
-    </div>
-
-@include('components.leaflet-assets')
-
-@endsection
-
-@section('scripts')
-<script>
-    // Route URLs and CSRF token compiled by Blade (the main script block below is
-    // wrapped in @verbatim, so route()/url()/@csrf cannot be used inside it).
-    window.GR_ROUTES = {
-        dashboardStats: @json(route('contractor.dashboard-stats')),
-        recentInvoices: @json(route('contractor.recent-invoices')),
-        upcomingSchedules: @json(route('contractor.upcoming-schedules')),
-        recentPendingPayments: @json(route('contractor.recent-pending-payments')),
-        clientsLocations: @json(route('contractor.clients.locations')),
-        clientBase: @json(url('dashboard/contractor/clients')),
-    };
-    window.GR_CSRF = @json(csrf_token());
-</script>
-@verbatim
-<script>
-    function showTab(tabName) {
-        document.querySelectorAll('#portal-sidebar .portal-sidebar__link').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('data-tab') === tabName) {
-                link.classList.add('active');
-            }
-        });
-
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.style.display = 'none';
-        });
-
-        const tabId = tabName + '-tab';
-        const selectedTabEl = document.getElementById(tabId);
-        if (selectedTabEl) {
-            selectedTabEl.style.display = 'block';
-        }
-
-        if (tabName === 'disposal') {
-            const disposalIframe = document.getElementById('disposal-iframe');
-            if (disposalIframe) {
-                disposalIframe.src = disposalIframe.src;
-            }
-        }
-
-        if (tabName === 'clients') {
-            loadClientsTable();
-        } else if (tabName === 'gps') {
-            initGPSMap();
-        }
-    }
-
-    document.querySelectorAll('#portal-sidebar .portal-sidebar__link[data-tab]').forEach(tab => {
-        tab.addEventListener('click', function(e) {
-            e.preventDefault();
-            const tabName = this.getAttribute('data-tab');
-            const path = '/dashboard/contractor' + (tabName === 'dashboard' ? '' : '/' + tabName);
-            history.pushState({tab: tabName}, '', path);
-            showTab(tabName);
-        });
-    });
-
-    window.addEventListener('popstate', function(e) {
-        if (e.state && e.state.tab) {
-            showTab(e.state.tab);
-        } else {
-            const path = window.location.pathname;
-            const segments = path.split('/').filter(Boolean);
-            const tabName = segments[segments.length - 1] || 'dashboard';
-            showTab(tabName);
-        }
-    });
-
-    (function() {
-        const path = window.location.pathname;
-        const segments = path.split('/').filter(Boolean);
-        const lastSegment = segments[segments.length - 1] || 'dashboard';
-        const validTabs = ['dashboard', 'clients', 'billing', 'collection', 'disposal', 'gps', 'schedules', 'routes', 'reports', 'zones', 'pending-payment-approvals'];
-        const tabName = validTabs.includes(lastSegment) ? lastSegment : 'dashboard';
-        showTab(tabName);
-    })();
-
-    function loadDashboardData() {
-        console.log('Loading dashboard data...');
-        // Load dashboard stats
-        fetch(GR_ROUTES.dashboardStats)
-            .then(response => {
-                console.log('Stats response:', response);
-                if (!response.ok) throw new Error('Stats fetch failed');
-                return response.json();
-            })
-            .then(data => {
-                console.log('Stats data:', data);
-                document.getElementById('totalClients').textContent = data.total_clients || 0;
-                document.getElementById('totalInvoices').textContent = data.total_invoices || 0;
-                document.getElementById('pendingPayments').textContent = 'TZS ' + Number(data.pending_payments || 0).toLocaleString();
-                document.getElementById('activeRoutes').textContent = data.active_routes || 0;
-                const badge = document.getElementById('paymentNotificationCount');
-                if (badge) {
-                    badge.textContent = data.new_payment_notifications || 0;
-                }
-                // Calculate performance metrics
-                const completionRate = data.total_clients > 0 ? Math.round((data.completed_jobs || 0) / data.total_clients * 100) : 0;
-                document.getElementById('completionRate').textContent = completionRate + '%';
-                document.getElementById('avgResponseTime').textContent = '2h';
-                document.getElementById('clientSatisfaction').textContent = '92%';
-                document.getElementById('efficiencyScore').textContent = completionRate + '%';
-            })
-            .catch(error => {
-                console.error('Dashboard stats error:', error);
-                document.getElementById('totalClients').textContent = '0';
-                document.getElementById('totalInvoices').textContent = '0';
-                document.getElementById('pendingPayments').textContent = 'TZS 0';
-                document.getElementById('activeRoutes').textContent = '0';
-                document.getElementById('completionRate').textContent = '0%';
-                document.getElementById('avgResponseTime').textContent = '0h';
-                document.getElementById('clientSatisfaction').textContent = '0%';
-                document.getElementById('efficiencyScore').textContent = '0%';
-            });
-
-        fetch(GR_ROUTES.recentInvoices)
-            .then(response => {
-                console.log('Invoices response:', response);
-                if (!response.ok) throw new Error('Invoices fetch failed');
-                return response.json();
-            })
-            .then(invoices => {
-                console.log('Invoices data:', invoices);
-                const container = document.getElementById('recentInvoices');
-                if (!invoices || invoices.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No recent invoices</p>';
-                    return;
-                }
-                container.innerHTML = '';
-                invoices.forEach(invoice => {
-                    container.innerHTML += `
-                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-start border-3 border-primary">
-                            <div>
-                                <strong>INV-${invoice.id}</strong><br>
-                                <small class="text-muted">${invoice.client_name}</small>
-                            </div>
-                            <div class="text-end">
-                                <span class="fw-bold text-${invoice.status === 'paid' ? 'success' : 'warning'}">TZS ${invoice.total_amount}</span><br>
-                                <small class="badge bg-${invoice.status === 'paid' ? 'success' : 'warning'}">${invoice.status}</small>
-                            </div>
-                        </div>
-                    `;
-                });
-            })
-            .catch(error => {
-                console.error('Invoices error:', error);
-                document.getElementById('recentInvoices').innerHTML = '<p class="text-muted">Unable to load invoices</p>';
-            });
-
-        fetch(GR_ROUTES.upcomingSchedules)
-            .then(response => {
-                console.log('Schedules response:', response);
-                if (!response.ok) throw new Error('Schedules fetch failed');
-                return response.json();
-            })
-            .then(schedules => {
-                console.log('Schedules data:', schedules);
-                const container = document.getElementById('upcomingSchedules');
-                if (!schedules || schedules.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No upcoming schedules</p>';
-                    return;
-                }
-                container.innerHTML = '';
-                schedules.forEach(schedule => {
-                    container.innerHTML += `
-                        <div class="border-start border-success border-4 ps-3 mb-3 bg-light p-2 rounded">
-                             <strong>${schedule.pickup_location}</strong><br>
-                             <small class="text-muted">${schedule.client_name}</small><br>
-                             <small class="text-info">${schedule.pickup_date} at ${schedule.pickup_time}</small>
-                             ${schedule.schedule_price ? `<br><small class="text-success fw-bold">TZS ${schedule.schedule_price}</small>` : ''}
-                        </div>
-                    `;
-                });
-            })
-            .catch(error => {
-                console.error('Schedules error:', error);
-                document.getElementById('upcomingSchedules').innerHTML = '<p class="text-muted">Unable to load schedules</p>';
-            });
-
-        fetch(GR_ROUTES.recentPendingPayments)
-            .then(response => {
-                console.log('Payments response:', response);
-                if (!response.ok) throw new Error('Payments fetch failed');
-                return response.json();
-            })
-            .then(payments => {
-                console.log('Payments data:', payments);
-                const container = document.getElementById('recentPaymentSubmissions');
-                if (!payments || payments.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No recent payment submissions</p>';
-                    return;
-                }
-                container.innerHTML = '';
-                payments.forEach(payment => {
-                    container.innerHTML += `
-                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-start border-3 border-warning">
-                            <div>
-                                <strong>PAY-${payment.id}</strong><br>
-                                <small class="text-muted">${payment.client_name}</small><br>
-                                <small class="text-muted">INV-${payment.invoice_number}</small>
-                            </div>
-                            <div class="text-end">
-                                <span class="fw-bold text-warning">TZS ${payment.amount_submitted}</span><br>
-                                <small class="badge bg-warning text-dark">${payment.status === 'pending_approval' ? 'Pending Approval' : payment.status}</small>
-                            </div>
-                        </div>
-                    `;
-                });
-            })
-            .catch(error => {
-                console.error('Payments error:', error);
-                document.getElementById('recentPaymentSubmissions').innerHTML = '<p class="text-muted">Unable to load payment submissions</p>';
-            });
-
-        // Load today's tasks
-        loadTodayTasks();
-    }
-
-    function searchClients() {
-        const name = document.getElementById('searchName').value;
-        const category = document.getElementById('searchCategory').value;
-        const location = document.getElementById('searchLocation').value;
-        const regNumber = document.getElementById('searchRegNumber').value;
-
-        const params = new URLSearchParams();
-        if (name) params.append('name', name);
-        if (category) params.append('category', category);
-        if (location) params.append('location', location);
-        if (regNumber) params.append('registration_number', regNumber);
-
-        fetch(`${GR_ROUTES.clientsLocations}?${params.toString()}`)
-            .then(response => response.json())
-            .then(clients => {
-                const tbody = document.getElementById('clientsTable');
-                tbody.innerHTML = '';
-                if (clients.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No clients found matching your search criteria</td></tr>';
-                    return;
-                }
-                clients.forEach(client => {
-                    const isPending = client.status === 'pending';
-                    const rowBg = isPending ? 'background:#fffbeb;' : '';
-                    const statusBadge = isPending
-                        ? '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>'
-                        : '<span class="badge bg-success">Active</span>';
-                    const selfRegBadge = client.self_registered
-                        ? '<br><small class="text-muted"><i class="bi bi-person-up"></i> Self-registered</small>'
-                        : '';
-                    const actionButtons = isPending
-                        ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}?')">
-                               <input type="hidden" name="_token" value="${GR_CSRF}">
-                               <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
-                           </form>
-                           <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
-                               <input type="hidden" name="_token" value="${GR_CSRF}">
-                               <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
-                           </form>`
-                        : `<a href="${GR_ROUTES.clientBase}/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
-                           <a href="${GR_ROUTES.clientBase}/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
-                    tbody.innerHTML += `
-                        <tr style="${rowBg}">
-                            <td>${client.registration_number || 'N/A'}</td>
-                            <td><strong>${client.name}</strong>${selfRegBadge}</td>
-                            <td>${client.contact_name || 'N/A'}</td>
-                            <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
-                            <td>${client.phone || 'N/A'}<br><small>${client.phone_2 || ''} ${client.phone_3 ? '<br>' + client.phone_3 : ''}</small></td>
-                            <td>${client.email || 'N/A'}</td>
-                            <td>${client.address || 'N/A'}${client.route ? '<br><small class="text-muted">Route: ' + client.route + ' (' + client.region + ')</small>' : ''}</td>
-                            <td>${statusBadge}</td>
-                            <td><div class="d-flex gap-1">${actionButtons}</div></td>
+        {{-- Recent Invoices --}}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-receipt"></i> Recent Invoices</span>
+                <a href="{{ route('invoices.index') }}" class="btn btn-sm btn-outline-success" style="border-radius:8px;font-size:.8rem;">View All</a>
+            </div>
+            <div class="panel-body p-0">
+                @if($recentInvoices->isEmpty())
+                    <div class="empty-state"><i class="bi bi-receipt"></i>No invoices yet</div>
+                @else
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Client</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
-                    `;
-                });
-            })
-            .catch(() => {
-                document.getElementById('clientsTable').innerHTML = '<tr><td colspan="9" class="text-center">Error searching clients</td></tr>';
-            });
-    }
-
-    function clearSearch() {
-        document.getElementById('searchName').value = '';
-        document.getElementById('searchCategory').value = '';
-        document.getElementById('searchLocation').value = '';
-        document.getElementById('searchRegNumber').value = '';
-        loadClientsTable();
-    }
-
-    function loadClientsTable() {
-        fetch(GR_ROUTES.clientsLocations)
-            .then(response => response.json())
-            .then(clients => {
-                const tbody = document.getElementById('clientsTable');
-                tbody.innerHTML = '';
-                if (clients.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No clients found</td></tr>';
-                    return;
-                }
-                clients.forEach(client => {
-                    const isPending = client.status === 'pending';
-                    const rowBg = isPending ? 'background:#fffbeb;' : '';
-                    const statusBadge = isPending
-                        ? '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>'
-                        : '<span class="badge bg-success">Active</span>';
-                    const selfRegBadge = client.self_registered
-                        ? '<br><small class="text-muted"><i class="bi bi-person-up"></i> Self-registered</small>'
-                        : '';
-                    const actionButtons = isPending
-                        ? `<form action="/contractor/pending-clients/${client.id}/approve" method="POST" class="d-inline" onsubmit="return confirm('Approve ${client.name}? They will receive login credentials by email.')">
-                               <input type="hidden" name="_token" value="${GR_CSRF}">
-                               <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg me-1"></i>Approve</button>
-                           </form>
-                           <form action="/contractor/pending-clients/${client.id}/reject" method="POST" class="d-inline" onsubmit="return confirm('Reject ${client.name}?')">
-                               <input type="hidden" name="_token" value="${GR_CSRF}">
-                               <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
-                           </form>`
-                        : `<a href="${GR_ROUTES.clientBase}/${client.id}" class="btn btn-sm btn-outline-primary">View</a>
-                           <a href="${GR_ROUTES.clientBase}/${client.id}/edit" class="btn btn-sm btn-outline-warning">Edit</a>`;
-                    tbody.innerHTML += `
-                        <tr style="${rowBg}">
-                            <td>${client.registration_number || 'N/A'}</td>
-                            <td><strong>${client.name}</strong>${selfRegBadge}</td>
-                            <td>${client.contact_name || 'N/A'}</td>
-                            <td><span class="badge bg-info">${client.category || 'N/A'}</span></td>
-                            <td>${client.phone || 'N/A'}<br><small>${client.phone_2 || ''} ${client.phone_3 ? '<br>' + client.phone_3 : ''}</small></td>
-                            <td>${client.email || 'N/A'}</td>
-                            <td>${client.address || 'N/A'}${client.route ? '<br><small class="text-muted">Route: ' + client.route + ' (' + client.region + ')</small>' : ''}</td>
-                            <td>${statusBadge}</td>
-                            <td><div class="d-flex gap-1">${actionButtons}</div></td>
+                    </thead>
+                    <tbody>
+                        @foreach($recentInvoices as $inv)
+                        <tr>
+                            <td><span class="fw-semibold">{{ $inv->invoice_number ?? 'INV-'.$inv->id }}</span></td>
+                            <td>{{ $inv->client->name ?? '—' }}</td>
+                            <td class="fw-semibold">TZS {{ number_format($inv->total_amount, 0) }}</td>
+                            <td><span class="badge-gr {{ $inv->status }}">{{ ucfirst($inv->status) }}</span></td>
+                            <td><a href="{{ route('invoices.show', $inv->id) }}" class="text-muted"><i class="bi bi-eye"></i></a></td>
                         </tr>
-                    `;
-                });
-            })
-            .catch(() => {
-                document.getElementById('clientsTable').innerHTML = '<tr><td colspan="9" class="text-center">Error loading clients</td></tr>';
-            });
-    }
+                        @endforeach
+                    </tbody>
+                </table>
+                @endif
+            </div>
+        </div>
 
-    function loadTodayTasks() {
-        const container = document.getElementById('todayTasks');
-        // Generate sample tasks based on dashboard data
-        const tasks = [
-            { icon: 'bi-truck', text: 'Complete Route A collection', priority: 'high' },
-            { icon: 'bi-receipt', text: 'Review pending invoices', priority: 'medium' },
-            { icon: 'bi-person-check', text: 'Approve 2 client requests', priority: 'high' },
-            { icon: 'bi-calendar-check', text: 'Schedule tomorrow pickups', priority: 'low' },
-        ];
-        
-        container.innerHTML = '';
-        tasks.forEach(task => {
-            const priorityColor = task.priority === 'high' ? 'danger' : (task.priority === 'medium' ? 'warning' : 'info');
-            container.innerHTML += `
-                <div class="d-flex align-items-center mb-2 p-2 border-start border-3 border-${priorityColor}">
-                    <i class="bi ${task.icon} me-2 text-${priorityColor}"></i>
-                    <span class="flex-grow-1">${task.text}</span>
-                    <span class="badge bg-${priorityColor} text-capitalize">${task.priority}</span>
+        {{-- Upcoming Collections --}}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-truck"></i> Upcoming Collections</span>
+                <a href="{{ route('schedules.index') }}" class="btn btn-sm btn-outline-success" style="border-radius:8px;font-size:.8rem;">View All</a>
+            </div>
+            <div class="panel-body">
+                @if($upcomingSchedules->isEmpty())
+                    <div class="empty-state"><i class="bi bi-calendar-x"></i>No upcoming collections</div>
+                @else
+                    @foreach($upcomingSchedules as $sched)
+                    <div class="sched-item">
+                        <div class="sched-date">
+                            {{ \Carbon\Carbon::parse($sched->pickup_date)->format('M d') }}
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="font-size:.875rem;">{{ $sched->pickup_location }}</div>
+                            <div style="font-size:.78rem;color:#64748b;">
+                                {{ $sched->client->name ?? '—' }}
+                                @if($sched->pickup_time)
+                                 · {{ $sched->pickup_time }}
+                                @endif
+                            </div>
+                        </div>
+                        @if($sched->displayed_price)
+                        <div class="ms-auto fw-bold" style="font-size:.85rem;color:#047857;">
+                            TZS {{ number_format($sched->displayed_price, 0) }}
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+
+        {{-- Pending Payment Submissions --}}
+        @if($pendingPayments->isNotEmpty())
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-clock-history"></i> Pending Payment Submissions</span>
+                <a href="{{ route('contractor.pending-payments') }}" class="btn btn-sm btn-outline-success" style="border-radius:8px;font-size:.8rem;">View All</a>
+            </div>
+            <div class="panel-body">
+                @foreach($pendingPayments as $pay)
+                <div class="pay-item">
+                    <div class="pay-avatar">{{ strtoupper(substr($pay->client->name ?? 'U', 0, 2)) }}</div>
+                    <div>
+                        <div class="pay-name">{{ $pay->client->name ?? 'Unknown' }}</div>
+                        <div class="pay-sub">INV {{ $pay->invoice->invoice_number ?? '#'.$pay->invoice_id }} · {{ $pay->submitted_at ? $pay->submitted_at->diffForHumans() : '' }}</div>
+                    </div>
+                    <div class="pay-amount">TZS {{ number_format($pay->amount_submitted, 0) }}</div>
                 </div>
-            `;
-        });
-    }
+                @endforeach
+            </div>
+        </div>
+        @endif
 
-    document.addEventListener('DOMContentLoaded', function() {
-        loadDashboardData();
-    });
-</script>
-@endverbatim
+    </div>
+
+    {{-- Right sidebar --}}
+    <div class="d-flex flex-column gap-3">
+
+        {{-- Quick Actions --}}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-lightning-charge-fill"></i> Quick Actions</span>
+            </div>
+            <div class="panel-body">
+                <div class="qa-grid">
+                    <a href="{{ route('contractor.pending-payments') }}" class="qa-btn qa-approve" style="position:relative;">
+                        <i class="bi bi-cash-coin"></i>
+                        Payment Approvals
+                        @if($stats['pending_approvals'] > 0)
+                        <span class="badge rounded-pill bg-danger" style="position:absolute;top:.5rem;right:.5rem;font-size:.7rem;">{{ $stats['pending_approvals'] }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('billing.create') }}" class="qa-btn qa-invoice">
+                        <i class="bi bi-receipt-cutoff"></i>
+                        Create Invoice
+                    </a>
+                    <a href="{{ route('schedules.create') }}" class="qa-btn qa-schedule">
+                        <i class="bi bi-calendar-plus"></i>
+                        Schedule Pickup
+                    </a>
+                    <a href="{{ route('contractor.clients.map') }}" class="qa-btn qa-map">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Client Map
+                    </a>
+                    <a href="{{ route('contractor.clients.index') }}" class="qa-btn qa-clients">
+                        <i class="bi bi-people-fill"></i>
+                        Clients
+                    </a>
+                    <a href="{{ route('route-management.index') }}" class="qa-btn qa-routes">
+                        <i class="bi bi-signpost-split-fill"></i>
+                        Routes
+                    </a>
+                    <a href="{{ route('reports.index') }}" class="qa-btn qa-reports">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Reports
+                    </a>
+                    <a href="{{ route('contractor.equipment.index') }}" class="qa-btn qa-equip">
+                        <i class="bi bi-tools"></i>
+                        Equipment
+                    </a>
+                    <a href="{{ route('contractor.sms.campaign') }}" class="qa-btn qa-sms">
+                        <i class="bi bi-megaphone-fill"></i>
+                        SMS Campaign
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- Business Snapshot --}}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-bar-chart-line-fill"></i> Business Snapshot</span>
+            </div>
+            <div class="panel-body">
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <div class="d-flex justify-content-between mb-1" style="font-size:.82rem;">
+                            <span class="text-muted">Total Clients</span>
+                            <strong>{{ $stats['total_clients'] }}</strong>
+                        </div>
+                        <div class="progress" style="height:7px;">
+                            @php $pct = $stats['total_clients'] > 0 ? min(100, round($stats['active_clients']/$stats['total_clients']*100)) : 0; @endphp
+                            <div class="progress-bar bg-success" style="width:{{ $pct }}%;border-radius:10px;"></div>
+                        </div>
+                        <div style="font-size:.72rem;color:#64748b;margin-top:.25rem;">{{ $pct }}% active</div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1" style="font-size:.82rem;">
+                            <span class="text-muted">Jobs Completed</span>
+                            <strong>{{ $stats['completed_jobs'] }}</strong>
+                        </div>
+                        <div class="progress" style="height:7px;">
+                            @php $total = max(1, $stats['completed_jobs'] + $stats['active_routes']); $cpct = min(100, round($stats['completed_jobs']/$total*100)); @endphp
+                            <div class="progress-bar" style="width:{{ $cpct }}%;border-radius:10px;background:#047857;"></div>
+                        </div>
+                        <div style="font-size:.72rem;color:#64748b;margin-top:.25rem;">{{ $cpct }}% completion rate</div>
+                    </div>
+
+                    <div class="mt-2 pt-2" style="border-top:1px solid #f1f5f9;">
+                        <div class="d-flex justify-content-between" style="font-size:.85rem;margin-bottom:.5rem;">
+                            <span class="text-muted">Pending Payments</span>
+                            <strong class="text-warning">{{ $stats['pending_approvals'] }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size:.85rem;">
+                            <span class="text-muted">Pending Clients</span>
+                            <strong class="text-warning">{{ $stats['pending_clients'] }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Map shortcut --}}
+        <a href="{{ route('contractor.clients.map') }}" class="panel text-decoration-none" style="overflow:hidden;position:relative;min-height:130px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#047857,#065f46);">
+            <div style="text-align:center;color:white;z-index:2;">
+                <i class="bi bi-map-fill" style="font-size:2.2rem;display:block;margin-bottom:.5rem;"></i>
+                <strong style="font-size:1rem;">View Client Map</strong>
+                <div style="font-size:.8rem;opacity:.85;margin-top:.2rem;">{{ $stats['total_clients'] }} clients plotted</div>
+            </div>
+        </a>
+
+    </div>
+</div>
+
 @endsection

@@ -406,26 +406,33 @@
         @endif
 
         <!-- Search and Filter Section -->
-        <div class="search-section">
+        <form method="GET" action="{{ route('contractor.clients.index') }}" class="search-section">
             <div class="row g-3 align-items-center">
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <h3 class="section-title">Client Database</h3>
                     <p class="section-subtitle">All clients linked to your contractor account</p>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Search by name, email or city">
+                        <input type="text" name="search" class="form-control" placeholder="Search by name, email or city" value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="col-lg-2">
-                    <select class="form-select">
-                        <option selected>All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Statuses</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     </select>
+                </div>
+                <div class="col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                    @if(request()->filled('search') || request()->filled('status'))
+                        <a href="{{ route('contractor.clients.index') }}" class="btn btn-outline-secondary btn-sm" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+                    @endif
                 </div>
                 <div class="col-lg-2 text-lg-end">
                     @php $pendingCount = \App\Models\Client::where('contractor_id', auth()->id())->where('status','pending')->where('self_registered',true)->count(); @endphp
@@ -437,12 +444,12 @@
                     <a href="{{ route('contractor.clients.map') }}" class="btn btn-outline-primary btn-sm mb-2 d-block">
                         <i class="bi bi-geo-alt me-1"></i> View Map
                     </a>
-                    <a href="{{ route('contractor.clients.create') }}" class="btn btn-primary">
+                    <a href="{{ route('contractor.clients.create') }}" class="btn btn-primary w-100">
                         <i class="bi bi-person-plus me-1"></i> Add Client
                     </a>
                 </div>
             </div>
-        </div>
+        </form>
 
         <!-- Clients Table -->
         <div class="table-section">
@@ -460,32 +467,74 @@
                     </a>
                 </div>
             @endif
-            <div class="table-header">
+            <div class="table-header flex-wrap gap-3">
                 <h4 class="table-title">Clients</h4>
+
+                <!-- Bulk Actions Toolbar (Hidden by default) -->
+                <div id="bulkActionsToolbar" class="d-none align-items-center gap-2 bg-light p-2 rounded border border-success" style="flex: 1; min-width: 250px;">
+                    <span class="small text-muted fw-semibold ms-2"><span id="selectedCount">0</span> selected:</span>
+                    <button type="button" class="btn btn-sm btn-success" onclick="submitBulkAction('{{ route('contractor.clients.bulk-approve') }}')">
+                        <i class="bi bi-check-lg me-1"></i>Approve Selected
+                    </button>
+                    
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-signpost-split me-1"></i>Assign to Route
+                        </button>
+                        <ul class="dropdown-menu">
+                            @forelse($routes as $route)
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="submitBulkAssign('{{ $route->route_name }}')">
+                                        {{ $route->route_name }}
+                                    </a>
+                                </li>
+                            @empty
+                                <li><a class="dropdown-item disabled" href="#">No active routes</a></li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="sort-buttons">
-                    <button type="button" class="sort-btn active">Name</button>
-                    <button type="button" class="sort-btn">City</button>
-                    <button type="button" class="sort-btn">Created</button>
+                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'name', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}" class="sort-btn {{ request('sort') === 'name' ? 'active' : '' }}">
+                        Name {!! request('sort') === 'name' ? (request('direction') === 'asc' ? '↑' : '↓') : '' !!}
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'city', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}" class="sort-btn {{ request('sort') === 'city' ? 'active' : '' }}">
+                        City {!! request('sort') === 'city' ? (request('direction') === 'asc' ? '↑' : '↓') : '' !!}
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'created_at', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}" class="sort-btn {{ request('sort') === 'created_at' || !request('sort') ? 'active' : '' }}">
+                        Created {!! request('sort') === 'created_at' || !request('sort') ? (request('direction') === 'asc' ? '↑' : '↓') : '' !!}
+                    </a>
                 </div>
             </div>
             
             @if($clients->count() > 0)
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;"></th>
-                                <th>Client</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>City / State</th>
-                                <th>Status</th>
-                                <th class="text-end" style="width: 180px;">Actions</th>
-                            </tr>
-                        </thead>
+                <form id="bulkActionsForm" method="POST" action="">
+                    @csrf
+                    <input type="hidden" name="route" id="bulkRouteInput" value="">
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px; vertical-align: middle;">
+                                        <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                                    </th>
+                                    <th style="width: 60px;"></th>
+                                    <th>Client</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Location / GPS</th>
+                                    <th>Status</th>
+                                    <th class="text-end" style="width: 180px;">Actions</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @foreach($clients as $client)
                                 <tr style="{{ $client->status === 'pending' ? 'background:#fffbeb;' : '' }}">
+                                    <td style="vertical-align: middle;">
+                                        <input type="checkbox" name="client_ids[]" value="{{ $client->id }}" class="client-checkbox form-check-input">
+                                    </td>
                                     <td>
                                         <div class="client-avatar">
                                             <i class="bi bi-person"></i>
@@ -508,7 +557,24 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="location-badge">{{ $client->city }}, {{ $client->state }}</span>
+                                        <span class="location-badge">{{ $client->city }}{{ $client->state ? ', '.$client->state : '' }}</span>
+                                        @if($client->address)
+                                            <div class="small text-muted mt-1" style="max-width:220px;" title="{{ $client->address }}">
+                                                <i class="bi bi-geo-alt me-1"></i>{{ \Illuminate\Support\Str::limit($client->address, 40) }}
+                                            </div>
+                                        @endif
+                                        @if($client->latitude && $client->longitude)
+                                            <a href="https://www.openstreetmap.org/?mlat={{ $client->latitude }}&mlon={{ $client->longitude }}#map=17/{{ $client->latitude }}/{{ $client->longitude }}"
+                                               target="_blank" rel="noopener"
+                                               class="badge bg-success-subtle text-success text-decoration-none mt-1 d-inline-flex align-items-center"
+                                               title="View on map — GPS location set by client">
+                                                <i class="bi bi-pin-map-fill me-1"></i>GPS set
+                                            </a>
+                                        @else
+                                            <span class="badge bg-warning-subtle text-warning mt-1 d-inline-flex align-items-center" title="This client has not pinned their GPS location yet">
+                                                <i class="bi bi-pin-map me-1"></i>No GPS
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="status-badge {{ $client->status === 'active' ? 'status-active' : ($client->status === 'pending' ? 'status-pending' : 'status-inactive') }}">
@@ -558,6 +624,7 @@
                         </tbody>
                     </table>
                 </div>
+            </form>
             @else
                 <div class="empty-state">
                     <div class="empty-icon">
@@ -585,7 +652,7 @@
     <script>
         // Add confirmation for delete actions
         document.addEventListener('DOMContentLoaded', function() {
-            const deleteForms = document.querySelectorAll('form[method="POST"]');
+            const deleteForms = document.querySelectorAll('form[method="POST"]:not(#bulkActionsForm)');
             deleteForms.forEach(form => {
                 form.addEventListener('submit', function(e) {
                     if (!confirm('Are you sure you want to delete this client?')) {
@@ -594,14 +661,73 @@
                 });
             });
 
-            // Sort button functionality
-            const sortButtons = document.querySelectorAll('.sort-btn');
-            sortButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    sortButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
+            // Bulk Actions logic
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const clientCheckboxes = document.querySelectorAll('.client-checkbox');
+            const bulkToolbar = document.getElementById('bulkActionsToolbar');
+            const selectedCount = document.getElementById('selectedCount');
+            const bulkForm = document.getElementById('bulkActionsForm');
+            const bulkRouteInput = document.getElementById('bulkRouteInput');
+
+            function updateBulkToolbar() {
+                const checkedCheckboxes = document.querySelectorAll('.client-checkbox:checked');
+                const count = checkedCheckboxes.length;
+                if (selectedCount) {
+                    selectedCount.textContent = count;
+                }
+
+                if (count > 0) {
+                    bulkToolbar.classList.remove('d-none');
+                    bulkToolbar.classList.add('d-flex');
+                } else {
+                    bulkToolbar.classList.remove('d-flex');
+                    bulkToolbar.classList.add('d-none');
+                }
+            }
+
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    clientCheckboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                    });
+                    updateBulkToolbar();
+                });
+            }
+
+            clientCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const allChecked = Array.from(clientCheckboxes).every(c => c.checked);
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = allChecked;
+                    }
+                    updateBulkToolbar();
                 });
             });
+
+            window.submitBulkAction = function(actionUrl) {
+                const checked = document.querySelectorAll('.client-checkbox:checked');
+                if (checked.length === 0) {
+                    alert('Please select at least one client.');
+                    return;
+                }
+                if (confirm(`Are you sure you want to approve the selected ${checked.length} client(s)?`)) {
+                    bulkForm.action = actionUrl;
+                    bulkForm.submit();
+                }
+            };
+
+            window.submitBulkAssign = function(routeName) {
+                const checked = document.querySelectorAll('.client-checkbox:checked');
+                if (checked.length === 0) {
+                    alert('Please select at least one client.');
+                    return;
+                }
+                if (confirm(`Assign selected ${checked.length} client(s) to route "${routeName}"?`)) {
+                    bulkRouteInput.value = routeName;
+                    bulkForm.action = '{{ route("contractor.clients.bulk-assign-route") }}';
+                    bulkForm.submit();
+                }
+            };
         });
     </script>
 @endsection

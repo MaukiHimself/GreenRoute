@@ -16,6 +16,7 @@ class ContractorRoute extends Model
         'district',
         'ward',
         'street',
+        'dumping_site',
         'description',
         'color',
         'is_active',

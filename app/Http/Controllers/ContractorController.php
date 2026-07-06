@@ -76,6 +76,10 @@ class ContractorController extends Controller
                 'new_payment_notifications' => PaymentSubmission::where('contractor_id', $contractorId)
                     ->whereIn('status', ['pending', 'pending_approval'])
                     ->count(),
+                'pending_clients' => Client::where('contractor_id', $contractorId)
+                    ->where('status', 'pending')
+                    ->where('self_registered', true)
+                    ->count(),
                 'completed_jobs' => Schedule::where('contractor_id', $contractorId)
                     ->where('status', 'completed')
                     ->count(),
@@ -281,6 +285,8 @@ class ContractorController extends Controller
              ->select('id', 'name', 'latitude', 'longitude', 'address', 'phone', 'city', 'route', 'category')
              ->get();
 
-         return view('contractor.clients-map', compact('clients'));
+         $dumpingSites = config('dumping_sites.sites', []);
+
+         return view('contractor.clients-map', compact('clients', 'dumpingSites'));
      }
 }

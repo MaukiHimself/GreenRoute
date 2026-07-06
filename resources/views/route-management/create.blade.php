@@ -124,7 +124,21 @@
                     <label class="form-label fw-bold">Description (Optional)</label>
                     <textarea name="description" class="form-control" rows="3" placeholder="Add notes about this route...">{{ old('description') }}</textarea>
                 </div>
-                
+
+                <!-- Dumping Site (final destination of the route) -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold"><i class="bi bi-trash3 me-1"></i>Dumping Site (Optional)</label>
+                    <select name="dumping_site" class="form-select">
+                        <option value="">— None (route ends at last client) —</option>
+                        @foreach(collect(config('dumping_sites.sites', []))->where('is_open', true) as $site)
+                            <option value="{{ $site['name'] }}" {{ old('dumping_site') === $site['name'] ? 'selected' : '' }}>
+                                {{ $site['name'] }} (open)
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Where the truck offloads. The optimised route ends here: your base → clients → dumping site.</small>
+                </div>
+
                 <!-- Site Location Assignment -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Route Site Location <span class="text-danger">*</span></label>

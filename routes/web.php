@@ -100,6 +100,10 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
             ->name('contractor.clients.geocode-bulk');
         Route::post('clients/{client}/geocode', [GeocodingController::class, 'geocodeClient'])
             ->name('contractor.clients.geocode');
+        Route::post('clients/bulk-approve', [ClientController::class, 'bulkApprove'])
+            ->name('contractor.clients.bulk-approve');
+        Route::post('clients/bulk-assign-route', [ClientController::class, 'bulkAssignRoute'])
+            ->name('contractor.clients.bulk-assign-route');
 
         Route::get('feedback', [ContractorFeedbackController::class, 'index'])->name('contractor.feedback.index');
         Route::get('feedback/{feedback}', [ContractorFeedbackController::class, 'show'])->name('contractor.feedback.show');
