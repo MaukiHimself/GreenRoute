@@ -55,10 +55,15 @@
                                     </td>
                                     <td class="text-muted">{{ $invoice->service_type }}</td>
                                     <td class="text-muted">{{ $invoice->invoice_date->format('M d, Y') }}</td>
-                                    <td class="fw-semibold">TZS {{ number_format($invoice->total_amount, 2) }}</td>
+                                    <td class="fw-semibold">
+                                        TZS {{ number_format($invoice->total_amount, 2) }}
+                                        @if($invoice->status === 'partially_paid' && $invoice->remaining_balance > 0)
+                                            <br><small class="text-warning">Remaining: TZS {{ number_format($invoice->remaining_balance, 2) }}</small>
+                                        @endif
+                                    </td>
                                     <td>
                                         @php $st=$invoice->status; @endphp
-                                        <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : 'bg-secondary')) }}">{{ ucfirst($st) }}</span>
+                                        <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : ($st==='partially_paid' ? 'bg-warning' : 'bg-secondary'))) }}">{{ ucfirst(str_replace('_', ' ', $st)) }}</span>
                                     </td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm" role="group">

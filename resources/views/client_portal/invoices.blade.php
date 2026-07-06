@@ -22,7 +22,8 @@
                                 <th>Invoice #</th>
                                 <th>Date</th>
                                 <th>Service</th>
-                                <th>Amount</th>
+                                <th>Total Amount</th>
+                                <th>Pending Amount</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
                             </tr>
@@ -34,6 +35,7 @@
                                     <td class="text-muted">{{ $invoice->invoice_date->format('M d, Y') }}</td>
                                     <td class="text-muted">{{ $invoice->service_type }}</td>
                                     <td class="fw-semibold">TZS {{ number_format($invoice->total_amount, 2) }}</td>
+                                    <td class="fw-semibold @if($invoice->remaining_balance > 0) text-warning @else text-success @endif">TZS {{ number_format($invoice->remaining_balance ?? 0, 2) }}</td>
                                     <td>
                                         @php $st=$invoice->status; @endphp
                                         <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : 'bg-secondary')) }}">{{ ucfirst($st) }}</span>
@@ -52,7 +54,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center text-muted p-4">No invoices found.</td></tr>
+                                <tr><td colspan="7" class="text-center text-muted p-4">No invoices found.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

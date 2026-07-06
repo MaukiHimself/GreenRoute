@@ -234,5 +234,36 @@
             </div>
         @endforelse
     </div>
+
+    <!-- Quick Templates -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Message Templates</h5>
+        </div>
+        <div class="card-body">
+            <h6 class="text-muted mb-3">English</h6>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Hello! This is a reminder about your upcoming waste collection. Please ensure your bins are accessible.')">Collection Reminder</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Your invoice is due soon. Please complete payment to avoid service interruption.')">Payment Reminder</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Thank you for your payment! We appreciate your prompt response.')">Thank You</button>
+            </div>
+            <h6 class="text-muted mb-3">Swahili (Kiswahili)</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-success" onclick="copyTemplate('Habari! Hii ni kumbusho kuhusu mkusanyiko wa taka unaofuata. Tafadhali hakikisha mabomba yako yanaweza kufikiwa.')">Kumbusho la Mkusanyiko</button>
+                <button class="btn btn-sm btn-outline-success" onclick="copyTemplate('Ankara yako inakaribia kuwa due. Tafadhali maliza malipo kuepuka kusitisha huduma.')">Kumbusho la Malipo</button>
+                <button class="btn btn-sm btn-outline-success" onclick="copyTemplate('Asante kwa malipo yako! Tunathamahia majibu yako ya haraka.')">Shukrani</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+function copyTemplate(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Template copied to clipboard! You can paste it when composing a message.');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+</script>
 @endsection

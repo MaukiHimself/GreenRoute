@@ -55,22 +55,22 @@
     <!-- Welcome Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm bg-gradient-primary" style="background: linear-gradient(135deg, #047857 0%, #087272 100%);">
                 <div class="card-body p-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h1 class="h3 mb-2 text-dark">Welcome, {{ Auth::user()->name }}!</h1>
-                            <p class="text-muted mb-0">Monitor and manage the entire GreenRoute waste management system.</p>
+                            <h1 class="h3 mb-2 text-white">Welcome, {{ Auth::user()->name }}!</h1>
+                            <p class="text-white-50 mb-0">Monitor and manage the entire GreenRoute waste management system.</p>
                         </div>
                         <div class="col-md-4 text-end">
                             <div class="d-flex justify-content-end">
                                 <div class="text-center me-4">
-                                    <div class="h4 mb-0 text-primary">{{ date('d') }}</div>
-                                    <small class="text-muted">{{ date('M Y') }}</small>
+                                    <div class="h4 mb-0 text-white">{{ date('d') }}</div>
+                                    <small class="text-white-50">{{ date('M Y') }}</small>
                                 </div>
                                 <div class="text-center">
-                                    <div class="h4 mb-0 text-success">{{ date('l') }}</div>
-                                    <small class="text-muted">{{ date('H:i A') }}</small>
+                                    <div class="h4 mb-0 text-white">{{ date('l') }}</div>
+                                    <small class="text-white-50">{{ date('H:i A') }}</small>
                                 </div>
                             </div>
         </div>
@@ -83,7 +83,7 @@
     <!-- System Statistics -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card stat-card border-0 shadow-sm h-100" style="border-left: 4px solid #047857;">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
@@ -92,7 +92,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="h4 mb-0 text-dark">{{ $contractorCount ?? 12 }}</div>
+                            <div class="h4 mb-0 text-dark">{{ $contractorsCount ?? 12 }}</div>
                             <div class="text-muted small">Contractors</div>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card stat-card border-0 shadow-sm h-100" style="border-left: 4px solid #10b981;">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
@@ -109,7 +109,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="h4 mb-0 text-dark">{{ $clientCount ?? 48 }}</div>
+                            <div class="h4 mb-0 text-dark">{{ $clientsCount ?? 48 }}</div>
                             <div class="text-muted small">Clients</div>
                         </div>
                     </div>
@@ -117,7 +117,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card stat-card border-0 shadow-sm h-100" style="border-left: 4px solid #f59e0b;">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
@@ -126,7 +126,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="h4 mb-0 text-dark">{{ $activeRoutes ?? 24 }}</div>
+                            <div class="h4 mb-0 text-dark">{{ $activeRoutesCount ?? 24 }}</div>
                             <div class="text-muted small">Active Routes</div>
                         </div>
                     </div>
@@ -134,7 +134,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card stat-card border-0 shadow-sm h-100" style="border-left: 4px solid #06b6d4;">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
@@ -143,8 +143,8 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="h4 mb-0 text-dark">$12,450</div>
-                            <div class="text-muted small">Total Revenue</div>
+                            <div class="h4 mb-0 text-dark">{{ $pendingVerifications ?? 3 }}</div>
+                            <div class="text-muted small">Pending Verifications</div>
                         </div>
                     </div>
                             </div>
@@ -163,266 +163,55 @@
                             <i class="bi bi-shield-check me-2 text-primary"></i>System Management
                         </h5>
                         <div class="btn-group" role="group" aria-label="Admin dashboard tabs">
-                            <button type="button" class="btn btn-primary active" id="management-tab" data-bs-toggle="tab" data-bs-target="#management" role="tab">
-                                <i class="bi bi-gear me-1"></i>Management
-                            </button>
-                            <button type="button" class="btn btn-outline-primary" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" role="tab">
-                                <i class="bi bi-people me-1"></i>Users
-                            </button>
-                            <button type="button" class="btn btn-outline-primary" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" role="tab">
-                                <i class="bi bi-graph-up me-1"></i>Analytics
-                            </button>
+                            <a href="{{ route('admin.verification') }}" class="btn btn-primary">
+                                <i class="bi bi-shield-check me-1"></i>Verification
+                            </a>
+                            <a href="{{ route('admin.clients') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-people me-1"></i>Clients
+                            </a>
+                            <a href="{{ route('admin.schedules') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-calendar3 me-1"></i>Schedules
+                            </a>
+                            <a href="{{ route('admin.users') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-person-gear me-1"></i>Users
+                            </a>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="tab-content" id="adminTabContent">
-                        <!-- Management Tab -->
-                        <div class="tab-pane fade show active" id="management" role="tabpanel">
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
+                    @if(isset($pendingTasks) && count($pendingTasks) > 0)
+                        <h6 class="mb-3 text-muted">Pending Tasks</h6>
+                        <div class="row">
+                            @foreach($pendingTasks as $task)
+                                <div class="col-md-6 mb-3">
                                     <div class="card border-0 border-start border-warning border-3 h-100">
                                         <div class="card-body p-4">
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
-                                                    <i class="bi bi-shield-check text-warning"></i>
+                                                    <i class="bi bi-{{ $task['icon'] ?? 'exclamation-circle' }} text-warning"></i>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-1">Contractor Verification</h6>
-                                                    <small class="text-muted">3 pending approvals</small>
+                                                    <h6 class="mb-1">{{ $task['title'] }}</h6>
+                                                    <small class="text-muted">{{ $task['count'] }} pending</small>
                                                 </div>
                                             </div>
-                                            <p class="text-muted small mb-3">Review and approve new contractor registrations</p>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-warning btn-sm">
-                                                    <i class="bi bi-eye me-1"></i>Review All
-                                                </button>
-                                                <button class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-clock me-1"></i>Schedule
-                                                </button>
-                                            </div>
+                                            <p class="text-muted small mb-3">{{ $task['description'] }}</p>
+                                            <a href="{{ $task['link'] }}" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card border-0 border-start border-success border-3 h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                                    <i class="bi bi-person-gear text-success"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-1">User Management</h6>
-                                                    <small class="text-muted">Manage user roles</small>
-                                                </div>
-                                            </div>
-                                            <p class="text-muted small mb-3">Update permissions and manage user access</p>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-success btn-sm">
-                                                    <i class="bi bi-gear me-1"></i>Manage
-                                                </button>
-                                                <button class="btn btn-outline-success btn-sm">
-                                                    <i class="bi bi-plus me-1"></i>Add User
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card border-0 border-start border-info border-3 h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
-                                                    <i class="bi bi-graph-up text-info"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-1">Analytics & Reports</h6>
-                                                    <small class="text-muted">System performance</small>
-                                                </div>
-                                            </div>
-                                            <p class="text-muted small mb-3">View detailed analytics and generate reports</p>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-info btn-sm">
-                                                    <i class="bi bi-bar-chart me-1"></i>View Reports
-                                                </button>
-                                                <button class="btn btn-outline-info btn-sm">
-                                                    <i class="bi bi-download me-1"></i>Export
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card border-0 border-start border-primary border-3 h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                                    <i class="bi bi-gear text-primary"></i>
-                                                </div>
-                                <div>
-                                                    <h6 class="mb-1">System Settings</h6>
-                                                    <small class="text-muted">Configure platform</small>
-                                                </div>
-                                            </div>
-                                            <p class="text-muted small mb-3">Update system configuration and preferences</p>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-sliders me-1"></i>Configure
-                                                </button>
-                                                <button class="btn btn-outline-primary btn-sm">
-                                                    <i class="bi bi-shield me-1"></i>Security
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                            <h6 class="mt-3 text-muted">All caught up!</h6>
+                            <p class="text-muted small">No pending tasks at the moment.</p>
+                        </div>
+                    @endif
 
-                        <!-- Users Tab -->
-                        <div class="tab-pane fade" id="users" role="tabpanel">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0 text-muted">User Management</h6>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-primary btn-sm active">All Users</button>
-                                    <button type="button" class="btn btn-outline-success btn-sm">Contractors</button>
-                                    <button type="button" class="btn btn-outline-info btn-sm">Clients</button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Type</th>
-                                            <th>Status</th>
-                                            <th>Last Active</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                                        <i class="bi bi-person text-primary"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">John Smith</div>
-                                                        <small class="text-muted">john@example.com</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="badge bg-success">Contractor</span></td>
-                                            <td><span class="badge bg-success">Active</span></td>
-                                            <td><small class="text-muted">2 hours ago</small></td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button class="btn btn-sm btn-outline-primary" title="View">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger" title="Suspend">
-                                                        <i class="bi bi-pause"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
-                                                        <i class="bi bi-person text-info"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">Sarah Johnson</div>
-                                                        <small class="text-muted">sarah@example.com</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="badge bg-info">Client</span></td>
-                                            <td><span class="badge bg-success">Active</span></td>
-                                            <td><small class="text-muted">1 day ago</small></td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button class="btn btn-sm btn-outline-primary" title="View">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger" title="Suspend">
-                                                        <i class="bi bi-pause"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Analytics Tab -->
-                        <div class="tab-pane fade" id="analytics" role="tabpanel">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card border-0 bg-primary bg-opacity-5">
-                                        <div class="card-body p-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1 text-primary">System Health</h6>
-                                                    <div class="h4 mb-0 text-primary">98%</div>
-                                                </div>
-                                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                                                    <i class="bi bi-heart-pulse text-primary"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="card border-0 bg-success bg-opacity-5">
-                                        <div class="card-body p-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                                    <h6 class="mb-1 text-success">Active Users</h6>
-                                                    <div class="h4 mb-0 text-success">156</div>
-                                                </div>
-                                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                                                    <i class="bi bi-people text-success"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <h6 class="mb-3 text-muted">Performance Metrics</h6>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="text-center p-3 border rounded">
-                                            <div class="h5 mb-1 text-primary">24</div>
-                                            <small class="text-muted">Total Routes</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="text-center p-3 border rounded">
-                                            <div class="h5 mb-1 text-success">89%</div>
-                                            <small class="text-muted">Success Rate</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="text-center p-3 border rounded">
-                                            <div class="h5 mb-1 text-info">$12,450</div>
-                                            <small class="text-muted">Revenue</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

@@ -280,12 +280,12 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="action-btn" onclick="viewInvoice({{ $invoice->id }})" title="View">
+                                    <a href="{{ route('invoices.show', $invoice->id) }}" class="action-btn" target="_blank" title="View">
                                         <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="action-btn" onclick="downloadInvoice({{ $invoice->id }})" title="Download">
+                                    </a>
+                                    <a href="{{ route('invoices.pdf', $invoice->id) }}" class="action-btn" target="_blank" title="Download PDF">
                                         <i class="bi bi-download"></i>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

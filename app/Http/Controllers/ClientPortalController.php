@@ -121,7 +121,7 @@ class ClientPortalController extends Controller
 
             // Payment statistics from contractor
             $totalPaid = $paidInvoices->sum('total_amount');
-            $totalPending = $pendingInvoices->sum('total_amount');
+            $totalPending = $pendingInvoices->sum('remaining_balance');
             $recentActivities = $this->buildRecentActivities($client, $contractorId);
         } else {
             // No contractor assigned or no client data

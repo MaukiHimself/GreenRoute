@@ -187,7 +187,7 @@
                         <i class="fas fa-edit mr-2"></i>Edit Invoice
                     </a>
                     @if($invoice->client)
-                        <a href="{{ route('clients.show', $invoice->client) }}" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200 block text-center">
+                        <a href="{{ route('contractor.clients.show', $invoice->client) }}" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200 block text-center">
                             <i class="fas fa-user mr-2"></i>View Client
                         </a>
                     @endif

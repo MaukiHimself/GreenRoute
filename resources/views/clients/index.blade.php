@@ -434,6 +434,9 @@
                             <i class="bi bi-person-check me-1"></i>{{ $pendingCount }} Pending Approval{{ $pendingCount > 1 ? 's' : '' }}
                         </a>
                     @endif
+                    <a href="{{ route('contractor.clients.map') }}" class="btn btn-outline-primary btn-sm mb-2 d-block">
+                        <i class="bi bi-geo-alt me-1"></i> View Map
+                    </a>
                     <a href="{{ route('contractor.clients.create') }}" class="btn btn-primary">
                         <i class="bi bi-person-plus me-1"></i> Add Client
                     </a>

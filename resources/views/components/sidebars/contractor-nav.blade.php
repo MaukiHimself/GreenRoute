@@ -96,6 +96,13 @@
 
     <div class="portal-sidebar__section-title">Communication</div>
 
+    <a href="{{ route('contractor.sms.campaign') }}"
+       class="portal-sidebar__link {{ request()->routeIs('contractor.sms.*') ? 'active' : '' }}"
+       data-tooltip="SMS Campaign">
+        <i class="bi bi-megaphone"></i>
+        <span class="portal-sidebar__label">SMS Campaign</span>
+    </a>
+
     <a href="{{ route('sms.inbox') }}"
        class="portal-sidebar__link {{ request()->routeIs('sms.*') ? 'active' : '' }}"
        data-tooltip="Chats">

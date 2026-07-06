@@ -270,6 +270,12 @@ Route::prefix('admin')->group(function () {
 Route::post('/location/validate-public', [App\Http\Controllers\LocationController::class, 'validateLocationAccuracy'])->name('location.validate.public');
 Route::post('/location/reverse-geocode', [App\Http\Controllers\LocationController::class, 'reverseGeocode'])->name('location.reverse.geocode');
 
+// Public location hierarchy API (used on signup page — no auth required)
+Route::get('/location/public/regions',   [App\Http\Controllers\LocationController::class, 'getRegions'])->name('location.public.regions');
+Route::get('/location/public/districts', [App\Http\Controllers\LocationController::class, 'getDistricts'])->name('location.public.districts');
+Route::get('/location/public/wards',     [App\Http\Controllers\LocationController::class, 'getWards'])->name('location.public.wards');
+Route::get('/location/public/streets',   [App\Http\Controllers\LocationController::class, 'getStreets'])->name('location.public.streets');
+
 // Location and mapping routes
 Route::middleware(['auth'])->group(function () {
     Route::post('/location/update', [App\Http\Controllers\LocationController::class, 'updateContractorLocation'])->name('location.update');
@@ -310,10 +316,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::delete('/users/{user}', [App\Http\Controllers\AdminController::class, 'deleteUser'])->name('admin.users.delete');
         Route::get('/contractors/locations', [App\Http\Controllers\AdminController::class, 'getContractorLocations'])->name('admin.contractors.locations');
 
-        // SMS Campaign routes
-        Route::get('/sms-campaign', [App\Http\Controllers\AdminController::class, 'smsCampaign'])->name('admin.sms.campaign');
-        Route::post('/sms-campaign/send', [App\Http\Controllers\AdminController::class, 'sendSmsCampaign'])->name('admin.sms.send');
-
         // Billing Rates Management routes
         Route::get('/billing-rates', [App\Http\Controllers\AdminController::class, 'billingRates'])->name('admin.billing.rates');
         Route::get('/billing-rate-changes', [App\Http\Controllers\AdminController::class, 'billingRateChanges'])->name('admin.billing.rate-changes');
@@ -337,8 +339,13 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
       Route::get('/recent-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPayments'])->name('contractor.recent-payments');
       Route::get('/upcoming-schedules', [App\Http\Controllers\ContractorController::class, 'getUpcomingSchedules'])->name('contractor.upcoming-schedules');
       Route::get('/recent-pending-payments', [App\Http\Controllers\ContractorController::class, 'getRecentPendingPayments'])->name('contractor.recent-pending-payments');
+      Route::get('/clients/map', [App\Http\Controllers\ContractorController::class, 'clientsMap'])->name('contractor.clients.map');
     Route::get('/clients/{client}', [ClientController::class, 'show']);
     Route::get('/clients/{client}/edit', [ClientController::class, 'edit']);
+    
+    // SMS Campaign routes
+    Route::get('/sms-campaign', [App\Http\Controllers\ContractorController::class, 'smsCampaign'])->name('contractor.sms.campaign');
+    Route::post('/sms-campaign/send', [App\Http\Controllers\ContractorController::class, 'sendSmsCampaign'])->name('contractor.sms.send');
 });
 
     // Billing routes

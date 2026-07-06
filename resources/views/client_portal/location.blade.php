@@ -21,7 +21,7 @@
         <div class="col-lg-7">
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="bi bi-geo-alt-fill me-2"></i>Register Your GPS Location</h2>
+                    <h2 class="section-title"><i class="bi bi-geo-alt-fill me-2"></i>Your Location</h2>
                 </div>
 
                 @if(session('success'))
@@ -31,17 +31,10 @@
                     </div>
                 @endif
 
-                <div class="alert alert-info mb-4">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Why register your GPS location?</strong>
-                    <p class="mb-0 mt-1">Providing your exact GPS coordinates helps your contractor plan efficient pickup routes and schedule visits at the right time. This is optional but highly recommended.</p>
-                </div>
-
                 @if($client->route)
-                    <div class="alert alert-success mb-4">
+                    <div class="alert alert-success mb-3">
                         <i class="bi bi-signpost-split me-2"></i>
-                        <strong>You are on route: {{ $client->route }}</strong>
-                        <p class="mb-0 mt-1">Your location will be shown alongside other clients on your route below.</p>
+                        <strong>Route: {{ $client->route }}</strong>
                     </div>
                 @endif
 
@@ -66,14 +59,16 @@
                     </div>
 
                     <div class="mb-4">
-                        <button type="button" id="watchLocation" class="btn btn-primary">
-                            <i class="bi bi-crosshair me-2"></i>Detect My GPS Coordinates
+                        <button type="button" id="watchLocation" class="btn btn-primary btn-lg">
+                            <i class="bi bi-crosshair me-2"></i>Detect My Location
                         </button>
-                        <span class="text-muted small ms-2">Click to capture your current location</span>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="resetLocation()">
+                            <i class="bi bi-x-circle me-2"></i>Reset
+                        </button>
                     </div>
 
-                    <div id="locationStatus" class="alert alert-info py-2 mb-3 small">
-                        📍 Click "Detect My GPS Coordinates" to capture your location.
+                    <div id="locationStatus" class="alert alert-info py-3 mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Click "Detect My Location" to capture your GPS coordinates.
                     </div>
 
                     <div class="mb-4">
@@ -93,15 +88,10 @@
             @if($routeClients->count() > 0)
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="bi bi-signpost-split me-2"></i>Your Route: {{ $client->route }}</h2>
-                </div>
-                <div class="alert alert-info mb-3">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Route Overview</strong>
-                    <p class="mb-0 mt-1">There are <strong>{{ $routeClients->count() }}</strong> clients on your route. The map shows all client locations for route planning.</p>
+                    <h2 class="section-title"><i class="bi bi-signpost-split me-2"></i>Route Clients ({{ $routeClients->count() }})</h2>
                 </div>
                 <div class="mb-3">
-                    <strong>Route Distance:</strong>
+                    <strong>Distance:</strong>
                     <span id="routeDistance" class="badge bg-primary ms-2">Calculating...</span>
                 </div>
                 <div class="list-group">
@@ -114,9 +104,6 @@
                                     <span class="badge bg-success ms-2">You</span>
                                 @endif
                                 <div class="small text-muted">{{ $rc->address }}</div>
-                                @if($rc->phone)
-                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ $rc->phone }}</div>
-                                @endif
                             </div>
                             @if($rc->latitude && $rc->longitude)
                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="panToClient({{ $rc->latitude }}, {{ $rc->longitude }})">
@@ -132,23 +119,10 @@
 
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="bi bi-lightbulb me-2"></i>Benefits</h2>
-                </div>
-                <ul class="list-unstyled">
-                    <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Optimized pickup routes for faster service</li>
-                    <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Accurate scheduling based on your location</li>
-                    <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Reduced wait times for collection</li>
-                    <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Better route planning for your contractor</li>
-                    <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Lower operational costs and emissions</li>
-                </ul>
-            </div>
-
-            <div class="content-section">
-                <div class="section-header">
                     <h2 class="section-title"><i class="bi bi-shield-check me-2"></i>Privacy</h2>
                 </div>
                 <p class="text-muted small mb-0">
-                    Your GPS coordinates are stored securely and are only visible to your assigned waste contractor for route planning purposes. We do not share your location with third parties.
+                    Your GPS coordinates are stored securely and are only visible to your assigned waste contractor for route planning. We do not share your location with third parties.
                 </p>
             </div>
         </div>
@@ -179,9 +153,9 @@
                     draggable: true,
                     title: 'Your Location'
                 }).addTo(mapCtx.map);
-                document.getElementById('locationStatus').innerHTML = `📍 Existing location loaded: ${defaultLat.toFixed(6)}, ${defaultLng.toFixed(6)}. Drag marker to adjust or click "Detect My GPS Coordinates".`;
+                document.getElementById('locationStatus').innerHTML = `<i class="bi bi-check-circle me-2"></i>Location loaded: ${defaultLat.toFixed(6)}, ${defaultLng.toFixed(6)}. Drag marker to adjust or click "Detect My Location".`;
             } else {
-                document.getElementById('locationStatus').innerHTML = '📍 No location set. Click "Detect My GPS Coordinates" or drag the marker to your exact location.';
+                document.getElementById('locationStatus').innerHTML = '<i class="bi bi-info-circle me-2"></i>No location set. Click "Detect My Location" or click on the map to set your location.';
             }
 
             mapCtx.map.on('click', function (event) {
@@ -276,7 +250,17 @@
                 });
             }
             if (mapCtx) mapCtx.map.setView([lat, lng], 16);
-            document.getElementById('locationStatus').innerHTML = `📍 Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('locationStatus').innerHTML = `<i class="bi bi-check-circle me-2"></i>Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
+
+        function resetLocation() {
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+            if (locationMarker) {
+                mapCtx.map.removeLayer(locationMarker);
+                locationMarker = null;
+            }
+            document.getElementById('locationStatus').innerHTML = '<i class="bi bi-info-circle me-2"></i>Location reset. Click "Detect My Location" or click on the map to set your location.';
         }
 
         function panToClient(lat, lng) {
@@ -320,8 +304,8 @@
 
             locationAttempts = 0;
             const statusEl = document.getElementById('locationStatus');
-            statusEl.innerHTML = '🎯 Detecting your GPS location... Please allow access if prompted.';
-            statusEl.className = 'alert alert-warning py-2 mb-3 small';
+            statusEl.innerHTML = '<i class="bi bi-crosshair me-2"></i>Detecting your GPS location... Please allow access if prompted.';
+            statusEl.className = 'alert alert-warning py-3 mb-3';
 
             let bestAccuracy = Infinity;
             let bestPosition = null;
@@ -329,8 +313,8 @@
             const targetAccuracy = 20;
 
             if (!navigator.geolocation) {
-                statusEl.innerHTML = '❌ GPS not supported by this browser.';
-                statusEl.className = 'alert alert-danger py-2 mb-3 small';
+                statusEl.innerHTML = '<i class="bi bi-x-circle me-2"></i>GPS not supported by this browser. Please try a different browser.';
+                statusEl.className = 'alert alert-danger py-3 mb-3';
                 return;
             }
 
@@ -341,7 +325,7 @@
                     const lng = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
-                    statusEl.innerHTML = `📍 Detecting (${locationAttempts}/${maxAttempts}) — Accuracy: ${Math.round(accuracy)}m`;
+                    statusEl.innerHTML = `<i class="bi bi-crosshair me-2"></i>Detecting (${locationAttempts}/${maxAttempts}) — Accuracy: ±${Math.round(accuracy)}m`;
 
                     if (accuracy < bestAccuracy) {
                         bestAccuracy = accuracy;
@@ -353,8 +337,8 @@
                         navigator.geolocation.clearWatch(watchId);
                         watchId = null;
                         const finalAccuracy = bestPosition ? Math.round(bestPosition.coords.accuracy) : Math.round(accuracy);
-                        statusEl.className = 'alert alert-success py-2 mb-3 small';
-                        statusEl.innerHTML = `✅ GPS captured! Accuracy: ±${finalAccuracy}m. Click "Save My Location" to confirm.`;
+                        statusEl.className = 'alert alert-success py-3 mb-3';
+                        statusEl.innerHTML = `<i class="bi bi-check-circle me-2"></i>GPS captured! Accuracy: ±${finalAccuracy}m. Click "Save My Location" to confirm.`;
 
                         if (bestPosition && bestPosition !== position) {
                             setLocation(bestPosition.coords.latitude, bestPosition.coords.longitude);
@@ -364,13 +348,17 @@
                 function (error) {
                     let msg = 'Could not acquire coordinates.';
                     if (error.code === error.PERMISSION_DENIED) {
-                        msg = 'Permission denied. Please enable location access in your browser settings.';
+                        msg = 'Permission denied. Please enable location access in your browser settings and try again.';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        msg = 'Location information unavailable. Please try again or click on the map to set your location manually.';
+                    } else if (error.code === error.TIMEOUT) {
+                        msg = 'Location request timed out. Please try again or click on the map to set your location manually.';
                     }
-                    statusEl.className = 'alert alert-danger py-2 mb-3 small';
-                    statusEl.innerHTML = `❌ GPS Error: ${msg}`;
+                    statusEl.className = 'alert alert-danger py-3 mb-3';
+                    statusEl.innerHTML = `<i class="bi bi-x-circle me-2"></i>${msg}`;
                     if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
                 },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
             );
         }
     </script>
