@@ -487,7 +487,14 @@ class ClientPortalController extends Controller
 
         $payments = $query->orderByDesc('paid_at')->paginate(15);
 
-        return view('client_portal.payments', compact('client', 'payments'));
+        // Every payment submission the client has made, so they can see each
+        // transaction's status (pending / approved / rejected + reason).
+        $submissions = \App\Models\PaymentSubmission::where('client_id', $client->id)
+            ->with('invoice')
+            ->orderByDesc('submitted_at')
+            ->get();
+
+        return view('client_portal.payments', compact('client', 'payments', 'submissions'));
     }
 
     public function feedback()

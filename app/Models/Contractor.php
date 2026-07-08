@@ -27,12 +27,19 @@ class Contractor extends Model
         'registration_number',
         'client_registration_number',
         'vodacom_mpesa_lipa_no',
+        'vodacom_mpesa_lipa_name',
         'airtel_money_lipa_no',
+        'airtel_money_lipa_name',
         'halopesa_lipa_no',
+        'halopesa_lipa_name',
         'mixx_by_yas_lipa_no',
+        'mixx_by_yas_lipa_name',
         'crdb_bank_lipa_no',
+        'crdb_bank_lipa_name',
         'nmb_bank_lipa_no',
-        'nbc_bank_lipa_no'
+        'nmb_bank_lipa_name',
+        'nbc_bank_lipa_no',
+        'nbc_bank_lipa_name'
     ];
 
     public function user(): BelongsTo
@@ -153,7 +160,26 @@ class Contractor extends Model
     }
 
     /**
-     * Get all payment methods with their Lipa Nos
+     * Get a payment method's Lipa Name by key
+     */
+    public function getLipaName(string $paymentMethod): ?string
+    {
+        $lipaNameColumn = match($paymentMethod) {
+            'vodacom_mpesa' => 'vodacom_mpesa_lipa_name',
+            'airtel_money' => 'airtel_money_lipa_name',
+            'halopesa' => 'halopesa_lipa_name',
+            'mixx_by_yas' => 'mixx_by_yas_lipa_name',
+            'crdb_bank' => 'crdb_bank_lipa_name',
+            'nmb_bank' => 'nmb_bank_lipa_name',
+            'nbc_bank' => 'nbc_bank_lipa_name',
+            default => null,
+        };
+
+        return $lipaNameColumn ? $this->$lipaNameColumn : null;
+    }
+
+    /**
+     * Get all payment methods with their Lipa Nos and Names
      */
     public function getPaymentMethods(): array
     {
@@ -161,30 +187,37 @@ class Contractor extends Model
             'vodacom_mpesa' => [
                 'name' => 'Vodacom M-Pesa',
                 'lipa_no' => $this->vodacom_mpesa_lipa_no,
+                'lipa_name' => $this->vodacom_mpesa_lipa_name,
             ],
             'airtel_money' => [
                 'name' => 'Airtel Money',
                 'lipa_no' => $this->airtel_money_lipa_no,
+                'lipa_name' => $this->airtel_money_lipa_name,
             ],
             'halopesa' => [
                 'name' => 'Halopesa',
                 'lipa_no' => $this->halopesa_lipa_no,
+                'lipa_name' => $this->halopesa_lipa_name,
             ],
             'mixx_by_yas' => [
                 'name' => 'Mixx by Yas (Tigo Pesa)',
                 'lipa_no' => $this->mixx_by_yas_lipa_no,
+                'lipa_name' => $this->mixx_by_yas_lipa_name,
             ],
             'crdb_bank' => [
                 'name' => 'CRDB Bank',
                 'lipa_no' => $this->crdb_bank_lipa_no,
+                'lipa_name' => $this->crdb_bank_lipa_name,
             ],
             'nmb_bank' => [
                 'name' => 'NMB Bank',
                 'lipa_no' => $this->nmb_bank_lipa_no,
+                'lipa_name' => $this->nmb_bank_lipa_name,
             ],
             'nbc_bank' => [
                 'name' => 'NBC Bank',
                 'lipa_no' => $this->nbc_bank_lipa_no,
+                'lipa_name' => $this->nbc_bank_lipa_name,
             ],
         ];
     }

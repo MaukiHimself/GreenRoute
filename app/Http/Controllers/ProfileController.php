@@ -39,12 +39,19 @@ class ProfileController extends Controller
         $validated = $request->validated();
         $paymentFields = [
             'vodacom_mpesa_lipa_no',
+            'vodacom_mpesa_lipa_name',
             'airtel_money_lipa_no',
+            'airtel_money_lipa_name',
             'halopesa_lipa_no',
+            'halopesa_lipa_name',
             'mixx_by_yas_lipa_no',
+            'mixx_by_yas_lipa_name',
             'crdb_bank_lipa_no',
+            'crdb_bank_lipa_name',
             'nmb_bank_lipa_no',
+            'nmb_bank_lipa_name',
             'nbc_bank_lipa_no',
+            'nbc_bank_lipa_name',
         ];
 
         $request->user()->fill(collect($validated)->except($paymentFields)->all());

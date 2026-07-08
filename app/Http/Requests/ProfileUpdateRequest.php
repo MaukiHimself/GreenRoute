@@ -26,12 +26,19 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'vodacom_mpesa_lipa_no' => ['nullable', 'string', 'max:255'],
+            'vodacom_mpesa_lipa_name' => ['nullable', 'string', 'max:255'],
             'airtel_money_lipa_no' => ['nullable', 'string', 'max:255'],
+            'airtel_money_lipa_name' => ['nullable', 'string', 'max:255'],
             'halopesa_lipa_no' => ['nullable', 'string', 'max:255'],
+            'halopesa_lipa_name' => ['nullable', 'string', 'max:255'],
             'mixx_by_yas_lipa_no' => ['nullable', 'string', 'max:255'],
+            'mixx_by_yas_lipa_name' => ['nullable', 'string', 'max:255'],
             'crdb_bank_lipa_no' => ['nullable', 'string', 'max:255'],
+            'crdb_bank_lipa_name' => ['nullable', 'string', 'max:255'],
             'nmb_bank_lipa_no' => ['nullable', 'string', 'max:255'],
+            'nmb_bank_lipa_name' => ['nullable', 'string', 'max:255'],
             'nbc_bank_lipa_no' => ['nullable', 'string', 'max:255'],
+            'nbc_bank_lipa_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

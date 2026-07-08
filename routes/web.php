@@ -44,6 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'open'])
         ->name('notifications.open');
 
+    // Payment receipt download reachable by clients (controller authorizes both
+    // the owning client and contractor).
+    Route::get('payment-receipt/{submission}/download', [\App\Http\Controllers\ContractorPaymentApprovalController::class, 'downloadReceipt'])
+        ->name('payment-receipt.download');
+
     Route::prefix('dashboard/client')->group(function () {
         Route::get('/', [ClientPortalController::class, 'dashboard'])->name('client.dashboard');
         Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');

@@ -8,13 +8,13 @@
     @php
         $contractor = $user->contractor;
         $paymentMethods = [
-            'crdb_bank_lipa_no' => ['name' => 'CRDB Bank', 'logo' => 'crdb.png'],
-            'nbc_bank_lipa_no' => ['name' => 'NBC Bank', 'logo' => 'nbc.png'],
-            'nmb_bank_lipa_no' => ['name' => 'NMB Bank', 'logo' => 'nmb.png'],
-            'vodacom_mpesa_lipa_no' => ['name' => 'Vodacom M-Pesa', 'logo' => 'mpesa.png'],
-            'halopesa_lipa_no' => ['name' => 'Halopesa', 'logo' => 'halopesa.png'],
-            'airtel_money_lipa_no' => ['name' => 'Airtel Money', 'logo' => 'airtel_money.png'],
-            'mixx_by_yas_lipa_no' => ['name' => 'Mixx by Yas', 'logo' => 'mixx_by_yas.png'],
+            'crdb_bank_lipa_no' => ['name' => 'CRDB Bank', 'logo' => 'crdb.png', 'name_field' => 'crdb_bank_lipa_name'],
+            'nbc_bank_lipa_no' => ['name' => 'NBC Bank', 'logo' => 'nbc.png', 'name_field' => 'nbc_bank_lipa_name'],
+            'nmb_bank_lipa_no' => ['name' => 'NMB Bank', 'logo' => 'nmb.png', 'name_field' => 'nmb_bank_lipa_name'],
+            'vodacom_mpesa_lipa_no' => ['name' => 'Vodacom M-Pesa', 'logo' => 'mpesa.png', 'name_field' => 'vodacom_mpesa_lipa_name'],
+            'halopesa_lipa_no' => ['name' => 'Halopesa', 'logo' => 'halopesa.png', 'name_field' => 'halopesa_lipa_name'],
+            'airtel_money_lipa_no' => ['name' => 'Airtel Money', 'logo' => 'airtel_money.png', 'name_field' => 'airtel_money_lipa_name'],
+            'mixx_by_yas_lipa_no' => ['name' => 'Mixx by Yas', 'logo' => 'mixx_by_yas.png', 'name_field' => 'mixx_by_yas_lipa_name'],
         ];
     @endphp
 
@@ -172,15 +172,15 @@
                             <h5 class="mb-0"><i class="bi bi-credit-card-2-front me-2"></i>Lipa No Configuration</h5>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted mb-3">Add the Lipa Namba clients should use for each payment gateway.</p>
+                            <p class="text-muted mb-3">Add the Lipa Namba and display name clients will see when paying for each payment gateway.</p>
                             <form method="post" action="{{ route('profile.update') }}">
                                 @csrf
                                 @method('patch')
                                 <div class="row g-3">
                                     @foreach ($paymentMethods as $field => $method)
                                         <div class="col-md-6">
-                                            <label for="{{ $field }}" class="form-label">{{ $method['name'] }} Lipa No</label>
-                                            <div class="input-group">
+                                            <label for="{{ $field }}" class="form-label fw-bold">{{ $method['name'] }} Lipa No</label>
+                                            <div class="input-group mb-2">
                                                 <span class="input-group-text bg-white">
                                                     <img src="{{ asset('assets/images/payments/' . $method['logo']) }}" alt="{{ $method['name'] }}" style="width: 42px; height: 30px; object-fit: contain;">
                                                 </span>
@@ -195,6 +195,17 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <label for="{{ $method['name_field'] }}" class="form-label small text-muted">Display Name (what clients see)</label>
+                                            <input
+                                                id="{{ $method['name_field'] }}"
+                                                name="{{ $method['name_field'] }}"
+                                                type="text"
+                                                value="{{ old($method['name_field'], $contractor?->{$method['name_field']}) }}"
+                                                class="form-control form-control-sm @error($method['name_field']) is-invalid @enderror"
+                                                placeholder="e.g., John Doe Waste Services">
+                                            @error($method['name_field'])
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     @endforeach
                                 </div>

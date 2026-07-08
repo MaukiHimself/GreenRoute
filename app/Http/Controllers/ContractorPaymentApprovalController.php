@@ -49,9 +49,24 @@ class ContractorPaymentApprovalController extends Controller
             ->orderBy('submitted_at', 'desc')
             ->get();
 
+        // History so the contractor can review already-processed transactions.
+        $approved = PaymentSubmission::where('contractor_id', $contractor->id)
+            ->where('status', 'approved')
+            ->with(['invoice', 'client'])
+            ->orderByDesc('verified_at')
+            ->get();
+
+        $rejected = PaymentSubmission::where('contractor_id', $contractor->id)
+            ->where('status', 'rejected')
+            ->with(['invoice', 'client'])
+            ->orderByDesc('rejected_at')
+            ->get();
+
         return view('contractor.pending-payment-approvals', [
             'submissions' => $submissions,
-            'pendingCount' => $submissions->count()
+            'pendingCount' => $submissions->count(),
+            'approved' => $approved,
+            'rejected' => $rejected,
         ]);
     }
 

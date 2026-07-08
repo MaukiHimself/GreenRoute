@@ -55,6 +55,89 @@
         <li class="breadcrumb-item active">Payments</li>
     </x-slot>
 
+    {{-- My Payment Transactions: every submission the client has made with its
+         approval status, so rejected/pending payments are visible too. --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>My Payment Transactions</h5>
+                    <span class="badge bg-secondary">{{ $submissions->count() }} Total</span>
+                </div>
+                <div class="card-body">
+                    @if($submissions->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Invoice #</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($submissions as $submission)
+                                        <tr>
+                                            <td>{{ $submission->submitted_at ? $submission->submitted_at->format('M d, Y') : 'N/A' }}</td>
+                                            <td><strong>{{ $submission->invoice->invoice_number ?? 'N/A' }}</strong></td>
+                                            <td class="fw-semibold">TZS {{ number_format($submission->amount_submitted, 2) }}</td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    {{ ucwords(str_replace('_', ' ', $submission->payment_method)) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @switch($submission->status)
+                                                    @case('approved')
+                                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                                        @break
+                                                    @case('rejected')
+                                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                                @endswitch
+                                            </td>
+                                            <td>
+                                                @if($submission->status === 'approved')
+                                                    @if($submission->receipt_path)
+                                                        <a href="{{ route('payment-receipt.download', $submission) }}"
+                                                           class="btn btn-sm btn-outline-success" target="_blank">
+                                                            <i class="bi bi-download"></i> Receipt
+                                                            @if($submission->receipt_number)
+                                                                <span class="text-muted small">#{{ $submission->receipt_number }}</span>
+                                                            @endif
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted small">Approved</span>
+                                                    @endif
+                                                @elseif($submission->status === 'rejected')
+                                                    <span class="text-danger small">
+                                                        <i class="bi bi-info-circle me-1"></i>{{ $submission->rejection_reason ?? 'No reason provided' }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted small">Awaiting contractor review</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="bi bi-arrow-left-right display-4 text-muted"></i>
+                            <p class="text-muted mt-2 mb-0">You haven't submitted any payments yet.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="card">
