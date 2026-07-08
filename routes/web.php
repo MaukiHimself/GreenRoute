@@ -38,6 +38,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // Client portal routes (auth only, no verification required for invited clients)
 Route::middleware(['auth'])->group(function () {
+    // Notification bell (shared by client & contractor portals)
+    Route::post('notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])
+        ->name('notifications.readAll');
+    Route::get('notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'open'])
+        ->name('notifications.open');
+
     Route::prefix('dashboard/client')->group(function () {
         Route::get('/', [ClientPortalController::class, 'dashboard'])->name('client.dashboard');
         Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');
@@ -305,6 +311,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::post('/contractors/{user}/reject', [App\Http\Controllers\AdminController::class, 'rejectContractor'])->name('admin.contractors.reject');
         Route::post('/contractors/{user}/toggle-status', [App\Http\Controllers\AdminController::class, 'toggleContractorStatus'])->name('admin.contractors.toggle');
         Route::get('/clients', [App\Http\Controllers\AdminController::class, 'clients'])->name('admin.clients');
+        Route::get('/clients/unassigned', [App\Http\Controllers\AdminController::class, 'unassignedClients'])->name('admin.clients.unassigned');
+        Route::post('/clients/{client}/assign', [App\Http\Controllers\AdminController::class, 'assignClient'])->name('admin.clients.assign');
         Route::get('/clients/create', [App\Http\Controllers\AdminController::class, 'createClient'])->name('admin.clients.create');
         Route::post('/clients', [App\Http\Controllers\AdminController::class, 'storeClient'])->name('admin.clients.store');
         Route::get('/clients/{client}/edit', [App\Http\Controllers\AdminController::class, 'editClient'])->name('admin.clients.edit');

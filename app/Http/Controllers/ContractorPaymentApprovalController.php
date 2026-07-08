@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PaymentSubmission;
 use App\Models\Invoice;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -87,6 +88,16 @@ class ContractorPaymentApprovalController extends Controller
                 'receipt_issued_at' => now(),
             ]);
 
+            // Notify the client (bell) that their payment was approved
+            if ($submission->client && $submission->client->user) {
+                $submission->client->user->notify(new GenericNotification(
+                    title: 'Payment approved',
+                    message: 'Your payment of TZS ' . number_format($submission->amount_submitted, 0) . ' has been approved. Receipt #' . $receiptNumber,
+                    url: route('client.payments'),
+                    icon: 'bi-check-circle',
+                ));
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Payment approved and receipt generated successfully.',
@@ -123,6 +134,16 @@ class ContractorPaymentApprovalController extends Controller
         }
 
         $submission->reject($validated['reason']);
+
+        // Notify the client (bell) that their payment was rejected
+        if ($submission->client && $submission->client->user) {
+            $submission->client->user->notify(new GenericNotification(
+                title: 'Payment rejected',
+                message: 'Your payment of TZS ' . number_format($submission->amount_submitted, 0) . ' was rejected. Reason: ' . $validated['reason'],
+                url: route('client.invoices'),
+                icon: 'bi-x-circle',
+            ));
+        }
 
         return response()->json([
             'success' => true,

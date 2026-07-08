@@ -63,3 +63,4 @@
                 <div id="notification" class="notification hidden"></div>
             </div>
 </div>
+@include('partials.password-toggle')

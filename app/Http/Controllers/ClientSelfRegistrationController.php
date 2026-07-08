@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Contractor;
 use App\Notifications\ClientVerifiedNotification;
 use App\Notifications\ClientPendingApprovalNotification;
+use App\Services\ContractorMatchingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -58,69 +59,74 @@ class ClientSelfRegistrationController extends Controller
     {
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
-            'contact_name'  => 'required|string|max:255',
+            'contact_name'  => 'nullable|string|max:255',
             'email'         => 'required|email|max:255|unique:clients,email',
             'phone'         => 'required|string|max:20',
             'address'       => 'required|string|max:500',
             'region'        => 'required|string|max:100',
             'district'      => 'nullable|string|max:100',
-            'ward'          => 'nullable|string|max:100',
-            'street'        => 'nullable|string|max:100',
+            'ward'          => 'required|string|max:100',
             'latitude'      => 'nullable|numeric|between:-90,90',
             'longitude'     => 'nullable|numeric|between:-180,180',
-            'category'      => 'required|string|max:255',
-            'route_id'      => 'required|exists:contractor_routes,id',
+            'category'      => 'nullable|string|max:255',
             'notes'         => 'nullable|string|max:1000',
         ], [
-            'email.unique'   => 'This email is already registered.',
-            'route_id.required' => 'Please select a collection route in your area.',
-            'route_id.exists'   => 'Selected route is invalid.',
+            'email.unique' => 'This email is already registered.',
+            'ward.required' => 'Please select your ward so we can match you to a contractor.',
         ]);
 
-        // Resolve the chosen route → contractor
-        $route = ContractorRoute::with('contractor')->findOrFail($validated['route_id']);
-        $contractor = Contractor::where('user_id', $route->contractor_id)->first();
+        // Auto-match to a contractor that covers this area (ward → district → region),
+        // using distance from the client's pin as a tiebreak.
+        $match = app(ContractorMatchingService::class)->match(
+            $validated['ward'],
+            $validated['district'] ?? null,
+            $validated['region'],
+            $validated['latitude'] ?? null,
+            $validated['longitude'] ?? null,
+        );
 
-        if (! $contractor) {
-            return back()->withErrors(['route_id' => 'The selected route has no assigned contractor.'])->withInput();
-        }
-
-        // Create the client record as pending
+        // Create the client record as pending. When no contractor covers the area,
+        // contractor_id stays null and the client surfaces in the admin queue.
         $client = Client::create([
-            'contractor_id'  => $route->contractor_id,
+            'contractor_id'  => $match['contractor_id'] ?? null,
             'name'           => $validated['name'],
-            'contact_name'   => $validated['contact_name'],
+            'contact_name'   => $validated['contact_name'] ?? $validated['name'],
             'email'          => $validated['email'],
             'phone'          => $validated['phone'],
             'address'        => $validated['address'],
-            'latitude'       => $validated['latitude'],
-            'longitude'      => $validated['longitude'],
+            'latitude'       => $validated['latitude'] ?? null,
+            'longitude'      => $validated['longitude'] ?? null,
             'region'         => $validated['region'],
             'district'       => $validated['district'] ?? null,
-            'ward'           => $validated['ward']     ?? null,
-            'street'         => $validated['street']   ?? null,
+            'ward'           => $validated['ward'],
             'city'           => $validated['district'] ?? $validated['region'],
             'state'          => $validated['region'],
             'zip_code'       => 'N/A',
-            'category'       => $validated['category'],
-            'route'          => $route->route_name,
+            'category'       => $validated['category'] ?? 'Other',
             'notes'          => $validated['notes'] ?? null,
             'status'         => 'pending',       // pending until contractor approves
             'self_registered' => true,
         ]);
 
-        // Notify the contractor that a new client is awaiting approval
-        try {
-            $contractorUser = User::find($route->contractor_id);
-            if ($contractorUser) {
-                $contractorUser->notify(new ClientPendingApprovalNotification($client, $contractor));
+        // Notify the matched contractor that a new client is awaiting approval.
+        if ($match) {
+            try {
+                $contractorUser = User::find($match['contractor_id']);
+                $contractor     = Contractor::where('user_id', $match['contractor_id'])->first();
+                if ($contractorUser) {
+                    $contractorUser->notify(new ClientPendingApprovalNotification($client, $contractor));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to notify contractor of new client registration: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            \Log::error('Failed to notify contractor of new client registration: ' . $e->getMessage());
+
+            return redirect()->route('client.registration.pending')
+                ->with('success', 'Registration submitted! Your contractor will review and approve your account.');
         }
 
+        // No coverage yet — client waits for an admin to assign a contractor.
         return redirect()->route('client.registration.pending')
-            ->with('success', 'Registration submitted! Your contractor will review and approve your account.');
+            ->with('success', 'Registration received! We\'re finding a waste contractor for your area and will notify you once your account is approved.');
     }
 
     /**
@@ -163,14 +169,28 @@ class ClientSelfRegistrationController extends Controller
         // Generate a temporary password
         $tempPassword = Str::random(10);
 
-        // Create the user account
-        $user = User::create([
-            'name'               => $client->name,
-            'email'              => $client->email,
-            'password'           => Hash::make($tempPassword),
-            'user_type'          => 'client',
-            'email_verified_at'  => now(),
-        ]);
+        // Reuse an existing user account if one already exists for this email
+        // (can happen if the client previously registered or was added manually).
+        $user = User::where('email', $client->email)->first();
+
+        if ($user) {
+            // Update the existing account to ensure it's a client type and set new temp password
+            $user->update([
+                'name'              => $client->name,
+                'user_type'         => 'client',
+                'password'          => Hash::make($tempPassword),
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            // Create a fresh user account
+            $user = User::create([
+                'name'              => $client->name,
+                'email'             => $client->email,
+                'password'          => Hash::make($tempPassword),
+                'user_type'         => 'client',
+                'email_verified_at' => now(),
+            ]);
+        }
 
         // Link and activate the client
         $client->update([
@@ -185,6 +205,18 @@ class ClientSelfRegistrationController extends Controller
             $user->notify(new ClientVerifiedNotification($client, $contractor, $tempPassword));
         } catch (\Exception $e) {
             \Log::error('Failed to send client approval email: ' . $e->getMessage());
+        }
+
+        // Notify the client (bell) that their account is now active
+        try {
+            $user->notify(new \App\Notifications\GenericNotification(
+                title: 'Account approved!',
+                message: 'Your account with ' . ($contractor?->company_name ?? 'your contractor') . ' has been approved. Welcome to GreenRoute!',
+                url: route('client.dashboard'),
+                icon: 'bi-person-check',
+            ));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send bell notification to approved client: ' . $e->getMessage());
         }
 
         return back()
@@ -205,6 +237,18 @@ class ClientSelfRegistrationController extends Controller
         $request->validate(['reason' => 'nullable|string|max:500']);
 
         $client->update(['status' => 'inactive']);
+
+        // Notify the client (bell) that their registration was rejected (if they have a user account)
+        if ($client->user) {
+            $contractorEntity = \App\Models\Contractor::where('user_id', Auth::id())->first();
+            $companyName = $contractorEntity?->company_name ?? Auth::user()->name;
+            $client->user->notify(new \App\Notifications\GenericNotification(
+                title: 'Registration not approved',
+                message: 'Unfortunately, your registration with ' . $companyName . ' could not be approved at this time. Please contact them for more information.',
+                url: url('/client/login'),
+                icon: 'bi-x-circle',
+            ));
+        }
 
         return back()->with('success', "Client {$client->name} has been rejected.");
     }

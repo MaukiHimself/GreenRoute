@@ -15,10 +15,21 @@
 </a>
 
 <a href="{{ route('admin.clients') }}"
-   class="portal-sidebar__link {{ request()->routeIs('admin.clients*') ? 'active' : '' }}"
+   class="portal-sidebar__link {{ request()->routeIs('admin.clients') || request()->routeIs('admin.clients.create') || request()->routeIs('admin.clients.edit') ? 'active' : '' }}"
    data-tooltip="Clients">
     <i class="bi bi-people"></i>
     <span class="portal-sidebar__label">Clients</span>
+</a>
+
+@php($unassignedCount = \App\Models\Client::whereNull('contractor_id')->where('status', 'pending')->count())
+<a href="{{ route('admin.clients.unassigned') }}"
+   class="portal-sidebar__link {{ request()->routeIs('admin.clients.unassigned') ? 'active' : '' }}"
+   data-tooltip="Unassigned Clients">
+    <i class="bi bi-person-exclamation"></i>
+    <span class="portal-sidebar__label">Unassigned</span>
+    @if($unassignedCount > 0)
+        <span class="badge rounded-pill bg-danger ms-2">{{ $unassignedCount }}</span>
+    @endif
 </a>
 
 <div class="portal-sidebar__group {{ request()->routeIs('admin.billing*') ? 'is-open' : '' }}">

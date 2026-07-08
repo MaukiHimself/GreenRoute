@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Client;
 use App\Models\Location; // Added
 use App\Models\Schedule;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -118,6 +119,16 @@ class InvoiceController extends Controller
                 
                 $invoice->invoice_number = $invoice->generateInvoiceNumber();
                 $invoice->calculateTotals();
+
+                // Notify the client (bell) that a new invoice has been issued
+                if ($client->user) {
+                    $client->user->notify(new GenericNotification(
+                        title: 'New invoice issued',
+                        message: 'Invoice ' . $invoice->invoice_number . ' for TZS ' . number_format($invoice->total_amount, 0) . ' is due on ' . \Carbon\Carbon::parse($validated['due_date'])->format('M d, Y'),
+                        url: route('client.invoices'),
+                        icon: 'bi-receipt',
+                    ));
+                }
             }
         });
 
@@ -254,7 +265,18 @@ class InvoiceController extends Controller
         ]);
         
         $invoice->markAsPaid($validated['payment_method'] ?? null);
-        
+
+        // Notify the client (bell) that their invoice has been marked as paid
+        $client = $invoice->client;
+        if ($client && $client->user) {
+            $client->user->notify(new GenericNotification(
+                title: 'Invoice paid',
+                message: 'Invoice ' . $invoice->invoice_number . ' for TZS ' . number_format($invoice->total_amount, 0) . ' has been marked as paid.',
+                url: route('client.payments'),
+                icon: 'bi-check2-circle',
+            ));
+        }
+
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice marked as paid successfully.');
     }

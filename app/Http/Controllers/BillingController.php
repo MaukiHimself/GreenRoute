@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Client;
 use App\Models\ServicePrice;
 use App\Models\Product;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -235,13 +236,34 @@ class BillingController extends Controller
 
         // Accumulate payment amount
         $newAmountPaid = $invoice->amount_paid + $validated['amount_paid'];
+        $newStatus = $newAmountPaid >= $invoice->total_amount ? 'paid' : 'partial';
 
         $invoice->update([
             'amount_paid' => $newAmountPaid,
             'payment_method' => $validated['payment_method'],
             'paid_at' => now(),
-            'status' => $newAmountPaid >= $invoice->total_amount ? 'paid' : 'partial'
+            'status' => $newStatus
         ]);
+
+        // Notify the client (bell) about the payment recording
+        $client = $invoice->client;
+        if ($client && $client->user) {
+            if ($newStatus === 'paid') {
+                $client->user->notify(new GenericNotification(
+                    title: 'Invoice fully paid',
+                    message: 'Invoice ' . $invoice->invoice_number . ' for TZS ' . number_format($invoice->total_amount, 0) . ' is now fully paid.',
+                    url: route('client.payments'),
+                    icon: 'bi-check2-circle',
+                ));
+            } else {
+                $client->user->notify(new GenericNotification(
+                    title: 'Partial payment recorded',
+                    message: 'A payment of TZS ' . number_format($validated['amount_paid'], 0) . ' was recorded for invoice ' . $invoice->invoice_number . '. Remaining: TZS ' . number_format($invoice->total_amount - $newAmountPaid, 0),
+                    url: route('client.invoices'),
+                    icon: 'bi-cash',
+                ));
+            }
+        }
 
         return redirect()->back()->with('success', 'Payment recorded successfully');
     }
@@ -252,9 +274,17 @@ class BillingController extends Controller
             abort(404);
         }
 
-        // Here you would implement SMS/Email sending logic
-        // For now, just return success message
-        
+        // Notify the client (bell) that the invoice has been sent
+        $client = $invoice->client;
+        if ($client && $client->user) {
+            $client->user->notify(new GenericNotification(
+                title: 'Invoice sent',
+                message: 'Invoice ' . $invoice->invoice_number . ' for TZS ' . number_format($invoice->total_amount, 0) . ' — due ' . \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y'),
+                url: route('client.invoices'),
+                icon: 'bi-envelope-open',
+            ));
+        }
+
         return redirect()->back()->with('success', 'Invoice sent successfully');
     }
 
@@ -264,8 +294,18 @@ class BillingController extends Controller
             abort(404);
         }
 
-        // Here you would implement debt reminder SMS/Email logic
-        
+        // Notify the client (bell) with a payment reminder
+        $client = $invoice->client;
+        if ($client && $client->user) {
+            $remaining = $invoice->total_amount - $invoice->amount_paid;
+            $client->user->notify(new GenericNotification(
+                title: 'Payment reminder',
+                message: 'Invoice ' . $invoice->invoice_number . ' — TZS ' . number_format($remaining, 0) . ' is due on ' . \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') . '. Please make payment to avoid late fees.',
+                url: route('client.invoices'),
+                icon: 'bi-bell',
+            ));
+        }
+
         return redirect()->back()->with('success', 'Payment reminder sent successfully');
     }
 }

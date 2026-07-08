@@ -335,14 +335,7 @@
 
                 <div class="d-flex align-items-center gap-3">
                     <!-- Notifications -->
-                    <div class="position-relative">
-                        <button class="btn btn-link text-muted p-2" type="button">
-                            <i class="bi bi-bell fs-5"></i>
-                            @if(isset($notificationCount))
-                                <span class="notification-badge">{{ $notificationCount }}</span>
-                            @endif
-                        </button>
-                    </div>
+                    <x-notification-bell />
 
                     <!-- User Menu -->
                     <div class="dropdown">
@@ -381,5 +374,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @include('partials.password-toggle')
 </body>
 </html>

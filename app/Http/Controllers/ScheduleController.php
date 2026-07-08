@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\Client;
 use App\Models\Location;
 use App\Models\ContractorRoute;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -159,6 +160,16 @@ class ScheduleController extends Controller
                         $reason
                     );
                 }
+
+                // Notify the client (bell) that a pickup has been scheduled
+                if ($client->user) {
+                    $client->user->notify(new GenericNotification(
+                        title: 'Pickup scheduled',
+                        message: 'A ' . $validated['service_type'] . ' pickup has been scheduled for ' . \Carbon\Carbon::parse($validated['pickup_date'])->format('M d, Y'),
+                        url: route('client.schedules'),
+                        icon: 'bi-calendar-check',
+                    ));
+                }
             }
         });
 
@@ -278,6 +289,16 @@ class ScheduleController extends Controller
             );
         }
 
+        // Notify the client (bell) that their schedule was updated
+        if ($client->user) {
+            $client->user->notify(new GenericNotification(
+                title: 'Schedule updated',
+                message: 'Your ' . $validated['service_type'] . ' pickup on ' . \Carbon\Carbon::parse($validated['pickup_date'])->format('M d, Y') . ' has been updated',
+                url: route('client.schedules'),
+                icon: 'bi-calendar2-event',
+            ));
+        }
+
         return redirect()->route('schedules.show', $schedule)
             ->with('success', 'Schedule updated successfully.');
     }
@@ -298,6 +319,26 @@ class ScheduleController extends Controller
         $message = 'Status updated successfully';
         if ($validated['status'] === 'completed' && $oldStatus !== 'completed') {
             $message = 'Schedule marked as completed! Please record disposal data in the Disposal section.';
+        }
+
+        // Notify the client (bell) on meaningful status changes
+        $notifyStatuses = [
+            'in_progress' => ['title' => 'Pickup on the way', 'message' => 'Your waste collection truck is en route to your location.', 'icon' => 'bi-truck'],
+            'completed'   => ['title' => 'Pickup completed', 'message' => 'Your waste collection has been completed successfully.', 'icon' => 'bi-check-circle'],
+            'cancelled'   => ['title' => 'Pickup cancelled', 'message' => 'Your scheduled pickup has been cancelled. Please contact your contractor for details.', 'icon' => 'bi-x-circle'],
+        ];
+
+        if (isset($notifyStatuses[$validated['status']]) && $validated['status'] !== $oldStatus) {
+            $clientRecord = $schedule->client;
+            if ($clientRecord && $clientRecord->user) {
+                $n = $notifyStatuses[$validated['status']];
+                $clientRecord->user->notify(new GenericNotification(
+                    title: $n['title'],
+                    message: $n['message'],
+                    url: route('client.schedules'),
+                    icon: $n['icon'],
+                ));
+            }
         }
 
         return response()->json([

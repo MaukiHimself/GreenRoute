@@ -38,5 +38,6 @@
             <!-- Footer -->
             <x-footer />
         </div>
+        @include('partials.password-toggle')
     </body>
 </html>

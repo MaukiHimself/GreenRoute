@@ -169,6 +169,21 @@
     }
 </style>
 @section('content')
+@if(is_null(Auth::user()->latitude) || is_null(Auth::user()->longitude))
+<div class="alert alert-warning alert-dismissible fade show d-flex align-items-start gap-3" role="alert" id="baseLocationPrompt">
+    <i class="bi bi-geo-alt-fill fs-4"></i>
+    <div class="flex-grow-1">
+        <strong>Set your base location.</strong>
+        New clients who sign up in your area are matched to the nearest contractor. Without a base location, we can only match you by ward/district and may skip you when several contractors overlap.
+        <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-warning" onclick="document.getElementById('updateLocation').click();">
+                <i class="bi bi-crosshair me-1"></i>Set my base location now
+            </button>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="dashboard-section">

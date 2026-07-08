@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Feedback;
+use App\Models\User;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -49,6 +51,17 @@ class ContractorFeedbackController extends Controller
             'responded_at' => now(),
         ]);
 
+        // Notify the client (bell) that their feedback received a response
+        $client = $feedback->client;
+        if ($client && $client->user) {
+            $client->user->notify(new GenericNotification(
+                title: 'Feedback responded',
+                message: 'Your contractor responded to your feedback: "' . \Illuminate\Support\Str::limit($feedback->subject, 50) . '"',
+                url: route('client.feedback'),
+                icon: 'bi-chat-left-dots',
+            ));
+        }
+
         return redirect()->route('contractor.feedback.index')
             ->with('success', 'Response sent to client successfully.');
     }
@@ -64,6 +77,20 @@ class ContractorFeedbackController extends Controller
         ]);
 
         $feedback->update(['status' => $validated['status']]);
+
+        // Notify the client (bell) when their feedback is resolved or closed
+        if (in_array($validated['status'], ['resolved', 'closed'])) {
+            $client = $feedback->client;
+            if ($client && $client->user) {
+                $label = $validated['status'] === 'resolved' ? 'resolved' : 'closed';
+                $client->user->notify(new GenericNotification(
+                    title: 'Feedback ' . $label,
+                    message: 'Your feedback "' . \Illuminate\Support\Str::limit($feedback->subject, 50) . '" has been marked as ' . $label,
+                    url: route('client.feedback'),
+                    icon: 'bi-check2-all',
+                ));
+            }
+        }
 
         return back()->with('success', 'Feedback status updated.');
     }

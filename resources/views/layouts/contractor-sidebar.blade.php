@@ -260,9 +260,7 @@
                         </nav>
                     </div>
                     <div class="d-flex align-items-center gap-3">
-                        <span class="user-badge">
-                            <i class="bi bi-bell me-1"></i>Notifications: 2
-                        </span>
+                        <x-notification-bell />
                         <div class="dropdown">
                             @if(Auth::user()->profile_picture)
                                 <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" data-bs-toggle="dropdown">

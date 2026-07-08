@@ -6,6 +6,8 @@ use App\Models\Invoice;
 use App\Models\PaymentSubmission;
 use App\Models\Contractor;
 use App\Models\Client;
+use App\Notifications\GenericNotification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -138,6 +140,17 @@ class PaymentSubmissionController extends Controller
             'status' => 'pending_approval',
             'submitted_at' => now(),
         ]);
+
+        // Notify the contractor (bell) that a client submitted a payment for approval
+        $contractorUser = User::find($invoice->contractor_id);
+        if ($contractorUser) {
+            $contractorUser->notify(new GenericNotification(
+                title: 'Payment submitted for approval',
+                message: ($client->name ?? 'A client') . ' submitted TZS ' . number_format($validated['amount_submitted'], 0) . ' for invoice ' . $invoice->invoice_number,
+                url: route('contractor.pending-payments'),
+                icon: 'bi-cash-coin',
+            ));
+        }
 
         return redirect()->route('client.payment-submitted', $invoice)
             ->with('success', 'Payment submission received. Please wait while the contractor verifies your transaction.');

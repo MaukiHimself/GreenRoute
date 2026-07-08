@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Schedule;
 use App\Models\EquipmentRequest;
+use App\Models\User;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -152,6 +154,26 @@ class ContractorEquipmentController extends Controller
             'contractor_response' => $data['contractor_response'] ?? null,
             'responded_at'        => now(),
         ]);
+
+        // Notify the client (bell) about the equipment request response
+        $client = $equipmentRequest->client;
+        if ($client && $client->user) {
+            $productName = $equipmentRequest->product->name ?? 'equipment';
+            $statusMessages = [
+                'approved'  => ['title' => 'Equipment request approved', 'message' => 'Your request for ' . $productName . ' has been approved.', 'icon' => 'bi-box-seam'],
+                'rejected'  => ['title' => 'Equipment request rejected', 'message' => 'Your request for ' . $productName . ' was not approved.' . ($data['contractor_response'] ? ' Note: ' . \Illuminate\Support\Str::limit($data['contractor_response'], 60) : ''), 'icon' => 'bi-x-circle'],
+                'fulfilled' => ['title' => 'Equipment delivered', 'message' => 'Your requested ' . $productName . ' has been delivered.', 'icon' => 'bi-truck'],
+            ];
+            if (isset($statusMessages[$data['status']])) {
+                $n = $statusMessages[$data['status']];
+                $client->user->notify(new GenericNotification(
+                    title: $n['title'],
+                    message: $n['message'],
+                    url: route('client.equipment'),
+                    icon: $n['icon'],
+                ));
+            }
+        }
 
         return back()->with('success', 'Request updated successfully.');
     }

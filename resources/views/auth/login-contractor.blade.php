@@ -231,6 +231,12 @@
                         <!-- Login Form Column -->
                         <div class="col-lg-6 mx-auto">
                             <div class="login-form-container">
+                                <!-- Back to Home -->
+                                <div class="mb-3">
+                                    <a href="{{ url('/') }}" class="text-decoration-none text-muted small">
+                                        <i class="bi bi-arrow-left me-1"></i>Back to Home
+                                    </a>
+                                </div>
                                 <!-- Header -->
                                 <div class="login-header">
                                     <div class="logo-icon">
@@ -307,5 +313,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @include('partials.password-toggle')
 </body>
 </html>

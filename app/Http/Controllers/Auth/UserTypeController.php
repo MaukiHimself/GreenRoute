@@ -196,6 +196,9 @@ class UserTypeController extends Controller
             'license_number' => ['required', 'string', 'max:50'],
             'certificate' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'location_address' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = User::create([
@@ -204,6 +207,9 @@ class UserTypeController extends Controller
             'password' => Hash::make($request->password),
             'user_type' => 'contractor',
             'status' => 'pending',
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'location_address' => $request->location_address,
         ]);
 
         $certificatePath = null;

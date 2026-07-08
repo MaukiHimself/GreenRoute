@@ -6,6 +6,8 @@ use App\Models\Client;
 use App\Models\Message;
 use App\Models\Schedule;
 use App\Models\Invoice;
+use App\Models\User;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -135,6 +137,17 @@ class SmsController extends Controller
         // Here you would send actual SMS
         \Log::info("SMS to {$client->phone}: {$validated['message']}");
 
+        // Notify the client (bell) that their contractor messaged them.
+        if ($client->user) {
+            $contractorName = Auth::user()->name;
+            $client->user->notify(new GenericNotification(
+                title: 'New message',
+                message: $contractorName . ' sent you a message',
+                url: route('client.chats'),
+                icon: 'bi-chat-dots',
+            ));
+        }
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -169,6 +182,17 @@ class SmsController extends Controller
             'message_type' => 'custom',
             'status' => 'sent'
         ]);
+
+        // Notify the contractor (bell) that their client messaged them.
+        $contractor = User::find($validated['contractor_id']);
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'New message',
+                message: ($client->name ?? 'A client') . ' sent you a message',
+                url: route('sms.conversation', $client),
+                icon: 'bi-chat-dots',
+            ));
+        }
 
         return response()->json([
             'success' => true,

@@ -509,9 +509,12 @@
             </div>
             
             @if($clients->count() > 0)
-                <form id="bulkActionsForm" method="POST" action="">
+                {{-- Bulk form lives OUTSIDE the table so row-level delete forms are never nested inside it --}}
+                <form id="bulkActionsForm" method="POST" action="" style="display:none">
                     @csrf
                     <input type="hidden" name="route" id="bulkRouteInput" value="">
+                    {{-- client_ids[] hidden inputs are injected here by JS before submit --}}
+                </form>
 
                     <div class="table-responsive">
                         <table class="table">
@@ -624,7 +627,6 @@
                         </tbody>
                     </table>
                 </div>
-            </form>
             @else
                 <div class="empty-state">
                     <div class="empty-icon">
@@ -711,6 +713,15 @@
                     return;
                 }
                 if (confirm(`Are you sure you want to approve the selected ${checked.length} client(s)?`)) {
+                    // Inject selected IDs into the hidden bulk form
+                    bulkForm.querySelectorAll('input[name="client_ids[]"]').forEach(el => el.remove());
+                    checked.forEach(cb => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'client_ids[]';
+                        input.value = cb.value;
+                        bulkForm.appendChild(input);
+                    });
                     bulkForm.action = actionUrl;
                     bulkForm.submit();
                 }
@@ -723,6 +734,15 @@
                     return;
                 }
                 if (confirm(`Assign selected ${checked.length} client(s) to route "${routeName}"?`)) {
+                    // Inject selected IDs into the hidden bulk form
+                    bulkForm.querySelectorAll('input[name="client_ids[]"]').forEach(el => el.remove());
+                    checked.forEach(cb => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'client_ids[]';
+                        input.value = cb.value;
+                        bulkForm.appendChild(input);
+                    });
                     bulkRouteInput.value = routeName;
                     bulkForm.action = '{{ route("contractor.clients.bulk-assign-route") }}';
                     bulkForm.submit();

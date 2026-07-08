@@ -11,6 +11,7 @@ use App\Models\Feedback;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Message;
+use App\Notifications\GenericNotification;
 use App\Support\Portal;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -356,6 +357,16 @@ class ClientPortalController extends Controller
             'includes_organic_waste' => $validated['waste_type'] === 'organic',
         ]);
 
+        // Notify the assigned contractor (bell).
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'New service request',
+                message: ($client->name ?? 'A client') . ' requested a ' . str_replace('_', ' ', $validated['service_type']),
+                url: route('dashboard.contractor'),
+                icon: 'bi-truck',
+            ));
+        }
+
         return redirect()->route('client.schedules')->with('success', 'Service request submitted successfully.');
     }
 
@@ -416,6 +427,17 @@ class ClientPortalController extends Controller
             'notes'         => $data['notes'] ?? null,
             'status'        => 'pending',
         ]);
+
+        // Notify the contractor (bell) of the equipment request.
+        $contractor = User::find($client->contractor_id);
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'Equipment request',
+                message: ($client->name ?? 'A client') . ' requested ' . $data['quantity'] . ' × ' . $product->name,
+                url: route('contractor.equipment.requests'),
+                icon: 'bi-box-seam',
+            ));
+        }
 
         return back()->with('success', 'Equipment request sent to your contractor.');
     }
@@ -498,6 +520,17 @@ class ClientPortalController extends Controller
             'message' => $data['message'],
             'status' => 'open',
         ]);
+
+        // Notify the contractor (bell) of new feedback.
+        $contractor = User::find($client->contractor_id);
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'New feedback',
+                message: ($client->name ?? 'A client') . ': ' . $data['subject'],
+                url: route('contractor.feedback.index'),
+                icon: 'bi-chat-left-text',
+            ));
+        }
 
         return redirect()->route('client.feedback')->with('success', 'Feedback submitted successfully.');
     }

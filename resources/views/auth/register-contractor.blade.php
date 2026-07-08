@@ -6,6 +6,7 @@
     <title>Contractor Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     <style>
         .primary-dark { color: #047857; }
         .primary-light { 
@@ -155,6 +156,12 @@
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
+                <!-- Back to Home -->
+                <div class="mb-3">
+                    <a href="{{ url('/') }}" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Home
+                    </a>
+                </div>
                 <!-- Header Section -->
                 <div class="text-center mb-5">
                     <div class="icon-circle">
@@ -255,7 +262,29 @@
                                 Search and select locations in format: Region → District → Ward → Street
                             </div>
                         </div>
-                        
+
+                        <!-- Base Location (used to match nearby clients) -->
+                        <div class="mb-4">
+                            <label class="form-label primary-dark">Base Location <span class="text-muted">(recommended)</span></label>
+                            <p class="form-text mt-0 mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                Pin your office/depot. We use it to match new clients in your area to you. Tap the map or use your current location. You can set this later from your dashboard.
+                            </p>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="c_locateBtn">
+                                    <i class="bi bi-crosshair me-1"></i>Use my current location
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="c_clearPinBtn" style="display:none;">
+                                    <i class="bi bi-x-circle me-1"></i>Clear pin
+                                </button>
+                            </div>
+                            <div id="c_pinMap" style="height:260px;border-radius:8px;border:1px solid #dee2e6;z-index:0;"></div>
+                            <input type="hidden" name="latitude"  id="c_latitude"  value="{{ old('latitude') }}">
+                            <input type="hidden" name="longitude" id="c_longitude" value="{{ old('longitude') }}">
+                            <input type="hidden" name="location_address" id="c_location_address" value="{{ old('location_address') }}">
+                            <div class="form-text mt-1" id="c_pinStatus"></div>
+                        </div>
+
                         <!-- Business Documentation -->
                         <div class="row mb-4">
                             <div class="col-12">
@@ -502,5 +531,72 @@
             });
         });
     </script>
+
+    <!-- Base location picker -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function () {
+            const latInput  = document.getElementById('c_latitude');
+            const lngInput  = document.getElementById('c_longitude');
+            const addrInput = document.getElementById('c_location_address');
+            const status    = document.getElementById('c_pinStatus');
+            const locateBtn = document.getElementById('c_locateBtn');
+            const clearBtn  = document.getElementById('c_clearPinBtn');
+
+            const map = L.map('c_pinMap').setView([-6.8235, 39.2695], 12); // Dar es Salaam
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors',
+            }).addTo(map);
+
+            let marker = null;
+
+            function setPin(lat, lng, zoom) {
+                latInput.value = Number(lat).toFixed(7);
+                lngInput.value = Number(lng).toFixed(7);
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    marker.on('dragend', function () {
+                        const p = marker.getLatLng();
+                        setPin(p.lat, p.lng);
+                    });
+                }
+                map.setView([lat, lng], zoom || map.getZoom());
+                status.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i>Base location pinned.';
+                clearBtn.style.display = 'inline-block';
+            }
+
+            map.on('click', function (e) { setPin(e.latlng.lat, e.latlng.lng); });
+
+            clearBtn.addEventListener('click', function () {
+                latInput.value = ''; lngInput.value = ''; addrInput.value = '';
+                if (marker) { map.removeLayer(marker); marker = null; }
+                status.textContent = '';
+                clearBtn.style.display = 'none';
+            });
+
+            locateBtn.addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    status.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i>Geolocation not supported — tap the map instead.';
+                    return;
+                }
+                status.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Locating…';
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) { setPin(pos.coords.latitude, pos.coords.longitude, 16); },
+                    function () { status.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i>Couldn\'t get your location — tap the map to set it manually.'; },
+                    { enableHighAccuracy: true, timeout: 8000 }
+                );
+            });
+
+            if (latInput.value && lngInput.value) {
+                setPin(parseFloat(latInput.value), parseFloat(lngInput.value), 16);
+            }
+
+            setTimeout(function () { map.invalidateSize(); }, 200);
+        })();
+    </script>
+    @include('partials.password-toggle')
 </body>
 </html>

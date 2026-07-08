@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Client;
+use App\Models\Contractor;
 use App\Models\ContractorRoute;
 use App\Models\ContractorLocation;
 use App\Models\BillingRate;
 use App\Models\ContractorBillingRateChange;
 use App\Mail\ContractorApproved;
+use App\Notifications\ClientPendingApprovalNotification;
+use App\Services\ContractorMatchingService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
@@ -120,6 +123,53 @@ class AdminController extends Controller
             'commercialCount' => $commercialCount,
             'activeCount' => $activeCount
         ]);
+    }
+
+    /**
+     * Self-registered clients with no contractor assigned (no active route covers
+     * their area). Admin assigns them manually. Suggests the nearest candidate.
+     */
+    public function unassignedClients(ContractorMatchingService $matcher)
+    {
+        $clients = Client::whereNull('contractor_id')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // All approved contractors, for the manual-assign dropdown.
+        $contractors = Contractor::orderBy('company_name')->get(['user_id', 'company_name', 'name', 'region', 'district']);
+
+        // Suggest a best-guess contractor per client (may be null).
+        foreach ($clients as $client) {
+            $match = $matcher->match($client->ward, $client->district, $client->region, $client->latitude, $client->longitude);
+            $client->suggested_contractor_id = $match['contractor_id'] ?? null;
+        }
+
+        return view('admin.clients-unassigned', compact('clients', 'contractors'));
+    }
+
+    /**
+     * Manually assign an unassigned client to a contractor and notify them.
+     */
+    public function assignClient(Request $request, Client $client)
+    {
+        $validated = $request->validate([
+            'contractor_id' => 'required|exists:users,id',
+        ]);
+
+        $client->update(['contractor_id' => $validated['contractor_id']]);
+
+        try {
+            $contractorUser = User::find($validated['contractor_id']);
+            $contractor     = Contractor::where('user_id', $validated['contractor_id'])->first();
+            if ($contractorUser && $contractor) {
+                $contractorUser->notify(new ClientPendingApprovalNotification($client, $contractor));
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to notify contractor of manual client assignment: ' . $e->getMessage());
+        }
+
+        return back()->with('success', "Client {$client->name} assigned. The contractor can now review and approve them.");
     }
 
     public function billing()
@@ -761,9 +811,25 @@ class AdminController extends Controller
         if ($user->status === 'approved') {
             $user->update(['status' => 'suspended']);
             $message = "Contractor {$user->name} has been suspended.";
+
+            // Notify the contractor (bell) of suspension
+            $user->notify(new \App\Notifications\GenericNotification(
+                title: 'Account suspended',
+                message: 'Your GreenRoute contractor account has been suspended. Please contact support for more information.',
+                url: url('/contractor/pending'),
+                icon: 'bi-slash-circle',
+            ));
         } elseif ($user->status === 'suspended') {
             $user->update(['status' => 'approved']);
             $message = "Contractor {$user->name} has been reactivated.";
+
+            // Notify the contractor (bell) of reactivation
+            $user->notify(new \App\Notifications\GenericNotification(
+                title: 'Account reactivated',
+                message: 'Your GreenRoute contractor account has been reactivated. You can log in and resume operations.',
+                url: route('dashboard.contractor'),
+                icon: 'bi-check-circle',
+            ));
         } else {
             return back()->with('error', 'Cannot change status of pending or rejected contractors.');
         }

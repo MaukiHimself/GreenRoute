@@ -222,7 +222,11 @@
                 <h1 class="page-title">Clients Information</h1>
                 <p class="page-description">Manage all clients across the system</p>
             </div>
-            <div>
+            <div class="d-flex gap-2">
+                @php($unassignedCount = \App\Models\Client::whereNull('contractor_id')->where('status', 'pending')->count())
+                <a href="{{ route('admin.clients.unassigned') }}" style="display: inline-block; padding: 12px 24px; background: #fff; color: var(--primary-teal); border: 2px solid var(--primary-teal); text-decoration: none; border-radius: 8px; font-weight: 600;">
+                    <i class="bi bi-person-exclamation me-2"></i>Unassigned @if($unassignedCount > 0)<span class="badge rounded-pill bg-danger ms-1">{{ $unassignedCount }}</span>@endif
+                </a>
                 <a href="{{ route('admin.clients.create') }}" class="btn-primary" style="display: inline-block; padding: 12px 24px; background: var(--primary-teal); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
                     <i class="bi bi-plus-circle me-2"></i>Register New Client
                 </a>

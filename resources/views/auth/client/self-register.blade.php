@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     <style>
         :root { --teal: #047857; --red: #c0392b; }
         body { background: linear-gradient(135deg, #f0f9f9 0%, #e2e8f0 100%); min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
@@ -24,6 +25,8 @@
         .route-card:hover { border-color: var(--teal); background: #f0fdf9; }
         .route-card.selected { border-color: var(--teal); background: #ecfdf5; }
         .route-card input[type="radio"] { accent-color: var(--teal); }
+        #pinMap { height: 260px; border-radius: 10px; border: 2px solid #e2e8f0; z-index: 0; }
+        .pin-hint { font-size: .85rem; }
     </style>
 </head>
 <body>
@@ -31,10 +34,13 @@
     <div class="row justify-content-center">
         <div class="col-lg-7">
 
-            {{-- Back to login --}}
-            <div class="mb-3">
+            {{-- Back to home / login --}}
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <a href="{{ url('/') }}" class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Home
+                </a>
                 <a href="{{ route('client.login') }}" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left me-1"></i>Already have an account? Login
+                    Already have an account? Login
                 </a>
             </div>
 
@@ -72,8 +78,8 @@
                                 <input type="text" name="name" class="form-control" value="{{ old('name') }}" placeholder="e.g. John's Residence or ABC Shop" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Contact Person Name <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" value="{{ old('contact_name') }}" placeholder="Your full name" required>
+                                <label class="form-label fw-semibold">Contact Person Name <span class="text-muted small">(optional)</span></label>
+                                <input type="text" name="contact_name" class="form-control" value="{{ old('contact_name') }}" placeholder="Defaults to the name above">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
@@ -84,8 +90,8 @@
                                 <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" placeholder="e.g. 0712345678" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
-                                <select name="category" class="form-select" required>
+                                <label class="form-label fw-semibold">Category <span class="text-muted small">(optional)</span></label>
+                                <select name="category" class="form-select">
                                     <option value="">Select your category</option>
                                     <option value="Residential (Unplanned)"            {{ old('category')=='Residential (Unplanned)' ? 'selected' : '' }}>Residential (Unplanned)</option>
                                     <option value="Residential (Planned/Modern)"       {{ old('category')=='Residential (Planned/Modern)' ? 'selected' : '' }}>Residential (Planned/Modern)</option>
@@ -141,43 +147,37 @@
 
                             {{-- Ward --}}
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Ward</label>
+                                <label class="form-label fw-semibold">Ward <span class="text-danger">*</span></label>
                                 <div class="loading-select">
-                                    <select name="ward" id="wardSelect" class="form-select" disabled>
+                                    <select name="ward" id="wardSelect" class="form-select" required disabled>
                                         <option value="">— select district first —</option>
                                     </select>
                                     <div class="select-spinner" id="wardSpinner">
                                         <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Street --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Street</label>
-                                <div class="loading-select">
-                                    <select name="street" id="streetSelect" class="form-select" disabled>
-                                        <option value="">— select ward first —</option>
-                                    </select>
-                                    <div class="select-spinner" id="streetSpinner">
-                                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                    </div>
-                                </div>
+                                <div class="pin-hint text-muted mt-1">We use your ward to connect you with a contractor serving your area.</div>
                             </div>
                         </div>
 
-                        {{-- Collection Route --}}
-                        <p class="section-label mt-4"><i class="bi bi-signpost-split me-2"></i>Select Your Collection Route</p>
+                        {{-- Pin location (optional, improves matching) --}}
+                        <p class="section-label mt-4"><i class="bi bi-geo-alt-fill me-2"></i>Pin Your Location <span class="text-muted small fw-normal">(optional)</span></p>
                         <div class="mb-3">
-                            <div id="routeLoadingSpinner" class="text-center py-2" style="display:none;">
-                                <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                <span class="ms-2 text-muted small">Loading routes…</span>
+                            <p class="text-muted pin-hint mb-2">
+                                <i class="bi bi-info-circle me-1"></i>Tap on the map or drag the marker to your exact location. This helps your contractor find you. You can skip this.
+                            </p>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="locateBtn">
+                                    <i class="bi bi-crosshair me-1"></i>Use my current location
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clearPinBtn" style="display:none;">
+                                    <i class="bi bi-x-circle me-1"></i>Clear pin
+                                </button>
                             </div>
-                            <div id="routeWrapper">
-                                <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Select your region above to see available collection routes in your area.</p>
-                            </div>
-                            <input type="hidden" name="route_id" id="route_id" value="{{ old('route_id') }}">
-                            @error('route_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            <div id="pinMap"></div>
+                            <input type="hidden" name="latitude"  id="latitude"  value="{{ old('latitude') }}">
+                            <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+                            <div class="pin-hint text-muted mt-1" id="pinStatus"></div>
                         </div>
 
                         {{-- Notes --}}
@@ -188,7 +188,7 @@
 
                         <div class="alert alert-info small">
                             <i class="bi bi-shield-check me-2"></i>
-                            After submitting, your contractor will review your registration. You will receive an email with your login credentials once approved. <strong>You cannot log in until approved.</strong>
+                            We'll automatically match you to a waste contractor serving your area. They will review your registration and you'll receive an email with your login credentials once approved. <strong>You cannot log in until approved.</strong>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -205,31 +205,24 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function () {
     // ── API base URLs (public, no auth required) ──────────────────────────
     const API = {
         districts: '/location/public/districts',
         wards:     '/location/public/wards',
-        streets:   '/location/public/streets',
-        routes:    '{{ route("client.registration.routes") }}',
     };
 
     // ── Element refs ──────────────────────────────────────────────────────
     const regionSel   = document.getElementById('regionSelect');
     const districtSel = document.getElementById('districtSelect');
     const wardSel     = document.getElementById('wardSelect');
-    const streetSel   = document.getElementById('streetSelect');
-    const routeInput  = document.getElementById('route_id');
-    const routeWrapper = document.getElementById('routeWrapper');
-    const routeSpinner = document.getElementById('routeLoadingSpinner');
 
     // Restore old() values after a validation failure
     const oldRegion   = @json(old('region'));
     const oldDistrict = @json(old('district'));
     const oldWard     = @json(old('ward'));
-    const oldStreet   = @json(old('street'));
-    const oldRouteId  = @json(old('route_id'));
 
     // ── Generic helpers ───────────────────────────────────────────────────
     function showSpinner(id)  { document.getElementById(id).style.display = 'block'; }
@@ -262,7 +255,6 @@
     async function loadDistricts(region, restoreValue) {
         resetSelect(districtSel, '— loading… —');
         resetSelect(wardSel,     '— select district first —');
-        resetSelect(streetSel,   '— select ward first —');
         showSpinner('districtSpinner');
         try {
             const data = await fetchJson(API.districts + '?region=' + encodeURIComponent(region));
@@ -276,8 +268,7 @@
 
     // ── Wards ─────────────────────────────────────────────────────────────
     async function loadWards(region, district, restoreValue) {
-        resetSelect(wardSel,   '— loading… —');
-        resetSelect(streetSel, '— select ward first —');
+        resetSelect(wardSel, '— loading… —');
         showSpinner('wardSpinner');
         try {
             const data = await fetchJson(
@@ -292,125 +283,103 @@
         }
     }
 
-    // ── Streets ───────────────────────────────────────────────────────────
-    async function loadStreets(region, district, ward, restoreValue) {
-        resetSelect(streetSel, '— loading… —');
-        showSpinner('streetSpinner');
-        try {
-            const data = await fetchJson(
-                API.streets + '?region='   + encodeURIComponent(region) +
-                              '&district=' + encodeURIComponent(district) +
-                              '&ward='     + encodeURIComponent(ward)
-            );
-            populateSelect(streetSel, data.data || [], restoreValue || null);
-        } catch (e) {
-            resetSelect(streetSel, '— unable to load —');
-        } finally {
-            hideSpinner('streetSpinner');
-        }
-    }
-
-    // ── Routes ────────────────────────────────────────────────────────────
-    async function loadRoutes(region) {
-        routeWrapper.innerHTML = '';
-        routeInput.value = '';
-        routeSpinner.style.display = 'block';
-        try {
-            const data = await fetchJson(API.routes + '?region=' + encodeURIComponent(region));
-            routeSpinner.style.display = 'none';
-            const routes = data.data || [];
-            if (routes.length === 0) {
-                routeWrapper.innerHTML =
-                    '<div class="alert alert-warning small py-2"><i class="bi bi-exclamation-circle me-2"></i>No collection routes are currently available in <strong>' +
-                    escHtml(region) + '</strong>. Please try a different region or contact support.</div>';
-                return;
-            }
-            let html = '<div class="row g-2">';
-            routes.forEach(function (r) {
-                const isChecked = String(r.id) === String(oldRouteId) ? 'checked' : '';
-                html += `
-                    <div class="col-12">
-                        <label class="route-card d-flex align-items-start gap-3 w-100 ${isChecked ? 'selected' : ''}">
-                            <input type="radio" name="_route_radio" value="${r.id}" class="mt-1 flex-shrink-0" ${isChecked} required>
-                            <div>
-                                <div class="fw-semibold">${escHtml(r.route_name)}</div>
-                                <div class="text-muted small">
-                                    ${r.contractor && r.contractor.name ? escHtml(r.contractor.name) : ''}
-                                    ${r.district ? ' &bull; ' + escHtml(r.district) : ''}
-                                    ${r.ward     ? ' &bull; ' + escHtml(r.ward) : ''}
-                                </div>
-                            </div>
-                        </label>
-                    </div>`;
-                if (isChecked) routeInput.value = r.id;
-            });
-            html += '</div>';
-            routeWrapper.innerHTML = html;
-
-            // Wire up radio buttons → hidden input
-            routeWrapper.querySelectorAll('input[name="_route_radio"]').forEach(function (radio) {
-                radio.addEventListener('change', function () {
-                    routeInput.value = this.value;
-                    routeWrapper.querySelectorAll('.route-card').forEach(function (c) { c.classList.remove('selected'); });
-                    this.closest('.route-card').classList.add('selected');
-                });
-            });
-        } catch (e) {
-            routeSpinner.style.display = 'none';
-            routeWrapper.innerHTML =
-                '<div class="alert alert-danger small py-2"><i class="bi bi-x-circle me-2"></i>Unable to load routes. Please try again.</div>';
-        }
-    }
-
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── Event listeners ───────────────────────────────────────────────────
+    // ── Dependent dropdown listeners ──────────────────────────────────────
     regionSel.addEventListener('change', function () {
         const region = this.value;
         resetSelect(districtSel, '— select region first —');
         resetSelect(wardSel,     '— select district first —');
-        resetSelect(streetSel,   '— select ward first —');
-        routeWrapper.innerHTML = '<p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Select your region above to see available collection routes.</p>';
-        routeInput.value = '';
         if (!region) return;
         loadDistricts(region, null);
-        loadRoutes(region);
     });
 
     districtSel.addEventListener('change', function () {
         const region   = regionSel.value;
         const district = this.value;
-        resetSelect(wardSel,   '— select district first —');
-        resetSelect(streetSel, '— select ward first —');
+        resetSelect(wardSel, '— select district first —');
         if (!district) return;
         loadWards(region, district, null);
     });
 
-    wardSel.addEventListener('change', function () {
-        const region   = regionSel.value;
-        const district = districtSel.value;
-        const ward     = this.value;
-        resetSelect(streetSel, '— select ward first —');
-        if (!ward) return;
-        loadStreets(region, district, ward, null);
-    });
-
-    // ── Restore old() values on validation failure ────────────────────────
+    // Restore old() values on validation failure
     if (oldRegion) {
         loadDistricts(oldRegion, oldDistrict).then(function () {
-            if (oldDistrict) {
-                return loadWards(oldRegion, oldDistrict, oldWard).then(function () {
-                    if (oldWard) {
-                        return loadStreets(oldRegion, oldDistrict, oldWard, oldStreet);
-                    }
-                });
-            }
+            if (oldDistrict) return loadWards(oldRegion, oldDistrict, oldWard);
         });
-        loadRoutes(oldRegion);
     }
+
+    // ── Leaflet location pin (optional, auto-locate + confirm) ────────────
+    const latInput   = document.getElementById('latitude');
+    const lngInput   = document.getElementById('longitude');
+    const pinStatus  = document.getElementById('pinStatus');
+    const locateBtn  = document.getElementById('locateBtn');
+    const clearBtn   = document.getElementById('clearPinBtn');
+
+    // Default view: Dar es Salaam.
+    const DEFAULT_CENTER = [-6.8235, 39.2695];
+    const map = L.map('pinMap').setView(DEFAULT_CENTER, 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    let marker = null;
+
+    function setPin(lat, lng, zoom) {
+        latInput.value = Number(lat).toFixed(7);
+        lngInput.value = Number(lng).toFixed(7);
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker.on('dragend', function () {
+                const p = marker.getLatLng();
+                setPin(p.lat, p.lng);
+            });
+        }
+        map.setView([lat, lng], zoom || map.getZoom());
+        pinStatus.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i>Location pinned.';
+        clearBtn.style.display = 'inline-block';
+    }
+
+    function clearPin() {
+        latInput.value = '';
+        lngInput.value = '';
+        if (marker) { map.removeLayer(marker); marker = null; }
+        pinStatus.textContent = '';
+        clearBtn.style.display = 'none';
+    }
+
+    // Tap map to drop/move the pin.
+    map.on('click', function (e) { setPin(e.latlng.lat, e.latlng.lng); });
+
+    clearBtn.addEventListener('click', clearPin);
+
+    locateBtn.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+            pinStatus.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i>Geolocation not supported — tap the map instead.';
+            return;
+        }
+        pinStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Locating…';
+        navigator.geolocation.getCurrentPosition(
+            function (pos) { setPin(pos.coords.latitude, pos.coords.longitude, 16); },
+            function ()    { pinStatus.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i>Couldn\'t get your location — tap the map to set it manually.'; },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    });
+
+    // Restore an old pin after validation failure, otherwise auto-locate once.
+    if (latInput.value && lngInput.value) {
+        setPin(parseFloat(latInput.value), parseFloat(lngInput.value), 16);
+    } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (pos) { setPin(pos.coords.latitude, pos.coords.longitude, 16); },
+            function () { /* silent: user can click the button or tap the map */ },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+
+    // Leaflet needs a size recalculation once laid out.
+    setTimeout(function () { map.invalidateSize(); }, 200);
 })();
 </script>
 </body>
