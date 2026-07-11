@@ -140,8 +140,10 @@
         return line;
     }
 
-    async function drawRoadRoute(ctx, points, apiKey) {
+    async function drawRoadRoute(ctx, points, apiKey, options = {}) {
         if (!points || points.length < 2) return null;
+
+        const color = options.color || BRAND;
 
         // Try OpenRouteService first if apiKey is provided
         if (apiKey && apiKey.trim() !== "") {
@@ -165,7 +167,7 @@
                     const data = await response.json();
                     const routeLayer = L.geoJSON(data, {
                         style: {
-                            color: BRAND,
+                            color: color,
                             weight: 5,
                             opacity: 0.75
                         }
@@ -173,8 +175,12 @@
 
                     ctx.polylines.push(routeLayer);
 
-                    // Return metadata for UI updates (distance/duration)
-                    return data.features[0].properties.summary;
+                    // Return metadata for UI updates (distance/duration) and coordinates
+                    return {
+                        distance: data.features[0].properties.summary.distance,
+                        duration: data.features[0].properties.summary.duration,
+                        geometry: data.features[0].geometry.coordinates.map(c => [c[1], c[0]]) // Convert [lng, lat] to [lat, lng]
+                    };
                 }
                 console.warn('OpenRouteService failed, falling back to OSRM');
             } catch (error) {
@@ -195,7 +201,7 @@
                 const route = osrmData.routes[0];
                 const routeLayer = L.geoJSON(route.geometry, {
                     style: {
-                        color: BRAND,
+                        color: color,
                         weight: 5,
                         opacity: 0.75
                     }
@@ -206,7 +212,8 @@
                 // OSRM returns distance in meters, convert to km
                 return {
                     distance: route.distance / 1000,
-                    duration: route.duration
+                    duration: route.duration,
+                    geometry: route.geometry.coordinates.map(c => [c[1], c[0]]) // Convert [lng, lat] to [lat, lng]
                 };
             }
             throw new Error('OSRM returned no routes');

@@ -120,6 +120,14 @@ class ClientPortalController extends Controller
                 ->limit(5)
                 ->get();
 
+            // Recent system alerts from contractor
+            $recentAlerts = Message::where('client_id', $client->id)
+                ->where('contractor_id', $contractorId)
+                ->whereIn('message_type', ['eta_alert', 'collection_update'])
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
+
             // Payment statistics from contractor
             $totalPaid = $paidInvoices->sum('total_amount');
             $totalPending = $pendingInvoices->sum('remaining_balance');
@@ -136,6 +144,7 @@ class ClientPortalController extends Controller
             $recentInvoices = collect();
             $monthlyPayments = collect();
             $recentFeedback = collect();
+            $recentAlerts = collect();
             $totalPaid = 0;
             $totalPending = 0;
             $upcomingSchedulesCount = 0;
@@ -154,6 +163,7 @@ class ClientPortalController extends Controller
             'paidInvoices' => $paidInvoices,
             'monthlyPayments' => $monthlyPayments,
             'recentFeedback' => $recentFeedback,
+            'recentAlerts' => $recentAlerts,
             'totalPaid' => $totalPaid,
             'totalPending' => $totalPending,
             'recentActivities' => $recentActivities,
@@ -653,5 +663,35 @@ class ClientPortalController extends Controller
         }
 
         return redirect()->route('client.location')->with('success', 'GPS location updated successfully. Your contractor can now use this for route optimization and scheduling.');
+    }
+
+    public function latestAlerts()
+    {
+        $client = $this->resolveClient();
+        if (!$client) {
+            return response()->json(['success' => false, 'message' => 'Client not found']);
+        }
+
+        $alerts = Message::where('client_id', $client->id)
+            ->where('contractor_id', $client->contractor_id)
+            ->whereIn('message_type', ['eta_alert', 'collection_update'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($alert) {
+                return [
+                    'id' => $alert->id,
+                    'message' => $alert->message,
+                    'message_type' => $alert->message_type,
+                    'created_at' => $alert->created_at->toIso8601String(),
+                    'time_formatted' => $alert->created_at->format('g:i A'),
+                    'diff' => $alert->created_at->diffForHumans()
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'alerts' => $alerts
+        ]);
     }
 }

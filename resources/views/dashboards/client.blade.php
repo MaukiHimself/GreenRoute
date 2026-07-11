@@ -510,6 +510,26 @@
                 min-width: 800px;
             }
         }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
         <!-- Welcome Section -->
         <div class="welcome-section">
@@ -683,6 +703,31 @@
 
             <!-- Sidebar -->
             <div class="col-lg-4">
+                <!-- Live Collection Alerts Panel -->
+                <div class="content-section mb-4">
+                    <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="section-title">
+                            <i class="bi bi-bell-fill text-warning"></i>Live Alerts Feed
+                        </h2>
+                        <span class="d-flex align-items-center gap-1 small text-success fw-bold">
+                            <span class="pulse-dot"></span> Live
+                        </span>
+                    </div>
+                    <div id="liveAlertsFeed" style="max-height: 250px; overflow-y: auto; padding-right: 0.25rem;">
+                        @forelse($recentAlerts as $alert)
+                            <div class="alert alert-info py-2 px-3 mb-2 border-0 rounded-3 small d-flex gap-2 align-items-start" style="background:#e0f2fe; color:#0369a1;">
+                                <i class="bi {{ $alert->message_type === 'eta_alert' ? 'bi-truck' : 'bi-check-circle-fill' }} mt-1"></i>
+                                <div>
+                                    <div class="fw-semibold">{{ $alert->message }}</div>
+                                    <small class="opacity-75 d-block mt-1"><i class="bi bi-clock me-1"></i>{{ $alert->created_at->diffForHumans() }}</small>
+                                </div>
+                            </div>
+                        @empty
+                            <p id="noAlertsText" class="text-muted text-center mb-0 py-3 small">No active alerts yet. Tracking updates will appear here in real-time.</p>
+                        @endforelse
+                    </div>
+                </div>
+
                 <!-- Recent Activity from contractor -->
                 <div class="content-section">
                     <div class="section-header">
@@ -713,7 +758,6 @@
             </div>
         </div>
 
-
     <script>
         // Animations from contractor
         document.addEventListener('DOMContentLoaded', function() {
@@ -739,6 +783,92 @@
                 });
             });
         });
+
+        // Dynamic Alerts Polling
+        let processedAlertIds = [];
+        @foreach($recentAlerts as $alert)
+            processedAlertIds.push({{ $alert->id }});
+        @endforeach
+
+        function pollLatestAlerts() {
+            fetch('{{ route("client.alerts.latest") }}')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.alerts.length > 0) {
+                        const feed = document.getElementById('liveAlertsFeed');
+                        const noAlerts = document.getElementById('noAlertsText');
+                        
+                        data.alerts.forEach(alert => {
+                            if (!processedAlertIds.includes(alert.id)) {
+                                processedAlertIds.push(alert.id);
+
+                                if (noAlerts) noAlerts.remove();
+
+                                // Prepend alert item
+                                const alertDiv = document.createElement('div');
+                                alertDiv.className = 'alert alert-info py-2 px-3 mb-2 border-0 rounded-3 small d-flex gap-2 align-items-start';
+                                alertDiv.style.cssText = 'background:#e0f2fe; color:#0369a1; animation: slideIn 0.3s ease;';
+                                
+                                const iconClass = alert.message_type === 'eta_alert' ? 'bi-truck' : 'bi-check-circle-fill';
+                                alertDiv.innerHTML = `
+                                    <i class="bi ${iconClass} mt-1"></i>
+                                    <div>
+                                        <div class="fw-semibold">${alert.message}</div>
+                                        <small class="opacity-75 d-block mt-1"><i class="bi bi-clock me-1"></i>${alert.diff}</small>
+                                    </div>
+                                `;
+                                feed.insertBefore(alertDiv, feed.firstChild);
+
+                                // Trigger Toast Notification
+                                showToastNotification(
+                                    alert.message_type === 'eta_alert' ? 'Collection Truck Nearby' : 'Collection Update',
+                                    alert.message
+                                );
+                            }
+                        });
+                    }
+                })
+                .catch(err => console.warn('Alert polling error:', err));
+        }
+
+        function showToastNotification(title, message) {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toastId = 'toast-' + Date.now();
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="background: white; border-radius: 12px; min-width: 280px;">
+                    <div class="toast-header text-white" style="background: var(--primary-color); border-radius: 12px 12px 0 0;">
+                        <i class="bi bi-bell-fill me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body fw-semibold" style="color: var(--text-dark); padding: 1rem;">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const el = document.getElementById(toastId);
+            
+            // Initialize Bootstrap Toast
+            const toast = new bootstrap.Toast(el, { delay: 7000 });
+            toast.show();
+            
+            el.addEventListener('hidden.bs.toast', () => el.remove());
+        }
+
+        function createToastContainer() {
+            const div = document.createElement('div');
+            div.id = 'toastContainer';
+            div.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            div.style.zIndex = '1100';
+            document.body.appendChild(div);
+            return div;
+        }
+
+        // Run polling every 8 seconds
+        setInterval(pollLatestAlerts, 8000);
     </script>
 </x-dashboard-layout>
 

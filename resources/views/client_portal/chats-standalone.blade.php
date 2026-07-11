@@ -226,10 +226,18 @@
                         @endphp
                     @endif
                     
-                    <div class="message {{ $message->sender_type }}">
-                        <div class="message-bubble">
-                            <div class="message-text">{{ $message->message }}</div>
-                            <div class="message-time">
+                    @php
+                        $isSystemAlert = in_array($message->message_type, ['eta_alert', 'collection_update']);
+                    @endphp
+                    <div class="message {{ $message->sender_type }} {{ $isSystemAlert ? 'system-alert' : '' }}">
+                        <div class="message-bubble" style="{{ $isSystemAlert ? 'background: #f0fdf4; border: 1.5px solid #bbf7d0; border-bottom-left-radius: 12px; color: #166534; max-width: 85%;' : '' }}">
+                            <div class="message-text">
+                                @if($isSystemAlert)
+                                    <i class="bi {{ $message->message_type === 'eta_alert' ? 'bi-truck' : 'bi-check-circle' }} me-2" style="font-size: 1.1rem; vertical-align: middle;"></i>
+                                @endif
+                                {{ $message->message }}
+                            </div>
+                            <div class="message-time" style="{{ $isSystemAlert ? 'color: #15803d; opacity: 0.85;' : '' }}">
                                 {{ $message->created_at->format('g:i A') }}
                             </div>
                         </div>

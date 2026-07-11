@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
         Route::get('payments', [ClientPortalController::class, 'payments'])->name('client.payments');
         Route::get('chats', [ClientPortalController::class, 'chats'])->name('client.chats');
+        Route::get('alerts/latest', [ClientPortalController::class, 'latestAlerts'])->name('client.alerts.latest');
         Route::get('support', [ClientPortalController::class, 'support'])->name('client.support');
         Route::post('support', [ClientPortalController::class, 'storeSupport'])->name('client.support.submit');
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
@@ -427,6 +428,10 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
         Route::post('/', [App\Http\Controllers\TruckController::class, 'store'])->name('trucks.store');
         Route::post('/{truck}/location', [App\Http\Controllers\TruckController::class, 'updateLocation'])->name('trucks.location');
         Route::get('/locations', [App\Http\Controllers\TruckController::class, 'getLocations'])->name('trucks.locations');
+        Route::get('/collection-runs', [App\Http\Controllers\TruckController::class, 'collectionRuns'])->name('trucks.collection-runs');
+        Route::post('/{truck}/assign-route', [App\Http\Controllers\TruckController::class, 'assignRoute'])->name('trucks.assign-route');
+        Route::get('/{truck}/route-path', [App\Http\Controllers\TruckController::class, 'routePath'])->name('trucks.route-path');
+        Route::get('/{truck}/playback-history', [App\Http\Controllers\TruckController::class, 'getPlaybackHistory'])->name('trucks.playback-history');
         Route::delete('/{truck}', [App\Http\Controllers\TruckController::class, 'destroy'])->name('trucks.destroy');
     });
 
@@ -447,5 +452,7 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
 // Driver Public Tracking Routes (No login required)
 Route::get('/driver/track/{token}', [App\Http\Controllers\TruckController::class, 'driverTrack'])->name('driver.track');
 Route::post('/driver/location/{token}', [App\Http\Controllers\TruckController::class, 'updateLocationByToken'])->name('driver.location');
+Route::post('/driver/stop-status/{token}', [App\Http\Controllers\TruckController::class, 'updateStopStatus'])->name('driver.stop-status');
+Route::post('/driver/start-route/{token}', [App\Http\Controllers\TruckController::class, 'startRouteByToken'])->name('driver.start-route');
 
 require __DIR__.'/auth.php';
