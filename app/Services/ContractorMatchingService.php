@@ -48,6 +48,33 @@ class ContractorMatchingService
             ];
         }
 
+        // Proximity-based GPS matching fallback when no regional/ward match is found
+        if ($lat !== null && $lng !== null && $lat !== '' && $lng !== '') {
+            $contractors = User::where('user_type', 'contractor')
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->get();
+            
+            if ($contractors->isNotEmpty()) {
+                $bestContractorId = null;
+                $bestDistance = INF;
+                foreach ($contractors as $contractor) {
+                    $d = $this->haversine((float) $lat, (float) $lng, (float) $contractor->latitude, (float) $contractor->longitude);
+                    if ($d < $bestDistance) {
+                        $bestDistance = $d;
+                        $bestContractorId = $contractor->id;
+                    }
+                }
+                if ($bestContractorId !== null) {
+                    return [
+                        'contractor_id' => $bestContractorId,
+                        'route'         => null,
+                        'level'         => 'coordinates',
+                    ];
+                }
+            }
+        }
+
         return null;
     }
 

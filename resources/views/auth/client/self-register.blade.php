@@ -109,54 +109,11 @@
                         </div>
 
                         {{-- Location --}}
-                        <p class="section-label mt-4"><i class="bi bi-geo-alt me-2"></i>Your Location</p>
                         <div class="row g-3 mb-3">
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Physical Address <span class="text-danger">*</span></label>
-                                <input type="text" name="address" class="form-control" value="{{ old('address') }}" placeholder="Street address or landmark" required>
-                            </div>
-
-                            {{-- Region --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Region <span class="text-danger">*</span></label>
-                                <div class="loading-select">
-                                    <select name="region" id="regionSelect" class="form-select" required>
-                                        <option value="">Select Region</option>
-                                        @foreach($regions as $region)
-                                            <option value="{{ $region }}" {{ old('region') == $region ? 'selected' : '' }}>{{ $region }}</option>
-                                        @endforeach
-                                    </select>
-                                    <div class="select-spinner" id="regionSpinner">
-                                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- District --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">District</label>
-                                <div class="loading-select">
-                                    <select name="district" id="districtSelect" class="form-select" disabled>
-                                        <option value="">— select region first —</option>
-                                    </select>
-                                    <div class="select-spinner" id="districtSpinner">
-                                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Ward --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Ward <span class="text-danger">*</span></label>
-                                <div class="loading-select">
-                                    <select name="ward" id="wardSelect" class="form-select" required disabled>
-                                        <option value="">— select district first —</option>
-                                    </select>
-                                    <div class="select-spinner" id="wardSpinner">
-                                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                    </div>
-                                </div>
-                                <div class="pin-hint text-muted mt-1">We use your ward to connect you with a contractor serving your area.</div>
+                                <label class="form-label fw-semibold">Physical Address / Street or Ward <span class="text-danger">*</span></label>
+                                <input type="text" name="address" class="form-control" value="{{ old('address') }}" placeholder="e.g. Mikocheni B, Kenge street or Ward name" required>
+                                <div class="pin-hint text-muted mt-1">Provide your physical address, street or ward to help connect you with a contractor serving your area.</div>
                             </div>
                         </div>
 
@@ -208,105 +165,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function () {
-    // ── API base URLs (public, no auth required) ──────────────────────────
-    const API = {
-        districts: '/location/public/districts',
-        wards:     '/location/public/wards',
-    };
-
-    // ── Element refs ──────────────────────────────────────────────────────
-    const regionSel   = document.getElementById('regionSelect');
-    const districtSel = document.getElementById('districtSelect');
-    const wardSel     = document.getElementById('wardSelect');
-
-    // Restore old() values after a validation failure
-    const oldRegion   = @json(old('region'));
-    const oldDistrict = @json(old('district'));
-    const oldWard     = @json(old('ward'));
-
-    // ── Generic helpers ───────────────────────────────────────────────────
-    function showSpinner(id)  { document.getElementById(id).style.display = 'block'; }
-    function hideSpinner(id)  { document.getElementById(id).style.display = 'none';  }
-
-    function resetSelect(sel, placeholder) {
-        sel.innerHTML = `<option value="">${placeholder}</option>`;
-        sel.disabled = true;
-    }
-
-    function populateSelect(sel, items, oldValue) {
-        sel.innerHTML = '<option value="">— select —</option>';
-        items.forEach(function (item) {
-            const opt = document.createElement('option');
-            opt.value = item;
-            opt.textContent = item;
-            if (item === oldValue) opt.selected = true;
-            sel.appendChild(opt);
-        });
-        sel.disabled = items.length === 0;
-    }
-
-    async function fetchJson(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-    }
-
-    // ── Districts ─────────────────────────────────────────────────────────
-    async function loadDistricts(region, restoreValue) {
-        resetSelect(districtSel, '— loading… —');
-        resetSelect(wardSel,     '— select district first —');
-        showSpinner('districtSpinner');
-        try {
-            const data = await fetchJson(API.districts + '?region=' + encodeURIComponent(region));
-            populateSelect(districtSel, data.data || [], restoreValue || null);
-        } catch (e) {
-            resetSelect(districtSel, '— unable to load —');
-        } finally {
-            hideSpinner('districtSpinner');
-        }
-    }
-
-    // ── Wards ─────────────────────────────────────────────────────────────
-    async function loadWards(region, district, restoreValue) {
-        resetSelect(wardSel, '— loading… —');
-        showSpinner('wardSpinner');
-        try {
-            const data = await fetchJson(
-                API.wards + '?region=' + encodeURIComponent(region) +
-                            '&district=' + encodeURIComponent(district)
-            );
-            populateSelect(wardSel, data.data || [], restoreValue || null);
-        } catch (e) {
-            resetSelect(wardSel, '— unable to load —');
-        } finally {
-            hideSpinner('wardSpinner');
-        }
-    }
-
-    // ── Dependent dropdown listeners ──────────────────────────────────────
-    regionSel.addEventListener('change', function () {
-        const region = this.value;
-        resetSelect(districtSel, '— select region first —');
-        resetSelect(wardSel,     '— select district first —');
-        if (!region) return;
-        loadDistricts(region, null);
-    });
-
-    districtSel.addEventListener('change', function () {
-        const region   = regionSel.value;
-        const district = this.value;
-        resetSelect(wardSel, '— select district first —');
-        if (!district) return;
-        loadWards(region, district, null);
-    });
-
-    // Restore old() values on validation failure
-    if (oldRegion) {
-        loadDistricts(oldRegion, oldDistrict).then(function () {
-            if (oldDistrict) return loadWards(oldRegion, oldDistrict, oldWard);
-        });
-    }
-
     // ── Leaflet location pin (optional, auto-locate + confirm) ────────────
     const latInput   = document.getElementById('latitude');
     const lngInput   = document.getElementById('longitude');

@@ -1,10 +1,16 @@
-@extends('layouts.app')
+@extends('layouts.contractor-sidebar')
 
 @section('title', 'Pending Payment Approvals')
 
-@push('styles')
+@push('head-scripts')
+<script src="https://cdn.tailwindcss.com"></script>
+@endpush
+
+@section('styles')
 <style>
 :root { --gr: #047857; --gr-dark: #064e3b; --gr-mid: #059669; --gr-light: #d1fae5; --gr-pale: #ecfdf5; }
+
+.hidden { display: none !important; }
 
 /* tabs */
 .ppa-tab { position:relative; padding:1rem 2rem; font-weight:700; font-size:.9rem; color:#6b7280;
@@ -102,7 +108,7 @@
 .empty-icon { animation:pulse 3s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { transform:scale(1); } 50% { transform:scale(1.08); } }
 </style>
-@endpush
+@endsection
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-6xl">

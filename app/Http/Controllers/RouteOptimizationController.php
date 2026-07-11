@@ -12,18 +12,19 @@ class RouteOptimizationController extends Controller
 {
     public function index()
     {
-        // Get site locations from tbl_locations grouped by Region -> District
-        $siteLocations = Location::select('region', 'district')
-            ->distinct()
-            ->orderBy('region')
-            ->orderBy('district')
-            ->get()
-            ->groupBy('region')
-            ->map(function ($districts) {
-                return $districts->pluck('district')->unique()->values();
-            });
+        $contractorId = Auth::id();
 
-        return view('routes.index', compact('siteLocations'));
+        // Get clients belonging to this contractor with valid coordinates
+        $clients = Client::where('contractor_id', $contractorId)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('name')
+            ->get(['id', 'name', 'address', 'latitude', 'longitude', 'phone']);
+
+        // Get dumping sites from config
+        $dumpingSites = config('dumping_sites.sites', []);
+
+        return view('routes.index', compact('clients', 'dumpingSites'));
     }
 
     public function optimize(Request $request)

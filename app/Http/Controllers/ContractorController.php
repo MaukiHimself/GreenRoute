@@ -236,7 +236,25 @@ class ContractorController extends Controller
 
          foreach ($recipients as $client) {
              try {
-                 $this->sendSms($client->phone, $validated['message']);
+                 // Personalize the message by replacing name placeholders with the client's name
+                 $personalizedMessage = str_replace(
+                     ['{name}', '{client_name}', '{Client Name}', '{Name}'],
+                     $client->name,
+                     $validated['message']
+                 );
+
+                 $this->sendSms($client->phone, $personalizedMessage);
+
+                 // Write to database messages table so it shows up in client's inbox
+                 \App\Models\Message::create([
+                     'contractor_id' => $contractorId,
+                     'client_id'     => $client->id,
+                     'sender_type'   => 'contractor',
+                     'message'       => $personalizedMessage,
+                     'message_type'  => 'campaign',
+                     'status'        => 'sent'
+                 ]);
+
                  $successCount++;
              } catch (\Exception $e) {
                  $failCount++;
