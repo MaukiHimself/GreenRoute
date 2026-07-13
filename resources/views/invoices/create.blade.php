@@ -128,13 +128,9 @@
                                 <option value="Other" {{ old('service_type') == 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="subtotal" class="form-label">Subtotal (TZS) *</label>
+                        <div class="col-md-6">
+                            <label for="subtotal" class="form-label">Amount (TZS) *</label>
                             <input type="number" name="subtotal" id="subtotal" step="0.01" min="0" value="{{ old('subtotal') }}" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="tax_rate" class="form-label">Tax Rate (%) *</label>
-                            <input type="number" name="tax_rate" id="tax_rate" step="0.01" min="0" max="100" value="{{ old('tax_rate', '0') }}" class="form-control" required>
                         </div>
                         <div class="col-12">
                             <label for="description" class="form-label">Description</label>
@@ -149,8 +145,7 @@
                     <div class="row g-3 mt-3">
                         <div class="col-md-4">
                             <div class="border rounded p-3">
-                                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Subtotal:</span><span id="display-subtotal">TZS 0.00</span></div>
-                                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Tax:</span><span id="display-tax">TZS 0.00</span></div>
+                                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Amount:</span><span id="display-subtotal">TZS 0.00</span></div>
                                 <div class="border-top pt-2 d-flex justify-content-between"><span class="fw-semibold">Total:</span><span id="display-total" class="fw-bold">TZS 0.00</span></div>
                             </div>
                         </div>
@@ -447,15 +442,10 @@
 
     function calculateTotals() {
         const sub = parseFloat(document.getElementById('subtotal').value) || 0;
-        const rate = parseFloat(document.getElementById('tax_rate').value) || 0;
-        const tax = sub * (rate/100);
-        const total = sub + tax;
         document.getElementById('display-subtotal').textContent = 'TZS ' + sub.toFixed(2);
-        document.getElementById('display-tax').textContent = 'TZS ' + tax.toFixed(2);
-        document.getElementById('display-total').textContent = 'TZS ' + total.toFixed(2);
+        document.getElementById('display-total').textContent = 'TZS ' + sub.toFixed(2);
     }
     document.getElementById('subtotal').addEventListener('input', calculateTotals);
-    document.getElementById('tax_rate').addEventListener('input', calculateTotals);
 
     const scheduleSelect = document.getElementById('schedule_id');
     if (scheduleSelect) {

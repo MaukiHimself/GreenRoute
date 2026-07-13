@@ -316,11 +316,16 @@
                                         </small>
                                     </div>
 
-                                    <div class="mb-4 form-check">
-                                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                                        <label class="form-check-label" for="remember">
-                                            Remember me for 30 days
-                                        </label>
+                                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                                        <div class="form-check mb-0">
+                                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                            <label class="form-check-label" for="remember">
+                                                Remember me for 30 days
+                                            </label>
+                                        </div>
+                                        <a href="{{ route('password.request') }}" class="support-link">
+                                            Forgot password?
+                                        </a>
                                     </div>
 
                                     <!-- Submit Button -->

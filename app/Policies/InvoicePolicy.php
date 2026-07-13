@@ -21,6 +21,11 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
+        // Admins can view any invoice (read-only oversight of system billing).
+        if ($user->isAdmin()) {
+            return true;
+        }
+
         return $user->isContractor() && $user->id === $invoice->contractor_id;
     }
 

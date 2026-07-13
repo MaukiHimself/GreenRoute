@@ -116,4 +116,11 @@
         <i class="bi bi-chat-square-text"></i>
         <span class="portal-sidebar__label">Feedback</span>
     </a>
+
+    <a href="{{ route('contractor.support') }}"
+       class="portal-sidebar__link {{ request()->routeIs('contractor.support') ? 'active' : '' }}"
+       data-tooltip="Support">
+        <i class="bi bi-life-preserver"></i>
+        <span class="portal-sidebar__label">Support</span>
+    </a>
 @endif

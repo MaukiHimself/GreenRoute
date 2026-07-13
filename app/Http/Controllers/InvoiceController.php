@@ -82,7 +82,6 @@ class InvoiceController extends Controller
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'subtotal' => 'required|numeric|min:0',
-            'tax_rate' => 'required|numeric|min:0|max:100',
             'notes' => 'nullable|string'
         ]);
 
@@ -114,7 +113,7 @@ class InvoiceController extends Controller
                 $invoice->service_type = $validated['service_type'];
                 $invoice->description = $validated['description'];
                 $invoice->subtotal = $validated['subtotal'];
-                $invoice->tax_rate = $validated['tax_rate'];
+                $invoice->tax_rate = 0;
                 $invoice->notes = $validated['notes'];
                 
                 $invoice->invoice_number = $invoice->generateInvoiceNumber();
@@ -179,7 +178,6 @@ class InvoiceController extends Controller
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'subtotal' => 'required|numeric|min:0',
-            'tax_rate' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:draft,sent,paid,overdue,cancelled',
             'notes' => 'nullable|string'
         ]);
@@ -220,6 +218,11 @@ class InvoiceController extends Controller
         $user = Auth::user();
 
         $canView = false;
+
+        // Admins have read-only oversight of all system billing.
+        if ($user && $user->isAdmin()) {
+            $canView = true;
+        }
 
         if ($user && $user->isContractor()) {
             $canView = (int) $user->id === (int) $invoice->contractor_id;

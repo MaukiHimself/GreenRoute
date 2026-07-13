@@ -191,12 +191,15 @@ class PaymentSubmissionController extends Controller
         $available = [];
         foreach ($this->paymentMethodCatalog() as $key => $method) {
             $lipaNo = $contractor->getLipaNo($key);
+            // Each Lipa number carries its own display name; only fall back to the
+            // contractor's name when a per-method name hasn't been configured.
+            $lipaName = $contractor->getLipaName($key);
             $available[$key] = [
                 'name' => $method['name'],
                 'logo' => $method['logo'],
                 'lipa_no' => $lipaNo,
                 'configured' => filled($lipaNo),
-                'account_name' => $contractor->name ?? $contractor->company_name,
+                'account_name' => $lipaName ?: ($contractor->name ?? $contractor->company_name),
             ];
         }
 

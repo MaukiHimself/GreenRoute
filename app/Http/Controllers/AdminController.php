@@ -9,6 +9,9 @@ use App\Models\ContractorRoute;
 use App\Models\ContractorLocation;
 use App\Models\BillingRate;
 use App\Models\ContractorBillingRateChange;
+use App\Models\Invoice;
+use App\Models\Schedule;
+use App\Models\SystemFeedback;
 use App\Mail\ContractorApproved;
 use App\Notifications\ClientPendingApprovalNotification;
 use App\Services\ContractorMatchingService;
@@ -21,7 +24,9 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        // Get system parameters
+        $today = today();
+
+        // Core system parameters
         $contractorsCount = User::where('user_type', 'contractor')->count();
         $clientsCount = Client::count();
         $activeRoutesCount = ContractorRoute::where('is_active', true)->count();
@@ -31,10 +36,47 @@ class AdminController extends Controller
             ->where('status', '!=', 'approved')
             ->count();
 
+        // Financial snapshot
+        $totalRevenue = Invoice::where('status', 'paid')->sum('total_amount');
+        $outstandingAmount = Invoice::where('status', 'sent')->sum('remaining_balance');
+        $overdueCount = Invoice::where('status', 'sent')
+            ->whereDate('due_date', '<', $today)
+            ->count();
+        $totalInvoices = Invoice::count();
+
+        // Operations snapshot
+        $schedulesToday = Schedule::whereDate('pickup_date', $today)->count();
+        $upcomingSchedulesCount = Schedule::whereDate('pickup_date', '>=', $today)
+            ->whereIn('status', ['scheduled', 'in_progress'])
+            ->count();
+        $completedSchedules = Schedule::where('status', 'completed')->count();
+
+        // System feedback & assignment queue
+        $openFeedbackCount = SystemFeedback::where('status', 'open')->count();
+        $unassignedClients = Client::whereNull('contractor_id')->count();
+
+        // Invoice status breakdown (for the donut chart)
+        $invoiceStatusCounts = [
+            'paid'    => Invoice::where('status', 'paid')->count(),
+            'sent'    => Invoice::where('status', 'sent')->whereDate('due_date', '>=', $today)->count(),
+            'overdue' => $overdueCount,
+            'draft'   => Invoice::where('status', 'draft')->count(),
+        ];
+
+        // Recent activity feeds
+        $recentFeedback = SystemFeedback::with('user')->latest()->take(5)->get();
+        $recentInvoices = Invoice::with('client')->latest()->take(5)->get();
+        $upcomingSchedules = Schedule::with('client')
+            ->whereDate('pickup_date', '>=', $today)
+            ->whereIn('status', ['scheduled', 'in_progress'])
+            ->orderBy('pickup_date')
+            ->orderBy('pickup_time')
+            ->take(5)
+            ->get();
+
         // Pending tasks
         $pendingTasks = [];
 
-        // Check for contractors pending verification
         if ($pendingVerifications > 0) {
             $pendingTasks[] = [
                 'icon' => 'person-check',
@@ -42,6 +84,36 @@ class AdminController extends Controller
                 'description' => 'New contractor registrations awaiting approval',
                 'count' => $pendingVerifications,
                 'link' => route('admin.verification')
+            ];
+        }
+
+        if ($unassignedClients > 0) {
+            $pendingTasks[] = [
+                'icon' => 'person-plus',
+                'title' => 'Assign Clients',
+                'description' => 'Self-registered clients with no contractor assigned',
+                'count' => $unassignedClients,
+                'link' => route('admin.clients.unassigned')
+            ];
+        }
+
+        if ($openFeedbackCount > 0) {
+            $pendingTasks[] = [
+                'icon' => 'life-preserver',
+                'title' => 'Answer Feedback',
+                'description' => 'System feedback from clients and contractors awaiting a reply',
+                'count' => $openFeedbackCount,
+                'link' => route('admin.feedback')
+            ];
+        }
+
+        if ($overdueCount > 0) {
+            $pendingTasks[] = [
+                'icon' => 'exclamation-triangle',
+                'title' => 'Overdue Invoices',
+                'description' => 'Issued invoices that are past their due date and unpaid',
+                'count' => $overdueCount,
+                'link' => route('admin.billing')
             ];
         }
 
@@ -62,6 +134,19 @@ class AdminController extends Controller
             'clientsCount' => $clientsCount,
             'activeRoutesCount' => $activeRoutesCount,
             'pendingVerifications' => $pendingVerifications,
+            'totalRevenue' => $totalRevenue,
+            'outstandingAmount' => $outstandingAmount,
+            'overdueCount' => $overdueCount,
+            'totalInvoices' => $totalInvoices,
+            'schedulesToday' => $schedulesToday,
+            'upcomingSchedulesCount' => $upcomingSchedulesCount,
+            'completedSchedules' => $completedSchedules,
+            'openFeedbackCount' => $openFeedbackCount,
+            'unassignedClients' => $unassignedClients,
+            'invoiceStatusCounts' => $invoiceStatusCounts,
+            'recentFeedback' => $recentFeedback,
+            'recentInvoices' => $recentInvoices,
+            'upcomingSchedules' => $upcomingSchedules,
             'pendingTasks' => $pendingTasks
         ]);
     }

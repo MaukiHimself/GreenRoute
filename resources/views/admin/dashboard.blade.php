@@ -288,7 +288,8 @@
                         <li class="breadcrumb-item">Dashboard</li>
                         <li class="breadcrumb-item active">Administrator - {{ auth()->user()->name }}</li>
                     </ol>
-                </nav>
+                    </nav>
+                </div>
                 <div class="header-right">
                     <div class="notification-badge">
                         <i class="bi bi-bell-fill"></i>
@@ -319,7 +320,7 @@
 
             <!-- Content Area -->
             <div class="content-area">
-                <h2 class="mb-4">System Parameters</h2>
+                <h2 class="mb-4">System Overview</h2>
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
@@ -338,41 +339,178 @@
                         <div class="stat-title">Active Routes</div>
                         <div class="stat-value">{{ $activeRoutesCount ?? 0 }}</div>
                     </div>
+                    <div class="stat-card revenue" style="border-left-color:#047857;">
+                        <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                        <div class="stat-title">Revenue (Paid)</div>
+                        <div class="stat-value" style="font-size:1.5rem;">TZS {{ number_format($totalRevenue ?? 0, 0) }}</div>
+                    </div>
+                    <div class="stat-card outstanding" style="border-left-color:#f59e0b;">
+                        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                        <div class="stat-title">Outstanding</div>
+                        <div class="stat-value" style="font-size:1.5rem;">TZS {{ number_format($outstandingAmount ?? 0, 0) }}</div>
+                    </div>
+                    <div class="stat-card overdue" style="border-left-color:#c0392b;">
+                        <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                        <div class="stat-title">Overdue Invoices</div>
+                        <div class="stat-value">{{ $overdueCount ?? 0 }}</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#3b82f6;">
+                        <div class="stat-icon"><i class="bi bi-truck"></i></div>
+                        <div class="stat-title">Pickups Today</div>
+                        <div class="stat-value">{{ $schedulesToday ?? 0 }}</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#8b5cf6;">
+                        <div class="stat-icon"><i class="bi bi-life-preserver"></i></div>
+                        <div class="stat-title">Open Feedback</div>
+                        <div class="stat-value">{{ $openFeedbackCount ?? 0 }}</div>
+                    </div>
                 </div>
 
-                <!-- Pending Tasks -->
-                <div class="tasks-section">
-                    <h3 class="section-title">Pending Tasks</h3>
-
-                    @if(isset($pendingTasks) && count($pendingTasks) > 0)
-                        @foreach($pendingTasks as $task)
-                            <div class="task-item">
-                                <div class="task-info">
-                                    <div class="task-icon">
-                                        <i class="bi bi-{{ $task['icon'] ?? 'exclamation-circle' }}"></i>
-                                    </div>
-                                    <div class="task-details">
-                                        <h5>{{ $task['title'] }}</h5>
-                                        <p>{{ $task['description'] }}</p>
-                                    </div>
-                                </div>
-                                <div class="task-action">
-                                    <span class="badge-count">{{ $task['count'] }}</span>
-                                    <a href="{{ $task['link'] }}" class="btn-view">View</a>
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="empty-state">
-                            <i class="bi bi-check-circle"></i>
-                            <p>No pending tasks. All caught up!</p>
+                <!-- Charts & Pending Tasks -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <div class="tasks-section h-100">
+                            <h3 class="section-title">Invoice Status</h3>
+                            @if(($totalInvoices ?? 0) > 0)
+                                <canvas id="invoiceChart" height="220"></canvas>
+                            @else
+                                <div class="empty-state"><i class="bi bi-receipt"></i><p>No invoices yet.</p></div>
+                            @endif
                         </div>
-                    @endif
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="tasks-section h-100">
+                            <h3 class="section-title">Pending Tasks</h3>
+
+                            @if(isset($pendingTasks) && count($pendingTasks) > 0)
+                                @foreach($pendingTasks as $task)
+                                    <div class="task-item">
+                                        <div class="task-info">
+                                            <div class="task-icon">
+                                                <i class="bi bi-{{ $task['icon'] ?? 'exclamation-circle' }}"></i>
+                                            </div>
+                                            <div class="task-details">
+                                                <h5>{{ $task['title'] }}</h5>
+                                                <p>{{ $task['description'] }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="task-action">
+                                            <span class="badge-count">{{ $task['count'] }}</span>
+                                            <a href="{{ $task['link'] }}" class="btn-view">View</a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="empty-state">
+                                    <i class="bi bi-check-circle"></i>
+                                    <p>No pending tasks. All caught up!</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="row g-4">
+                    <!-- Recent System Feedback -->
+                    <div class="col-lg-4">
+                        <div class="tasks-section h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h3 class="section-title mb-0 border-0 pb-0">Recent Feedback</h3>
+                                <a href="{{ route('admin.feedback') }}" class="small" style="color:var(--primary-teal);">View all</a>
+                            </div>
+                            @forelse($recentFeedback as $fb)
+                                <a href="{{ route('admin.feedback.show', $fb) }}" class="d-block text-decoration-none border-bottom py-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <span class="fw-semibold text-dark text-truncate" style="max-width:70%;">{{ $fb->subject }}</span>
+                                        <span class="badge {{ $fb->status === 'open' ? 'bg-warning text-dark' : ($fb->status === 'resolved' ? 'bg-success' : 'bg-info text-dark') }}">{{ ucfirst($fb->status) }}</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        {{ ucfirst($fb->role) }} · {{ $fb->user->name ?? 'Unknown' }} · {{ $fb->created_at->diffForHumans() }}
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="empty-state py-4"><i class="bi bi-chat-left-dots"></i><p>No feedback yet.</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Recent Invoices -->
+                    <div class="col-lg-4">
+                        <div class="tasks-section h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h3 class="section-title mb-0 border-0 pb-0">Recent Invoices</h3>
+                                <a href="{{ route('admin.billing') }}" class="small" style="color:var(--primary-teal);">View all</a>
+                            </div>
+                            @forelse($recentInvoices as $inv)
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div>
+                                        <div class="fw-semibold">{{ $inv->client->name ?? 'Group / N/A' }}</div>
+                                        <div class="small text-muted">{{ $inv->invoice_number }} · {{ optional($inv->invoice_date)->format('M d, Y') }}</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-semibold">TZS {{ number_format($inv->total_amount, 0) }}</div>
+                                        <span class="badge {{ $inv->status === 'paid' ? 'bg-success' : ($inv->status === 'draft' ? 'bg-secondary' : 'bg-info text-dark') }}">{{ ucfirst($inv->status) }}</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="empty-state py-4"><i class="bi bi-receipt"></i><p>No invoices yet.</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Pickups -->
+                    <div class="col-lg-4">
+                        <div class="tasks-section h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h3 class="section-title mb-0 border-0 pb-0">Upcoming Pickups</h3>
+                                <a href="{{ route('admin.schedules') }}" class="small" style="color:var(--primary-teal);">View all</a>
+                            </div>
+                            @forelse($upcomingSchedules as $sched)
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div>
+                                        <div class="fw-semibold">{{ $sched->client->name ?? 'N/A' }}</div>
+                                        <div class="small text-muted">{{ ucfirst(str_replace('_', ' ', $sched->service_type)) }} · {{ optional($sched->pickup_date)->format('M d') }}</div>
+                                    </div>
+                                    <span class="badge {{ $sched->status === 'in_progress' ? 'bg-primary' : 'bg-info text-dark' }}">{{ ucfirst(str_replace('_', ' ', $sched->status)) }}</span>
+                                </div>
+                            @empty
+                                <div class="empty-state py-4"><i class="bi bi-calendar3"></i><p>No upcoming pickups.</p></div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const canvas = document.getElementById('invoiceChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const counts = @json($invoiceStatusCounts ?? []);
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Paid', 'Sent', 'Overdue', 'Draft'],
+                    datasets: [{
+                        data: [counts.paid || 0, counts.sent || 0, counts.overdue || 0, counts.draft || 0],
+                        backgroundColor: ['#047857', '#3b82f6', '#c0392b', '#9ca3af'],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '62%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

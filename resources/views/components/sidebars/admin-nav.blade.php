@@ -76,3 +76,14 @@
     <i class="bi bi-person-gear"></i>
     <span class="portal-sidebar__label">Users</span>
 </a>
+
+@php($openFeedbackCount = \App\Models\SystemFeedback::where('status', 'open')->count())
+<a href="{{ route('admin.feedback') }}"
+   class="portal-sidebar__link {{ request()->routeIs('admin.feedback*') ? 'active' : '' }}"
+   data-tooltip="System Feedback">
+    <i class="bi bi-life-preserver"></i>
+    <span class="portal-sidebar__label">System Feedback</span>
+    @if($openFeedbackCount > 0)
+        <span class="badge rounded-pill bg-danger ms-2">{{ $openFeedbackCount }}</span>
+    @endif
+</a>

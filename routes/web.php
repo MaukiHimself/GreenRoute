@@ -10,6 +10,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Auth\UserTypeController;
 use App\Http\Controllers\ClientPortalController;
 use App\Http\Controllers\ContractorFeedbackController;
+use App\Http\Controllers\SystemFeedbackController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\PaymentSubmissionController;
@@ -67,8 +68,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('payments', [ClientPortalController::class, 'payments'])->name('client.payments');
         Route::get('chats', [ClientPortalController::class, 'chats'])->name('client.chats');
         Route::get('alerts/latest', [ClientPortalController::class, 'latestAlerts'])->name('client.alerts.latest');
-        Route::get('support', [ClientPortalController::class, 'support'])->name('client.support');
-        Route::post('support', [ClientPortalController::class, 'storeSupport'])->name('client.support.submit');
+        Route::get('support', [SystemFeedbackController::class, 'create'])->name('client.support');
+        Route::post('support', [SystemFeedbackController::class, 'store'])->name('client.support.submit');
         Route::get('feedback', [ClientPortalController::class, 'feedback'])->name('client.feedback');
         Route::post('feedback', [ClientPortalController::class, 'storeFeedback'])->name('client.feedback.store');
         Route::get('location', [ClientPortalController::class, 'location'])->name('client.location');
@@ -121,6 +122,10 @@ Route::middleware(['auth', 'verified.contractor'])->group(function () {
         Route::get('feedback/{feedback}', [ContractorFeedbackController::class, 'show'])->name('contractor.feedback.show');
         Route::post('feedback/{feedback}/respond', [ContractorFeedbackController::class, 'respond'])->name('contractor.feedback.respond');
         Route::post('feedback/{feedback}/status', [ContractorFeedbackController::class, 'updateStatus'])->name('contractor.feedback.status');
+
+        // System support / feedback (contractor → admin)
+        Route::get('support', [SystemFeedbackController::class, 'create'])->name('contractor.support');
+        Route::post('support', [SystemFeedbackController::class, 'store'])->name('contractor.support.submit');
 
         Route::resource('equipment', \App\Http\Controllers\ContractorEquipmentController::class)->names([
             'index' => 'contractor.equipment.index',
@@ -333,6 +338,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::put('/users/{user}', [App\Http\Controllers\AdminController::class, 'updateUser'])->name('admin.users.update');
         Route::delete('/users/{user}', [App\Http\Controllers\AdminController::class, 'deleteUser'])->name('admin.users.delete');
         Route::get('/contractors/locations', [App\Http\Controllers\AdminController::class, 'getContractorLocations'])->name('admin.contractors.locations');
+
+        // System feedback (from clients & contractors)
+        Route::get('/feedback', [SystemFeedbackController::class, 'adminIndex'])->name('admin.feedback');
+        Route::get('/feedback/{feedback}', [SystemFeedbackController::class, 'adminShow'])->name('admin.feedback.show');
+        Route::post('/feedback/{feedback}/respond', [SystemFeedbackController::class, 'adminRespond'])->name('admin.feedback.respond');
 
         // Billing Rates Management routes
         Route::get('/billing-rates', [App\Http\Controllers\AdminController::class, 'billingRates'])->name('admin.billing.rates');

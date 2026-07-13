@@ -65,6 +65,20 @@ class Client extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * Whether this client has any invoice that is past its due date and not
+     * fully paid. Used to block scheduling new pickups until they settle up.
+     */
+    public function hasOverdueUnpaidInvoice(): bool
+    {
+        // Only issued invoices count — a draft/cancelled invoice was never billed
+        // to the client, so it must not block scheduling.
+        return $this->invoices()
+            ->whereIn('status', ['sent', 'overdue'])
+            ->whereDate('due_date', '<', now())
+            ->exists();
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);

@@ -105,6 +105,21 @@ class ScheduleController extends Controller
         ]);
 
         $contractor = Auth::user();
+
+        // Block scheduling for any client that has an overdue, unpaid invoice.
+        $blocked = Client::where('contractor_id', $contractor->id)
+            ->whereIn('id', $validated['client_ids'])
+            ->get()
+            ->filter->hasOverdueUnpaidInvoice()
+            ->pluck('name');
+
+        if ($blocked->isNotEmpty()) {
+            return back()->withInput()->withErrors([
+                'client_ids' => 'Cannot schedule for ' . $blocked->implode(', ') .
+                    ' — they have an overdue unpaid invoice. Please settle it before scheduling a new pickup.',
+            ]);
+        }
+
         $billingRate = $this->resolveBillingRate($validated['billing_rate_id'] ?? null);
         $contractorAdjustedFee = $this->normalizeFee($request->contractor_adjusted_fee);
         $schedulePrice = $contractorAdjustedFee ?? optional($billingRate)->collection_fee;
@@ -239,6 +254,17 @@ class ScheduleController extends Controller
         $client = Client::where('id', $validated['client_id'])
             ->where('contractor_id', Auth::id())
             ->firstOrFail();
+
+        // Block (re)scheduling a future pickup for a client with an overdue unpaid
+        // invoice. Editing to complete/cancel a pickup stays allowed.
+        if ($validated['status'] === 'scheduled'
+            && \Carbon\Carbon::parse($validated['pickup_date'])->startOfDay()->gte(now()->startOfDay())
+            && $client->hasOverdueUnpaidInvoice()) {
+            return back()->withInput()->withErrors([
+                'client_id' => 'Cannot schedule for ' . $client->name .
+                    ' — they have an overdue unpaid invoice. Please settle it before scheduling a new pickup.',
+            ]);
+        }
 
         $oldBillingRate = $schedule->billingRate;
         $oldAdjustedFee = $this->normalizeFee($schedule->contractor_adjusted_fee);
