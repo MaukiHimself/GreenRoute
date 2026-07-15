@@ -405,6 +405,7 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
         Route::get('/{schedule}', [App\Http\Controllers\DisposalController::class, 'show'])->name('disposal.show');
         Route::get('/{schedule}/edit', [App\Http\Controllers\DisposalController::class, 'edit'])->name('disposal.edit');
         Route::put('/{schedule}', [App\Http\Controllers\DisposalController::class, 'update'])->name('disposal.update');
+        Route::post('/{schedule}/confirm', [App\Http\Controllers\DisposalController::class, 'confirm'])->name('disposal.confirm');
     });
 
     // SMS routes
@@ -465,5 +466,7 @@ Route::post('/driver/location/{token}', [App\Http\Controllers\TruckController::c
 Route::post('/driver/stop-status/{token}', [App\Http\Controllers\TruckController::class, 'updateStopStatus'])->name('driver.stop-status');
 Route::post('/driver/start-route/{token}', [App\Http\Controllers\TruckController::class, 'startRouteByToken'])->name('driver.start-route');
 Route::post('/driver/record-weight/{token}', [App\Http\Controllers\TruckController::class, 'recordWeightByToken'])->name('driver.record-weight');
+Route::get('/driver/pending-disposals/{token}', [App\Http\Controllers\TruckController::class, 'pendingDisposalsByToken'])->name('driver.pending-disposals');
+Route::post('/driver/record-disposal/{token}', [App\Http\Controllers\TruckController::class, 'recordDisposalByToken'])->name('driver.record-disposal');
 
 require __DIR__.'/auth.php';

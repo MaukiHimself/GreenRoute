@@ -123,6 +123,18 @@
                                 <strong class="primary-dark">Disposal Site:</strong>
                                 <span class="ms-2">{{ $schedule->disposal_site }}</span>
                             </div>
+                            @if($schedule->disposal_recorded_by)
+                                <div class="col-12 mb-2">
+                                    <strong class="primary-dark">Recorded by:</strong>
+                                    <span class="ms-2">{{ ucfirst($schedule->disposal_recorded_by) }}
+                                        @if($schedule->disposal_confirmed_at)
+                                            <span class="badge bg-success ms-1">Confirmed {{ $schedule->disposal_confirmed_at->format('d M Y H:i') }}</span>
+                                        @else
+                                            <span class="badge bg-info text-dark ms-1">Awaiting confirmation</span>
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
                             <div class="col-12 mb-2">
                                 <strong class="primary-dark">Disposal Type:</strong> 
                                 <span class="ms-2">{{ ucfirst(str_replace('_', ' ', $schedule->disposal_type)) }}</span>

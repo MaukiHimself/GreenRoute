@@ -292,7 +292,11 @@
                             @endif
                         </td>
                         <td>
-                            @if(($schedule->weight_kg || $schedule->total_volume) && $schedule->disposal_site)
+                            @if($schedule->weight_kg && $schedule->disposal_confirmed_at)
+                                <span class="badge bg-success">Confirmed</span>
+                            @elseif($schedule->weight_kg)
+                                <span class="badge bg-info text-dark">From driver — awaiting confirmation</span>
+                            @elseif($schedule->total_volume && $schedule->disposal_site)
                                 <span class="badge bg-success">Recorded</span>
                             @else
                                 <span class="badge bg-warning">Pending</span>
@@ -301,7 +305,17 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('disposal.show', $schedule) }}" class="btn btn-outline-primary">View</a>
-                                <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-outline-warning">Record Data</a>
+                                @if($schedule->weight_kg && !$schedule->disposal_confirmed_at)
+                                    <form action="{{ route('disposal.confirm', $schedule) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check2-circle me-1"></i>Confirm
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-outline-warning">Edit</a>
+                                @else
+                                    <a href="{{ route('disposal.edit', $schedule) }}" class="btn btn-outline-warning">{{ $schedule->weight_kg ? 'Edit' : 'Record Data' }}</a>
+                                @endif
                             </div>
                         </td>
                     </tr>

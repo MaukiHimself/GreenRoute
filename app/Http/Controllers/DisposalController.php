@@ -49,8 +49,6 @@ class DisposalController extends Controller
             'weight_kg' => 'required|numeric|min:0.1|max:100000',
             'waste_category' => 'required|in:general,organic,recyclable,mixed',
             'disposal_site' => 'required|string|max:255',
-            'disposal_type' => 'required|in:sorting_facility,landfill',
-            'total_volume' => 'nullable|numeric|min:0',
             'disposal_notes' => 'nullable|string'
         ]);
 
@@ -58,11 +56,34 @@ class DisposalController extends Controller
             'weight_kg' => $validated['weight_kg'],
             'waste_category' => $validated['waste_category'],
             'disposal_site' => $validated['disposal_site'],
-            'disposal_type' => $validated['disposal_type'],
-            'total_volume' => $validated['total_volume'] ?? $schedule->total_volume,
-            'disposal_notes' => $validated['disposal_notes']
+            // Recyclable/organic loads go to the sorting facility, the rest to
+            // landfill — derived so reports keep their recycling split.
+            'disposal_type' => in_array($validated['waste_category'], ['recyclable', 'organic'])
+                ? 'sorting_facility' : 'landfill',
+            'disposal_notes' => $validated['disposal_notes'],
+            // The contractor filled it personally — no separate confirmation needed.
+            'disposal_recorded_by' => 'contractor',
+            'disposal_confirmed_at' => now(),
         ]);
 
         return redirect()->route('disposal.index')->with('success', 'Disposal data recorded successfully');
+    }
+
+    /**
+     * Confirm a disposal record submitted by the driver from his terminal.
+     */
+    public function confirm(Schedule $schedule)
+    {
+        if ($schedule->contractor_id !== Auth::id()) {
+            abort(404);
+        }
+
+        if (!$schedule->weight_kg) {
+            return redirect()->route('disposal.index')->with('error', 'Nothing to confirm — no disposal record on this collection yet.');
+        }
+
+        $schedule->update(['disposal_confirmed_at' => now()]);
+
+        return redirect()->route('disposal.index')->with('success', 'Driver disposal record confirmed.');
     }
 }

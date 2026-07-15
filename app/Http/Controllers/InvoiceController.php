@@ -50,20 +50,26 @@ class InvoiceController extends Controller
             ->with('client')
             ->get();
             
-        // Get regions for group selection
-        $regions = [];
-        if (Schema::hasTable('tbl_locations')) {
-            try {
-                $regions = Location::select('region')
-                    ->distinct()
-                    ->orderBy('region')
-                    ->pluck('region');
-            } catch (\Exception $e) {
-                $regions = [];
-            }
-        }
+        // Routes for the group-invoice mode, with client counts.
+        $routes = \App\Models\ContractorRoute::where('contractor_id', $contractorId)
+            ->where('is_active', true)
+            ->orderBy('route_name')
+            ->pluck('route_name');
 
-        return view('invoices.create', compact('clients', 'schedules', 'regions'));
+        $routeClientCounts = Client::where('contractor_id', $contractorId)
+            ->whereNotNull('route')
+            ->select('route', DB::raw('count(*) as total'))
+            ->groupBy('route')
+            ->pluck('total', 'route');
+
+        // The contractor's published price list, used to fill the amount.
+        $servicePrices = \App\Models\ServicePrice::where('contractor_id', $contractorId)
+            ->where('is_active', true)
+            ->orderBy('service_type')
+            ->orderBy('price')
+            ->get();
+
+        return view('invoices.create', compact('clients', 'schedules', 'routes', 'routeClientCounts', 'servicePrices'));
     }
 
     /**

@@ -48,7 +48,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="mode" id="mode_group" value="group" onchange="toggleMode()">
                                 <label class="form-check-label" for="mode_group">
-                                    Group Invoice (by Location)
+                                    Group Invoice (by Route)
                                 </label>
                             </div>
                         </div>
@@ -70,20 +70,22 @@
                         <div class="col-12" id="group_section" style="display: none;">
                             <div class="card bg-light border-0 mb-3">
                                 <div class="card-body">
-                                    <h6 class="card-title fw-bold mb-3">Select Location Group</h6>
-                                    <div class="mb-3 position-relative">
-                                        <input type="text"
-                                               id="locationAutocomplete"
-                                               class="form-control"
-                                               placeholder="Type to search location (e.g., ARUSHA → ARUMERU → Ward → Street)"
-                                               autocomplete="off">
-                                        <div id="locationDropdown" class="autocomplete-dropdown"></div>
-                                        <small class="text-muted">Search and select a location in format: Region → District → Ward → Street</small>
+                                    <h6 class="card-title fw-bold mb-3"><i class="bi bi-signpost-split me-1"></i>Select Route</h6>
+                                    <div class="mb-3">
+                                        <select id="route_select" class="form-select">
+                                            <option value="">Choose one of your routes…</option>
+                                            @foreach($routes as $routeName)
+                                                <option value="{{ $routeName }}">
+                                                    {{ $routeName }} ({{ $routeClientCounts[$routeName] ?? 0 }} client{{ ($routeClientCounts[$routeName] ?? 0) == 1 ? '' : 's' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">Every client assigned to the route is listed below — untick anyone you don't want to invoice.</small>
                                     </div>
 
                                     <div id="clients_list_container" style="display: none;">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label mb-0 fw-bold">Select Clients to Invoice</label>
+                                            <label class="form-label mb-0 fw-bold">Clients to Invoice</label>
                                             <div>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">Select All</button>
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">Deselect All</button>
@@ -128,6 +130,19 @@
                                 <option value="Other" {{ old('service_type') == 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
+                        @if(!$servicePrices->isEmpty())
+                        <div class="col-md-6">
+                            <label for="price_list_select" class="form-label">Fill Amount From Your Price List</label>
+                            <select id="price_list_select" class="form-select" onchange="applyPriceList()">
+                                <option value="">Enter amount manually…</option>
+                                @foreach($servicePrices as $sp)
+                                    <option value="{{ $sp->price }}">
+                                        {{ \App\Models\ServicePrice::getLabel($sp->service_type) }} — {{ \App\Models\ServicePrice::getVolumeLabel($sp->volume_tier) }} — TZS {{ number_format($sp->price) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
                         <div class="col-md-6">
                             <label for="subtotal" class="form-label">Amount (TZS) *</label>
                             <input type="number" name="subtotal" id="subtotal" step="0.01" min="0" value="{{ old('subtotal') }}" class="form-control" required>
@@ -145,8 +160,8 @@
                     <div class="row g-3 mt-3">
                         <div class="col-md-4">
                             <div class="border rounded p-3">
-                                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Amount:</span><span id="display-subtotal">TZS 0.00</span></div>
-                                <div class="border-top pt-2 d-flex justify-content-between"><span class="fw-semibold">Total:</span><span id="display-total" class="fw-bold">TZS 0.00</span></div>
+                                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Amount per client:</span><span id="display-subtotal">TZS 0.00</span></div>
+                                <div class="border-top pt-2 d-flex justify-content-between"><span class="fw-semibold">Total (all selected):</span><span id="display-total" class="fw-bold">TZS 0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -159,52 +174,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-    .autocomplete-dropdown {
-        position: absolute;
-        z-index: 1000;
-        background: white;
-        border: 2px solid #0d6efd;
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        max-height: 300px;
-        overflow-y: auto;
-        width: 100%;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        display: none;
-        box-sizing: border-box;
-    }
-
-    .autocomplete-dropdown.show {
-        display: block;
-    }
-
-    .autocomplete-item {
-        padding: 12px 16px;
-        cursor: pointer;
-        border-bottom: 1px solid #f0f0f0;
-        transition: all 0.2s;
-        white-space: normal;
-        word-break: break-word;
-    }
-
-    .autocomplete-item:hover {
-        background: #e7f3ff;
-        color: #0d6efd;
-        font-weight: 600;
-    }
-
-    .autocomplete-item:last-child {
-        border-bottom: none;
-    }
-
-    .autocomplete-item.active {
-        background: #0d6efd;
-        color: white;
-        font-weight: 600;
-    }
-    </style>
 
     <script>
     function toggleMode() {
@@ -222,210 +191,52 @@
             groupSection.style.display = 'none';
             clientSelect.required = true;
         }
+        calculateTotals();
     }
 
     const allClients = @json($clients);
     const schedulePrices = @json($schedules->mapWithKeys(fn($schedule) => [$schedule->id => $schedule->displayed_price]));
 
-    // Build unique location list from clients
-    const locationList = [];
-    const locationMap = new Map();
-
-    allClients.forEach(client => {
-        // Build location from available fields
-        const parts = [];
-        if (client.region) parts.push(client.region);
-        if (client.district) parts.push(client.district);
-        if (client.ward) parts.push(client.ward);
-        if (client.street) parts.push(client.street);
-
-        if (parts.length > 0) {
-            const locationString = parts.join(' → ');
-            const locationKey = parts.join('|');
-
-            if (!locationMap.has(locationKey)) {
-                const locData = {
-                    display: locationString,
-                    region: client.region || '',
-                    district: client.district || '',
-                    ward: client.ward || '',
-                    street: client.street || '',
-                    key: locationKey
-                };
-                locationMap.set(locationKey, locData);
-                locationList.push(locData);
-            }
-        }
-    });
-
-    console.log('Invoice form - Unique locations found:', locationList.length);
-    console.log('Sample locations:', locationList.slice(0, 5).map(l => l.display));
-
-    // Sort locations alphabetically
-    locationList.sort((a, b) => a.display.localeCompare(b.display));
-
-    // Autocomplete functionality
-    const autocompleteInput = document.getElementById('locationAutocomplete');
-    const dropdown = document.getElementById('locationDropdown');
-    let currentFocus = -1;
-    let selectedLocation = null;
-
-    function showLocationDropdown(searchTerm = '') {
-        dropdown.innerHTML = '';
-        currentFocus = -1;
-
-        if (locationList.length === 0) {
-            dropdown.innerHTML = '<div class="autocomplete-item" style="color: #999;">No client locations available. Please ensure clients have location data.</div>';
-            dropdown.classList.add('show');
-            return;
-        }
-
-        const search = searchTerm.toLowerCase().trim();
-        let filtered = locationList;
-
-        if (search.length > 0) {
-            filtered = locationList.filter(loc =>
-                loc.display.toLowerCase().includes(search) ||
-                loc.region.toLowerCase().includes(search) ||
-                loc.district.toLowerCase().includes(search) ||
-                loc.ward.toLowerCase().includes(search) ||
-                loc.street.toLowerCase().includes(search)
-            );
-        }
-
-        if (filtered.length === 0) {
-            dropdown.innerHTML = `<div class="autocomplete-item" style="color: #999;">No locations matching "${searchTerm}"</div>`;
-            dropdown.classList.add('show');
-            return;
-        }
-
-        const maxResults = 50;
-        const resultsToShow = filtered.slice(0, maxResults);
-
-        resultsToShow.forEach((loc, index) => {
-            const item = document.createElement('div');
-            item.className = 'autocomplete-item';
-            item.textContent = loc.display;
-            item.dataset.index = index;
-
-            item.addEventListener('click', function() {
-                selectLocation(loc);
-            });
-
-            dropdown.appendChild(item);
-        });
-
-        if (filtered.length > maxResults) {
-            const moreItem = document.createElement('div');
-            moreItem.className = 'autocomplete-item';
-            moreItem.style.color = '#999';
-            moreItem.style.fontStyle = 'italic';
-            moreItem.textContent = `+ ${filtered.length - maxResults} more locations (refine your search)`;
-            dropdown.appendChild(moreItem);
-        }
-
-        dropdown.classList.add('show');
-    }
-
-    autocompleteInput.addEventListener('input', function() {
-        showLocationDropdown(this.value);
-    });
-
-    // Show all locations when clicking the input field
-    autocompleteInput.addEventListener('focus', function() {
-        if (this.value.trim() === '') {
-            showLocationDropdown('');
-        }
-    });
-
-    // Keyboard navigation
-    autocompleteInput.addEventListener('keydown', function(e) {
-        const items = dropdown.querySelectorAll('.autocomplete-item');
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            currentFocus++;
-            if (currentFocus >= items.length) currentFocus = 0;
-            setActive(items);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            currentFocus--;
-            if (currentFocus < 0) currentFocus = items.length - 1;
-            setActive(items);
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            if (currentFocus > -1 && items[currentFocus]) {
-                items[currentFocus].click();
-            }
-        } else if (e.key === 'Escape') {
-            dropdown.classList.remove('show');
-        }
-    });
-
-    function setActive(items) {
-        items.forEach((item, index) => {
-            if (index === currentFocus) {
-                item.classList.add('active');
-                item.scrollIntoView({ block: 'nearest' });
-            } else {
-                item.classList.remove('active');
-            }
-        });
-    }
-
-    function selectLocation(location) {
-        selectedLocation = location;
-        autocompleteInput.value = location.display;
-        dropdown.classList.remove('show');
-        loadGroupClients(location);
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (autocompleteInput && !autocompleteInput.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.remove('show');
-        }
-    });
-
-    function loadGroupClients(location) {
-        if (!location || !location.region) return;
-
-        // Filter clients based on selection
-        const filteredClients = allClients.filter(client => {
-            if (client.region !== location.region) return false;
-            if (location.district && client.district !== location.district) return false;
-            if (location.ward && client.ward !== location.ward) return false;
-            if (location.street && client.street !== location.street) return false;
-            return true;
-        });
-
+    /* ── route → clients ─────────────────────────────── */
+    document.getElementById('route_select').addEventListener('change', function () {
+        const route = this.value;
         const listContainer = document.getElementById('clients_list_container');
         const list = document.getElementById('clients_list');
+
+        if (!route) {
+            listContainer.style.display = 'none';
+            list.innerHTML = '';
+            updateCount();
+            return;
+        }
+
+        const filtered = allClients.filter(c => (c.route || '') === route);
         listContainer.style.display = 'block';
         list.innerHTML = '';
 
-        if (filteredClients.length === 0) {
-            list.innerHTML = '<p class="text-muted text-center my-2">No clients found in this location.</p>';
+        if (filtered.length === 0) {
+            list.innerHTML = '<p class="text-muted text-center my-2">No clients assigned to this route yet.</p>';
         } else {
-            filteredClients.forEach(client => {
+            filtered.forEach(client => {
                 const div = document.createElement('div');
                 div.className = 'form-check mb-2';
                 div.innerHTML = `
-                    <input class="form-check-input client-checkbox" type="checkbox" name="client_ids[]" value="${client.id}" id="client_${client.id}" onchange="updateCount()">
+                    <input class="form-check-input client-checkbox" type="checkbox" name="client_ids[]" value="${client.id}" id="client_${client.id}" checked onchange="updateCount()">
                     <label class="form-check-label" for="client_${client.id}">
-                        <strong>${client.name}</strong> <span class="text-muted">(${client.registration_number})</span><br>
-                        <small class="text-muted">${client.street ? client.street + ', ' : ''}${client.ward}</small>
+                        <strong>${client.name}</strong> <span class="text-muted">(${client.registration_number || 'N/A'})</span><br>
+                        <small class="text-muted">${client.ward || client.district || ''}${client.phone ? ' · ' + client.phone : ''}</small>
                     </label>
                 `;
                 list.appendChild(div);
             });
         }
         updateCount();
-    }
+    });
 
     function updateCount() {
         const count = document.querySelectorAll('.client-checkbox:checked').length;
         document.getElementById('selected_count').textContent = count;
+        calculateTotals();
     }
 
     function selectAll() {
@@ -438,12 +249,24 @@
         updateCount();
     }
 
-    // (Dependent dropdowns removed - using autocomplete instead)
+    /* ── amounts ─────────────────────────────────────── */
+    function applyPriceList() {
+        const select = document.getElementById('price_list_select');
+        if (select && select.value) {
+            document.getElementById('subtotal').value = select.value;
+        }
+        calculateTotals();
+    }
 
     function calculateTotals() {
         const sub = parseFloat(document.getElementById('subtotal').value) || 0;
-        document.getElementById('display-subtotal').textContent = 'TZS ' + sub.toFixed(2);
-        document.getElementById('display-total').textContent = 'TZS ' + sub.toFixed(2);
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const clientCount = mode === 'group'
+            ? Math.max(document.querySelectorAll('.client-checkbox:checked').length, 0)
+            : 1;
+
+        document.getElementById('display-subtotal').textContent = 'TZS ' + sub.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('display-total').textContent = 'TZS ' + (sub * Math.max(clientCount, 1)).toLocaleString(undefined, {minimumFractionDigits: 2});
     }
     document.getElementById('subtotal').addEventListener('input', calculateTotals);
 

@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\TruckLocationHistory;
 use App\Models\CollectionRun;
 use App\Models\CollectionRunStop;
+use App\Models\Schedule;
 use App\Notifications\GenericNotification;
 use App\Events\TruckLocationUpdated;
 use Illuminate\Http\Request;
@@ -957,6 +958,89 @@ class TruckController extends Controller
             'collected_stops' => $collectedStops->count(),
             'per_stop_kg' => $perStop,
         ]);
+    }
+
+    /**
+     * Public driver endpoint: completed schedules of this truck's contractor
+     * that still need a disposal record — the driver fills these at the
+     * dumping site, then the contractor confirms them on the Disposal page.
+     */
+    public function pendingDisposalsByToken($token)
+    {
+        $truck = Truck::where('tracking_token', $token)->firstOrFail();
+
+        $pending = Schedule::where('contractor_id', $truck->contractor_id)
+            ->where('status', 'completed')
+            ->whereNull('weight_kg')
+            ->with('client:id,name')
+            ->orderByDesc('pickup_date')
+            ->limit(15)
+            ->get()
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'client_name' => $s->client?->name ?? $s->pickup_location,
+                'route' => $s->route,
+                'pickup_date' => $s->pickup_date?->format('d M Y'),
+            ])
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'pending' => $pending,
+            'sites' => collect(config('dumping_sites.sites', []))->pluck('name')->values(),
+        ]);
+    }
+
+    /**
+     * Public driver endpoint: save a disposal record (weight, category, site)
+     * for a completed schedule. Marked as recorded by the driver and left
+     * unconfirmed until the contractor confirms it on the Disposal page.
+     */
+    public function recordDisposalByToken(Request $request, $token)
+    {
+        $truck = Truck::where('tracking_token', $token)->firstOrFail();
+
+        $validated = $request->validate([
+            'schedule_id' => 'required|exists:schedules,id',
+            'weight_kg' => 'required|numeric|min:0.1|max:100000',
+            'waste_category' => 'required|in:general,organic,recyclable,mixed',
+            'disposal_site' => 'required|string|max:255',
+        ]);
+
+        $schedule = Schedule::where('id', $validated['schedule_id'])
+            ->where('contractor_id', $truck->contractor_id)
+            ->where('status', 'completed')
+            ->first();
+
+        if (!$schedule) {
+            return response()->json(['success' => false, 'message' => 'Schedule not found or not completed.'], 404);
+        }
+
+        $schedule->update([
+            'weight_kg' => $validated['weight_kg'],
+            'waste_category' => $validated['waste_category'],
+            'disposal_site' => $validated['disposal_site'],
+            // Recyclable/organic loads go to the sorting facility, the rest to
+            // landfill — keeps the recycling split on reports working without
+            // asking the driver an extra question.
+            'disposal_type' => in_array($validated['waste_category'], ['recyclable', 'organic'])
+                ? 'sorting_facility' : 'landfill',
+            'disposal_recorded_by' => 'driver',
+            'disposal_confirmed_at' => null,
+        ]);
+
+        $contractor = $truck->contractor;
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'Disposal record from driver',
+                message: "{$truck->driver_name} recorded " . number_format((float) $validated['weight_kg'], 1)
+                    . " kg ({$validated['waste_category']}) for {$schedule->pickup_location}. Please confirm it.",
+                url: route('disposal.index'),
+                icon: 'bi-clipboard-check',
+            ));
+        }
+
+        return response()->json(['success' => true]);
     }
 
     public function getPlaybackHistory(Request $request, Truck $truck)

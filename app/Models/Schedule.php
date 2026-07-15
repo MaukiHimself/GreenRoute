@@ -43,6 +43,8 @@ class Schedule extends Model
         'total_volume',
         'weight_kg',
         'waste_category',
+        'disposal_recorded_by',
+        'disposal_confirmed_at',
         'disposal_site',
         'disposal_type',
         'disposal_notes'
@@ -58,6 +60,7 @@ class Schedule extends Model
         'contractor_adjusted_fee' => 'decimal:2',
         'schedule_price' => 'decimal:2',
         'billing_rate_modified_at' => 'datetime',
+        'disposal_confirmed_at' => 'datetime',
         'service_type' => 'string',
         'frequency' => 'string',
         'includes_organic_waste' => 'boolean',

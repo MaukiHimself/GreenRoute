@@ -62,8 +62,24 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @php $st=$invoice->status; @endphp
-                                        <span class="badge {{ $st==='paid' ? 'bg-success' : ($st==='overdue' ? 'bg-danger' : ($st==='sent' ? 'bg-primary' : ($st==='partially_paid' ? 'bg-warning' : 'bg-secondary'))) }}">{{ ucfirst(str_replace('_', ' ', $st)) }}</span>
+                                        @php
+                                            $st = $invoice->status;
+                                            // Treat a sent invoice past its due date as due, even if
+                                            // the status column was never flipped to 'overdue'.
+                                            $isPastDue = in_array($st, ['sent', 'draft'], true) && $invoice->due_date->isPast();
+                                            [$badgeClass, $badgeIcon, $badgeLabel] = match (true) {
+                                                $st === 'paid' => ['bg-success', 'bi-check-circle-fill', 'Paid'],
+                                                $st === 'overdue' || $isPastDue => ['bg-danger', 'bi-exclamation-triangle-fill', 'Due'],
+                                                $st === 'partially_paid' => ['bg-warning text-dark', 'bi-hourglass-split', 'Partially Paid'],
+                                                $st === 'sent' => ['bg-info text-dark', 'bi-send-fill', 'Pending'],
+                                                $st === 'cancelled' => ['bg-secondary', 'bi-x-circle-fill', 'Cancelled'],
+                                                default => ['bg-secondary', 'bi-file-earmark', ucfirst(str_replace('_', ' ', $st))],
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }}"><i class="bi {{ $badgeIcon }} me-1"></i>{{ $badgeLabel }}</span>
+                                        @if($isPastDue || $st === 'overdue')
+                                            <small class="text-danger d-block mt-1">was due {{ $invoice->due_date->format('M d') }}</small>
+                                        @endif
                                     </td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm" role="group">

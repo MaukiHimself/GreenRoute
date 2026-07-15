@@ -1,285 +1,284 @@
-@extends('layouts.app')
+@extends('layouts.contractor-sidebar')
+
+@section('title', 'Edit Schedule')
+
+@section('styles')
+<style>
+    :root {
+        --primary-teal: #047857;
+        --primary-red: #c0392b;
+        --white: #ffffff;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-teal) 0%, #059669 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        margin-bottom: 0;
+    }
+
+    .form-container {
+        background: var(--white);
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-label {
+        color: #2d3748;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .required-star {
+        color: var(--primary-red);
+        font-weight: bold;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-teal);
+        box-shadow: 0 0 0 3px rgba(5, 92, 92, 0.1);
+        outline: none;
+    }
+
+    .section-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.25rem 1.25rem 0.5rem;
+        margin-bottom: 1.5rem;
+        background: #fbfdfd;
+    }
+
+    .section-card h6 {
+        color: var(--primary-teal);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+
+    .price-summary {
+        background: #ecfdf5;
+        border: 2px solid #a7f3d0;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .price-summary .amount {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #065f46;
+    }
+
+    .btn-primary-custom {
+        background: var(--primary-teal);
+        color: var(--white);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-primary-custom:hover { background: #065f46; color: var(--white); }
+
+    .btn-secondary-custom {
+        background: var(--white);
+        color: var(--primary-red);
+        border: 2px solid var(--primary-red);
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary-custom:hover { background: var(--primary-red); color: var(--white); }
+
+    .client-chip {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+</style>
+@endsection
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <div class="max-w-3xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center">
-                <a href="{{ route('dashboard.contractor') }}" class="text-gray-500 hover:text-gray-700 mr-4 flex items-center" title="Home" target="_parent">
-                    <i class="fas fa-home"></i>
-                </a>
-                <a href="{{ route('schedules.show', $schedule) }}" class="text-teal-600 hover:text-teal-800 mr-4">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Page Header -->
+            <div class="page-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Edit Schedule</h1>
-                    <p class="text-sm text-gray-500">Update pickup details, pricing and location</p>
+                    <h1 class="mb-1" style="font-size: 1.75rem; font-weight: 700;">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Schedule
+                    </h1>
+                    <p class="mb-0" style="opacity: 0.95;">{{ $schedule->route }} — {{ $schedule->pickup_date->format('M d, Y') }}</p>
                 </div>
-            </div>
-            <a href="{{ route('schedules.show', $schedule) }}" class="hidden sm:inline-flex items-center text-sm text-gray-600 hover:text-gray-800">
-                <i class="fas fa-eye mr-1"></i>View
-            </a>
-        </div>
-
-        @if($errors->any())
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <ul class="list-disc list-inside space-y-1">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form action="{{ route('schedules.update', $schedule) }}" method="POST" class="space-y-6">
-            @csrf
-            @method('PUT')
-
-            <!-- Client & Service -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                        <i class="fas fa-user-circle text-teal-600 mr-2"></i>Client &amp; Service
-                    </h2>
-                </div>
-                <div class="p-5 space-y-5">
-                    <div>
-                        <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Client *</label>
-                        <select name="client_id" id="client_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('client_id') border-red-500 @enderror" required>
-                            <option value="">Select a client</option>
-                            @foreach($clients as $client)
-                                <option value="{{ $client->id }}" {{ (old('client_id', $schedule->client_id) == $client->id) ? 'selected' : '' }}>
-                                    {{ $client->name }} - {{ $client->email }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('client_id')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="service_type" class="block text-sm font-medium text-gray-700 mb-2">Service Type *</label>
-                            <select name="service_type" id="service_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('service_type') border-red-500 @enderror" required>
-                                <option value="">Select service type</option>
-                                <option value="collection" {{ old('service_type', $schedule->service_type) == 'collection' ? 'selected' : '' }}>Collection</option>
-                                <option value="disposal" {{ old('service_type', $schedule->service_type) == 'disposal' ? 'selected' : '' }}>Disposal</option>
-                                <option value="both" {{ old('service_type', $schedule->service_type) == 'both' ? 'selected' : '' }}>Both</option>
-                            </select>
-                            @error('service_type')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                            <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('status') border-red-500 @enderror" required>
-                                <option value="scheduled" {{ old('status', $schedule->status) == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                <option value="in_progress" {{ old('status', $schedule->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                <option value="completed" {{ old('status', $schedule->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="cancelled" {{ old('status', $schedule->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            </select>
-                            @error('status')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Timing -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                        <i class="fas fa-clock text-teal-600 mr-2"></i>Timing
-                    </h2>
-                </div>
-                <div class="p-5">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="pickup_date" class="block text-sm font-medium text-gray-700 mb-2">Pickup Date *</label>
-                            <input type="date" name="pickup_date" id="pickup_date" value="{{ old('pickup_date', $schedule->pickup_date->format('Y-m-d')) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('pickup_date') border-red-500 @enderror" required>
-                            @error('pickup_date')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="pickup_time" class="block text-sm font-medium text-gray-700 mb-2">Pickup Time *</label>
-                            <input type="time" name="pickup_time" id="pickup_time" value="{{ old('pickup_time', $schedule->pickup_time->format('H:i')) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('pickup_time') border-red-500 @enderror" required>
-                            @error('pickup_time')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="estimated_duration" class="block text-sm font-medium text-gray-700 mb-2">Est. Duration (hrs)</label>
-                            <input type="number" name="estimated_duration" id="estimated_duration" value="{{ old('estimated_duration', $schedule->estimated_duration) }}"
-                                   step="0.25" min="0.25" max="24" placeholder="2.5"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('estimated_duration') border-red-500 @enderror">
-                            @error('estimated_duration')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Billing -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                        <i class="fas fa-coins text-teal-600 mr-2"></i>Billing
-                    </h2>
-                </div>
-                <div class="p-5 space-y-5">
-                    <div>
-                        <label for="billing_rate_id" class="block text-sm font-medium text-gray-700 mb-2">Official Billing Rate</label>
-                        <select name="billing_rate_id" id="billing_rate_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('billing_rate_id') border-red-500 @enderror">
-                            <option value="">Select an official billing rate</option>
-                            @foreach($billingRates as $rate)
-                                <option value="{{ $rate->id }}" data-fee="{{ $rate->collection_fee }}" {{ old('billing_rate_id', $schedule->billing_rate_id) == $rate->id ? 'selected' : '' }}>
-                                    {{ $rate->label }} - TZS {{ number_format($rate->collection_fee, 2) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('billing_rate_id')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="contractor_adjusted_fee" class="block text-sm font-medium text-gray-700 mb-2">Contractor Adjusted Price (TZS)</label>
-                            <input type="number" name="contractor_adjusted_fee" id="contractor_adjusted_fee" value="{{ old('contractor_adjusted_fee', $schedule->contractor_adjusted_fee) }}"
-                                   step="0.01" min="0"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('contractor_adjusted_fee') border-red-500 @enderror">
-                            @error('contractor_adjusted_fee')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="schedule_price_preview" class="block text-sm font-medium text-gray-700 mb-2">Schedule Price (TZS)</label>
-                            <input type="text" name="schedule_price_preview" id="schedule_price_preview" value="TZS {{ number_format($schedule->displayed_price ?? 0, 2) }}" readonly
-                                   class="w-full px-3 py-2 border border-gray-200 rounded-md bg-teal-50 text-teal-800 font-semibold">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="billing_rate_change_reason" class="block text-sm font-medium text-gray-700 mb-2">Reason for Rate Selection or Price Override</label>
-                        <textarea name="billing_rate_change_reason" id="billing_rate_change_reason" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('billing_rate_change_reason') border-red-500 @enderror"
-                                  placeholder="Example: Client requested additional service, difficult access, or volume difference">{{ old('billing_rate_change_reason', $schedule->billing_rate_change_reason) }}</textarea>
-                        @error('billing_rate_change_reason')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-
-            <!-- Location -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                        <i class="fas fa-map-marker-alt text-teal-600 mr-2"></i>Location
-                    </h2>
-                </div>
-                <div class="p-5 space-y-5">
-                    <div>
-                        <label for="pickup_location" class="block text-sm font-medium text-gray-700 mb-2">Pickup Location *</label>
-                        <input type="text" name="pickup_location" id="pickup_location" value="{{ old('pickup_location', $schedule->pickup_location) }}"
-                               placeholder="e.g., Front yard, Garage, Loading dock"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('pickup_location') border-red-500 @enderror" required>
-                        @error('pickup_location')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="pickup_address" class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
-                        <input type="text" name="pickup_address" id="pickup_address" value="{{ old('pickup_address', $schedule->pickup_address) }}"
-                               placeholder="123 Main Street"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('pickup_address') border-red-500 @enderror" required>
-                        @error('pickup_address')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                            <input type="text" name="city" id="city" value="{{ old('city', $schedule->city) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('city') border-red-500 @enderror" required>
-                            @error('city')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                            <input type="text" name="state" id="state" value="{{ old('state', $schedule->state) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('state') border-red-500 @enderror" required>
-                            @error('state')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
-                            <input type="text" name="zip_code" id="zip_code" value="{{ old('zip_code', $schedule->zip_code) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('zip_code') border-red-500 @enderror" required>
-                            @error('zip_code')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notes -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                        <i class="fas fa-sticky-note text-teal-600 mr-2"></i>Notes
-                    </h2>
-                </div>
-                <div class="p-5">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                    <textarea name="notes" id="notes" rows="3"
-                              placeholder="Special instructions, access codes, etc."
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 @error('notes') border-red-500 @enderror">{{ old('notes', $schedule->notes) }}</textarea>
-                    @error('notes')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="flex justify-end space-x-4">
-                <a href="{{ route('schedules.show', $schedule) }}" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
-                    Cancel
+                <a href="{{ route('schedules.show', $schedule) }}" class="btn btn-light btn-sm">
+                    <i class="bi bi-eye me-1"></i>View
                 </a>
-                <button type="submit" class="px-5 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition duration-200 shadow-sm">
-                    <i class="fas fa-save mr-1"></i>Update Schedule
-                </button>
             </div>
-        </form>
+
+            <div class="form-container p-4 p-md-5">
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('schedules.update', $schedule) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Client & Status -->
+                    <div class="section-card">
+                        <h6><i class="bi bi-person-circle me-1"></i>Client &amp; Status</h6>
+
+                        <div class="client-chip mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <strong>{{ $schedule->client->name ?? 'Client' }}</strong>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ $schedule->client->ward ?? '' }}{{ $schedule->client->ward && $schedule->client->district ? ', ' : '' }}{{ $schedule->client->district ?? '' }}
+                                    @if($schedule->client->phone) &nbsp;·&nbsp; <i class="bi bi-telephone me-1"></i>{{ $schedule->client->phone }} @endif
+                                </small>
+                            </div>
+                            <span class="badge bg-success">{{ $schedule->route }}</span>
+                        </div>
+                        <input type="hidden" name="client_id" value="{{ $schedule->client_id }}">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status <span class="required-star">*</span></label>
+                                <select name="status" id="status" class="form-select" required>
+                                    <option value="scheduled" {{ old('status', $schedule->status) == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                    <option value="in_progress" {{ old('status', $schedule->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                    <option value="completed" {{ old('status', $schedule->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                                    <option value="cancelled" {{ old('status', $schedule->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="service_type" class="form-label">Service Type <span class="required-star">*</span></label>
+                                <select name="service_type" id="service_type" class="form-select" required>
+                                    <option value="collection" {{ old('service_type', $schedule->service_type) == 'collection' ? 'selected' : '' }}>Collection</option>
+                                    <option value="disposal" {{ old('service_type', $schedule->service_type) == 'disposal' ? 'selected' : '' }}>Disposal</option>
+                                    <option value="both" {{ old('service_type', $schedule->service_type) == 'both' ? 'selected' : '' }}>Both</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timing -->
+                    <div class="section-card">
+                        <h6><i class="bi bi-clock me-1"></i>Timing</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="pickup_date" class="form-label">Pickup Date <span class="required-star">*</span></label>
+                                <input type="date" name="pickup_date" id="pickup_date" class="form-control"
+                                       value="{{ old('pickup_date', $schedule->pickup_date->format('Y-m-d')) }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pickup_time" class="form-label">Pickup Time <span class="required-star">*</span></label>
+                                <input type="time" name="pickup_time" id="pickup_time" class="form-control"
+                                       value="{{ old('pickup_time', $schedule->pickup_time->format('H:i')) }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="section-card">
+                        <h6><i class="bi bi-cash-coin me-1"></i>Price (from your service price list)</h6>
+
+                        @if($servicePrices->isEmpty())
+                            <div class="alert alert-warning mb-3">
+                                You have no active service prices yet.
+                                <a href="{{ route('contractor.pricing.create') }}">Add one on your pricing page</a>.
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <label for="service_price_id" class="form-label">Service</label>
+                                <select id="service_price_id" class="form-select" onchange="updatePrice()">
+                                    <option value="" data-price="{{ $schedule->contractor_adjusted_fee ?? $schedule->schedule_price ?? '' }}">Keep current price</option>
+                                    @foreach($servicePrices as $sp)
+                                        <option value="{{ $sp->id }}" data-price="{{ $sp->price }}"
+                                                data-label="{{ \App\Models\ServicePrice::getLabel($sp->service_type) }} — {{ \App\Models\ServicePrice::getVolumeLabel($sp->volume_tier) }}">
+                                            {{ \App\Models\ServicePrice::getLabel($sp->service_type) }} — {{ \App\Models\ServicePrice::getVolumeLabel($sp->volume_tier) }} — TZS {{ number_format($sp->price) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text">Prices come from your published price list, so the client sees the same amount everywhere.</div>
+                            </div>
+                        @endif
+
+                        <div class="price-summary">
+                            <span class="text-muted">Price for this pickup</span>
+                            <span class="amount" id="price_display">TZS {{ number_format($schedule->contractor_adjusted_fee ?? $schedule->schedule_price ?? 0) }}</span>
+                        </div>
+                        <input type="hidden" name="contractor_adjusted_fee" id="contractor_adjusted_fee"
+                               value="{{ old('contractor_adjusted_fee', $schedule->contractor_adjusted_fee ?? $schedule->schedule_price) }}">
+                        <input type="hidden" name="billing_rate_change_reason" id="billing_rate_change_reason"
+                               value="{{ old('billing_rate_change_reason', $schedule->billing_rate_change_reason) }}">
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="section-card">
+                        <h6><i class="bi bi-sticky me-1"></i>Notes</h6>
+                        <div class="mb-3">
+                            <textarea name="notes" id="notes" rows="3" class="form-control"
+                                      placeholder="Special instructions for the driver (optional)">{{ old('notes', $schedule->notes) }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-end gap-3 mt-4">
+                        <a href="{{ route('schedules.show', $schedule) }}" class="btn-secondary-custom">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="bi bi-check-circle me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
 <script>
-function updateBillingPreview() {
-    const rateSelect = document.getElementById('billing_rate_id');
-    const overrideInput = document.getElementById('contractor_adjusted_fee');
-    const preview = document.getElementById('schedule_price_preview');
-    const selectedOption = rateSelect.options[rateSelect.selectedIndex];
-    const officialFee = selectedOption.dataset.fee ? parseFloat(selectedOption.dataset.fee) : null;
-    const overrideFee = overrideInput.value.trim() === '' ? null : parseFloat(overrideInput.value);
-    const finalFee = overrideFee !== null ? overrideFee : officialFee;
+function updatePrice() {
+    const select = document.getElementById('service_price_id');
+    if (!select) return;
+    const opt = select.options[select.selectedIndex];
+    const price = opt && opt.dataset.price !== '' ? parseFloat(opt.dataset.price) : null;
 
-    preview.value = finalFee !== null ? 'TZS ' + finalFee.toFixed(2) : 'TZS 0.00';
+    document.getElementById('price_display').textContent =
+        price !== null && !isNaN(price) ? 'TZS ' + price.toLocaleString() : 'TZS 0';
+    if (price !== null && !isNaN(price)) {
+        document.getElementById('contractor_adjusted_fee').value = price;
+    }
+    if (opt && opt.value) {
+        document.getElementById('billing_rate_change_reason').value =
+            'Priced from published service price list: ' + opt.dataset.label;
+    }
 }
-
-document.getElementById('billing_rate_id').addEventListener('change', updateBillingPreview);
-document.getElementById('contractor_adjusted_fee').addEventListener('input', updateBillingPreview);
-updateBillingPreview();
 </script>
 @endsection

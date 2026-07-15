@@ -249,6 +249,8 @@
         let stopStatuses = @json($truck->stop_statuses ?? []);
         const truckTareKg = {{ $truck->tare_weight_kg ?? 'null' }};
         let recordedNetKg = {{ $latestRunWeight ?? 'null' }};
+        let pendingDisposals = [];
+        let disposalSites = [];
         let isTracking = false;
         let watchId = null;
         let updateIntervalId = null;
@@ -277,6 +279,9 @@
             
             // Initial render of UI
             renderChecklist();
+
+            // Completed collections awaiting disposal records (kg entry).
+            loadPendingDisposals();
         });
 
         function drawRouteOnMap() {
@@ -512,6 +517,115 @@
             // and let the driver start another route.
             if (clientsCount > 0 && completedCount === clientsCount) {
                 renderCompletionCard(container);
+                renderDisposalCard(container);
+            }
+        }
+
+        // ---- Disposal records: filled by the driver at the dumping site ----
+        // Completed collections that still need waste data (kg + category +
+        // site). The contractor confirms each record on the Disposal page.
+
+        async function loadPendingDisposals() {
+            try {
+                const res = await fetch(`/driver/pending-disposals/${token}`, { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+                if (data.success) {
+                    pendingDisposals = data.pending || [];
+                    disposalSites = data.sites || [];
+                    renderChecklist();
+                }
+            } catch (err) {
+                console.warn('Could not load pending disposals', err);
+            }
+        }
+
+        function renderDisposalCard(container) {
+            if (!pendingDisposals.length) return;
+
+            const siteOptions = disposalSites.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            const itemsHtml = pendingDisposals.map(p => `
+                <div class="p-3 rounded mb-2" style="background:#f8fafc;border:1px solid #e2e8f0;" id="disposal-item-${p.id}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="small">${p.client_name}</strong>
+                        <span class="badge bg-light text-muted">${p.pickup_date ?? ''}</span>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <input type="number" class="form-control form-control-sm" id="disp-weight-${p.id}" min="0.1" step="0.1" placeholder="Weight (kg)">
+                        </div>
+                        <div class="col-4">
+                            <select class="form-select form-select-sm" id="disp-category-${p.id}">
+                                <option value="">Category</option>
+                                <option value="general">General</option>
+                                <option value="organic">Organic</option>
+                                <option value="recyclable">Recyclable</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <select class="form-select form-select-sm" id="disp-site-${p.id}">
+                                <option value="">Site</option>
+                                ${siteOptions}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-success btn-sm w-100 mt-2 fw-bold" onclick="submitDisposal(${p.id}, this)">
+                        <i class="bi bi-check2"></i> Save Record
+                    </button>
+                    <div class="small text-danger mt-1" id="disp-feedback-${p.id}"></div>
+                </div>`).join('');
+
+            const card = document.createElement('div');
+            card.className = 'terminal-card mt-2';
+            card.innerHTML = `
+                <h5 class="fw-bold mb-1"><i class="bi bi-clipboard-data me-2 text-success"></i>Disposal Records</h5>
+                <p class="text-muted small mb-3">Fill the waste data for each completed collection. Your contractor will confirm the records.</p>
+                ${itemsHtml}
+            `;
+            container.appendChild(card);
+        }
+
+        async function submitDisposal(scheduleId, btn) {
+            const weight = parseFloat(document.getElementById(`disp-weight-${scheduleId}`).value);
+            const category = document.getElementById(`disp-category-${scheduleId}`).value;
+            const site = document.getElementById(`disp-site-${scheduleId}`).value;
+            const feedback = document.getElementById(`disp-feedback-${scheduleId}`);
+
+            if (isNaN(weight) || weight <= 0 || !category || !site) {
+                feedback.textContent = 'Fill weight, category and site first.';
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...'; }
+
+            try {
+                const response = await fetch(`/driver/record-disposal/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        schedule_id: scheduleId,
+                        weight_kg: weight,
+                        waste_category: category,
+                        disposal_site: site
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    pendingDisposals = pendingDisposals.filter(p => p.id !== scheduleId);
+                    renderChecklist();
+                } else {
+                    feedback.textContent = data.message || 'Failed to save the record.';
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check2"></i> Save Record'; }
+                }
+            } catch (err) {
+                console.error(err);
+                feedback.textContent = 'Connection error occurred.';
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check2"></i> Save Record'; }
             }
         }
 

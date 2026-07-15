@@ -49,9 +49,23 @@ class ScheduleController extends Controller
 
             $routes = ContractorRoute::where('contractor_id', Auth::id())
                 ->where('is_active', true)
-                ->whereNotNull('region')
                 ->select('id', 'route_name', 'region', 'district', 'ward', 'street')
                 ->orderBy('route_name')
+                ->get();
+
+            // Client counts per route so the picker shows real coverage.
+            $routeClientCounts = Client::where('contractor_id', Auth::id())
+                ->whereNotNull('route')
+                ->select('route', DB::raw('count(*) as total'))
+                ->groupBy('route')
+                ->pluck('total', 'route');
+
+            // The contractor's own published price list — schedules are priced
+            // from it so clients see the same price everywhere.
+            $servicePrices = \App\Models\ServicePrice::where('contractor_id', Auth::id())
+                ->where('is_active', true)
+                ->orderBy('service_type')
+                ->orderBy('price')
                 ->get();
 
             $billingRates = BillingRate::where('is_active', true)
@@ -71,7 +85,7 @@ class ScheduleController extends Controller
             $siteLocations = collect([]);
             $assignedClient = $clients->first();
 
-            return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient', 'regions', 'routes', 'siteLocations', 'billingRates', 'billingRatesData'));
+            return view('contractor.create-schedule', compact('contractor', 'clients', 'assignedClient', 'regions', 'routes', 'routeClientCounts', 'siteLocations', 'billingRates', 'billingRatesData', 'servicePrices'));
         }
 
         $regions = collect([]);
@@ -90,10 +104,13 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'client_ids' => 'required|array|min:1',
             'client_ids.*' => 'exists:clients,id',
+            'route_name' => 'nullable|string|max:255',
             'pickup_date' => 'required|date',
             'pickup_time' => 'required',
-            'pickup_location' => 'required|string',
+            'pickup_location' => 'nullable|string',
             'service_type' => 'required|string',
+            'frequency' => 'nullable|in:once,weekly,twice_month,thrice_month,monthly',
+            'repeat_until' => 'nullable|date|after_or_equal:pickup_date',
             'estimated_duration' => 'nullable|numeric',
             'total_volume' => 'nullable|numeric',
             'disposal_site' => 'nullable|string',
@@ -103,6 +120,39 @@ class ScheduleController extends Controller
             'contractor_adjusted_fee' => 'nullable|numeric|min:0',
             'billing_rate_change_reason' => 'nullable|string|max:1000',
         ]);
+
+        $frequency = $validated['frequency'] ?? 'once';
+        if ($frequency !== 'once' && empty($validated['repeat_until'])) {
+            return back()->withInput()->withErrors([
+                'repeat_until' => 'Please choose the date the repeating schedule should run until.',
+            ]);
+        }
+
+        // Expand the recurrence into concrete pickup dates (capped at 31).
+        $pickupDates = [\Carbon\Carbon::parse($validated['pickup_date'])];
+        if ($frequency !== 'once') {
+            $until = \Carbon\Carbon::parse($validated['repeat_until'])->endOfDay();
+            $cursor = $pickupDates[0]->copy();
+            while (count($pickupDates) < 31) {
+                $cursor = match ($frequency) {
+                    'weekly' => $cursor->copy()->addDays(7),
+                    'twice_month' => $cursor->copy()->addDays(14),
+                    'thrice_month' => $cursor->copy()->addDays(10),
+                    'monthly' => $cursor->copy()->addMonthNoOverflow(),
+                };
+                if ($cursor->gt($until)) {
+                    break;
+                }
+                $pickupDates[] = $cursor;
+            }
+        }
+        $frequencyLabels = [
+            'once' => null,
+            'weekly' => 'weekly',
+            'twice_month' => 'twice per month',
+            'thrice_month' => 'thrice per month',
+            'monthly' => 'monthly',
+        ];
 
         $contractor = Auth::user();
 
@@ -125,62 +175,73 @@ class ScheduleController extends Controller
         $schedulePrice = $contractorAdjustedFee ?? optional($billingRate)->collection_fee;
         $reason = $validated['billing_rate_change_reason'] ?? null;
 
-        DB::transaction(function () use ($validated, $contractor, $billingRate, $contractorAdjustedFee, $schedulePrice, $reason) {
+        $created = 0;
+        DB::transaction(function () use ($validated, $contractor, $billingRate, $contractorAdjustedFee, $schedulePrice, $reason, $pickupDates, $frequency, $frequencyLabels, &$created) {
             foreach ($validated['client_ids'] as $clientId) {
                 $client = Client::where('id', $clientId)
                     ->where('contractor_id', $contractor->id)
                     ->firstOrFail();
 
-                $schedule = Schedule::create([
-                    'contractor_id' => $contractor->id,
-                    'client_id' => $client->id,
-                    'contractor_registration_number' => $contractor->registration_number,
-                    'client_registration_number' => $client->registration_number,
-                    'route' => $client->route ?? 'Not Assigned',
-                    'billing_rate_id' => $billingRate?->id,
-                    'billing_rate_category' => $billingRate?->category,
-                    'billing_rate_location' => $billingRate?->location,
-                    'billing_rate_frequency' => $billingRate?->frequency,
-                    'base_collection_fee' => $billingRate?->collection_fee,
-                    'contractor_adjusted_fee' => $contractorAdjustedFee,
-                    'schedule_price' => $schedulePrice,
-                    'billing_rate_change_reason' => $reason,
-                    'billing_rate_modified_at' => $billingRate || $contractorAdjustedFee !== null ? now() : null,
-                    'pickup_date' => $validated['pickup_date'],
-                    'pickup_time' => $validated['pickup_time'],
-                    'scheduled_date' => $validated['pickup_date'],
-                    'scheduled_time' => $validated['pickup_time'],
-                    'pickup_location' => $validated['pickup_location'],
-                    'pickup_address' => $client->address ?? 'Not Provided',
-                    'city' => $client->city ?? 'Not Provided',
-                    'state' => $client->state ?? 'Not Provided',
-                    'zip_code' => $client->zip_code ?? '00000',
-                    'service_type' => $validated['service_type'],
-                    'status' => 'scheduled',
-                    'estimated_duration' => $validated['estimated_duration'] ?? null,
-                    'total_volume' => $validated['total_volume'] ?? null,
-                    'disposal_site' => $validated['disposal_site'] ?? null,
-                    'notes' => $validated['notes'] ?? null,
-                ]);
+                $firstSchedule = null;
+                foreach ($pickupDates as $pickupDate) {
+                    $schedule = Schedule::create([
+                        'contractor_id' => $contractor->id,
+                        'client_id' => $client->id,
+                        'contractor_registration_number' => $contractor->registration_number,
+                        'client_registration_number' => $client->registration_number,
+                        'route' => $validated['route_name'] ?? $client->route ?? 'Not Assigned',
+                        'billing_rate_id' => $billingRate?->id,
+                        'billing_rate_category' => $billingRate?->category,
+                        'billing_rate_location' => $billingRate?->location,
+                        'billing_rate_frequency' => $billingRate?->frequency,
+                        'base_collection_fee' => $billingRate?->collection_fee,
+                        'contractor_adjusted_fee' => $contractorAdjustedFee,
+                        'schedule_price' => $schedulePrice,
+                        'billing_rate_change_reason' => $reason,
+                        'billing_rate_modified_at' => $billingRate || $contractorAdjustedFee !== null ? now() : null,
+                        'pickup_date' => $pickupDate->toDateString(),
+                        'pickup_time' => $validated['pickup_time'],
+                        'scheduled_date' => $pickupDate->toDateString(),
+                        'scheduled_time' => $validated['pickup_time'],
+                        'pickup_location' => ($validated['pickup_location'] ?? null)
+                            ?: ($client->ward ?: ($validated['route_name'] ?? $client->route ?? 'Client premises')),
+                        'pickup_address' => $client->address ?? 'Not Provided',
+                        'city' => $client->city ?? 'Not Provided',
+                        'state' => $client->state ?? 'Not Provided',
+                        'zip_code' => $client->zip_code ?? '00000',
+                        'service_type' => $validated['service_type'],
+                        'frequency' => $frequencyLabels[$frequency],
+                        'status' => 'scheduled',
+                        'estimated_duration' => $validated['estimated_duration'] ?? null,
+                        'total_volume' => $validated['total_volume'] ?? null,
+                        'disposal_site' => $validated['disposal_site'] ?? null,
+                        'notes' => $validated['notes'] ?? null,
+                    ]);
+                    $firstSchedule ??= $schedule;
+                    $created++;
 
-                if ($billingRate || $contractorAdjustedFee !== null) {
-                    $this->recordBillingRateChange(
-                        $schedule,
-                        $client,
-                        null,
-                        $billingRate,
-                        null,
-                        $schedulePrice,
-                        $billingRate ? 'created' : 'price_added',
-                        $reason
-                    );
+                    if ($billingRate || $contractorAdjustedFee !== null) {
+                        $this->recordBillingRateChange(
+                            $schedule,
+                            $client,
+                            null,
+                            $billingRate,
+                            null,
+                            $schedulePrice,
+                            $billingRate ? 'created' : 'price_added',
+                            $reason
+                        );
+                    }
                 }
 
-                // Notify the client (bell) that a pickup has been scheduled
-                if ($client->user) {
+                // One bell notification per client, covering the whole series.
+                if ($client->user && $firstSchedule) {
+                    $message = count($pickupDates) === 1
+                        ? 'A ' . $validated['service_type'] . ' pickup has been scheduled for ' . $pickupDates[0]->format('M d, Y')
+                        : ucfirst($frequencyLabels[$frequency]) . ' ' . $validated['service_type'] . ' pickups scheduled: ' . count($pickupDates) . ' dates starting ' . $pickupDates[0]->format('M d, Y');
                     $client->user->notify(new GenericNotification(
                         title: 'Pickup scheduled',
-                        message: 'A ' . $validated['service_type'] . ' pickup has been scheduled for ' . \Carbon\Carbon::parse($validated['pickup_date'])->format('M d, Y'),
+                        message: $message,
                         url: route('client.schedules'),
                         icon: 'bi-calendar-check',
                     ));
@@ -189,7 +250,7 @@ class ScheduleController extends Controller
         });
 
         return redirect()->route('schedules.index')
-            ->with('success', 'Schedules created successfully.');
+            ->with('success', $created . ' schedule' . ($created === 1 ? '' : 's') . ' created successfully.');
     }
 
     public function show(Schedule $schedule)
@@ -224,7 +285,13 @@ class ScheduleController extends Controller
             ->orderBy('frequency')
             ->get();
 
-        return view('schedules.edit', compact('schedule', 'clients', 'billingRates'));
+        $servicePrices = \App\Models\ServicePrice::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('service_type')
+            ->orderBy('price')
+            ->get();
+
+        return view('schedules.edit', compact('schedule', 'clients', 'billingRates', 'servicePrices'));
     }
 
     public function update(Request $request, Schedule $schedule)
@@ -237,11 +304,11 @@ class ScheduleController extends Controller
             'client_id' => 'required|exists:clients,id',
             'pickup_date' => 'required|date',
             'pickup_time' => 'required',
-            'pickup_location' => 'required|string',
-            'pickup_address' => 'required|string',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:10',
+            'pickup_location' => 'nullable|string',
+            'pickup_address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:10',
             'service_type' => 'required|string',
             'status' => 'required|in:scheduled,in_progress,completed,cancelled',
             'estimated_duration' => 'nullable|numeric',
@@ -285,6 +352,11 @@ class ScheduleController extends Controller
             'client_id' => $client->id,
             'client_registration_number' => $client->registration_number,
             'route' => $client->route ?? $schedule->route,
+            'pickup_location' => ($validated['pickup_location'] ?? null) ?: ($client->ward ?: $schedule->pickup_location),
+            'pickup_address' => ($validated['pickup_address'] ?? null) ?: ($client->address ?? $schedule->pickup_address),
+            'city' => ($validated['city'] ?? null) ?: ($client->city ?? $schedule->city),
+            'state' => ($validated['state'] ?? null) ?: ($client->state ?? $schedule->state),
+            'zip_code' => ($validated['zip_code'] ?? null) ?: ($client->zip_code ?? $schedule->zip_code),
             'billing_rate_id' => $billingRate?->id,
             'billing_rate_category' => $billingRate?->category,
             'billing_rate_location' => $billingRate?->location,

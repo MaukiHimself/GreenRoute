@@ -126,42 +126,18 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label for="disposal_site" class="form-label">Disposal Site *</label>
-                        <select class="form-select @error('disposal_site') is-invalid @enderror" id="disposal_site" name="disposal_site" required>
-                            <option value="">Select Disposal Site</option>
-                            @foreach($dumpingSites as $site)
-                                <option value="{{ $site }}" {{ old('disposal_site', $schedule->disposal_site) == $site ? 'selected' : '' }}>{{ $site }}</option>
-                            @endforeach
-                            @if($schedule->disposal_site && !$dumpingSites->contains($schedule->disposal_site))
-                                <option value="{{ $schedule->disposal_site }}" selected>{{ $schedule->disposal_site }}</option>
-                            @endif
-                        </select>
-                        @error('disposal_site')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label for="disposal_type" class="form-label">Disposal Type *</label>
-                        <select class="form-select @error('disposal_type') is-invalid @enderror" id="disposal_type" name="disposal_type" required>
-                            <option value="">Select Disposal Type</option>
-                            <option value="sorting_facility" {{ old('disposal_type', $schedule->disposal_type) == 'sorting_facility' ? 'selected' : '' }}>Sorting Facility</option>
-                            <option value="landfill" {{ old('disposal_type', $schedule->disposal_type) == 'landfill' ? 'selected' : '' }}>Landfill</option>
-                        </select>
-                        @error('disposal_type')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
                 <div class="mb-4">
-                    <label for="total_volume" class="form-label">Volume (m³) — optional</label>
-                    <input type="number" class="form-control @error('total_volume') is-invalid @enderror"
-                           id="total_volume" name="total_volume" step="0.01" min="0"
-                           value="{{ old('total_volume', $schedule->total_volume) }}"
-                           placeholder="Only if you also track volume">
-                    @error('total_volume')
+                    <label for="disposal_site" class="form-label">Disposal Site *</label>
+                    <select class="form-select @error('disposal_site') is-invalid @enderror" id="disposal_site" name="disposal_site" required>
+                        <option value="">Select Disposal Site</option>
+                        @foreach($dumpingSites as $site)
+                            <option value="{{ $site }}" {{ old('disposal_site', $schedule->disposal_site) == $site ? 'selected' : '' }}>{{ $site }}</option>
+                        @endforeach
+                        @if($schedule->disposal_site && !$dumpingSites->contains($schedule->disposal_site))
+                            <option value="{{ $schedule->disposal_site }}" selected>{{ $schedule->disposal_site }}</option>
+                        @endif
+                    </select>
+                    @error('disposal_site')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
