@@ -22,12 +22,17 @@ class CollectionRun extends Model
         'collected_count',
         'skipped_count',
         'blocked_count',
+        'gross_weight_kg',
+        'tare_weight_kg',
+        'net_weight_kg',
+        'weighed_at',
         'status',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'weighed_at' => 'datetime',
     ];
 
     public function truck(): BelongsTo

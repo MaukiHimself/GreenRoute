@@ -72,9 +72,9 @@ Key tables and their job:
 | `users` | Every login (admin, contractor, client) | `user_type`, `email`, `password`, `latitude/longitude` |
 | `clients` | A collection **stop** owned by a contractor | `contractor_id`, `route`, `latitude/longitude`, `ward` |
 | `contractor_routes` | A named **route** | `route_name`, `district`, `ward`, `dumping_site`, `color` |
-| `trucks` | A **vehicle** | `assigned_route_id`, `base_latitude/longitude`, `stop_statuses`, `tracking_token` |
-| `collection_runs` | One **dispatch** of a truck along a route | `total_stops`, `collected/skipped/blocked_count`, `status` |
-| `collection_run_stops` | What happened at **each client** in a run | `client_id`, `status`, `actioned_at` |
+| `trucks` | A **vehicle** | `assigned_route_id`, `base_latitude/longitude`, `tare_weight_kg`, `stop_statuses`, `tracking_token` |
+| `collection_runs` | One **dispatch** of a truck along a route | `total_stops`, `collected/skipped/blocked_count`, `gross/net_weight_kg`, `status` |
+| `collection_run_stops` | What happened at **each client** in a run | `client_id`, `status`, `prorated_weight_kg`, `actioned_at` |
 | `truck_locations_history` | GPS **breadcrumbs** (for playback) | `latitude`, `longitude`, `recorded_at` |
 | `messages` | Alerts/chats to clients | `message_type` (`eta_alert`, `collection_update`) |
 
@@ -141,6 +141,29 @@ For each upcoming stop we add up the distances along the path and assume an aver
 **≤ 10 minutes**, the client automatically gets a "truck is nearby" alert.
 Code: `TruckController::calculateEtas()`.
 
+### Layer 6 — Live rerouting (the plan vs. reality)
+The optimised route from Layers 1–5 is the **plan**. Reality on Dar roads is different:
+traffic jams, closed streets, the driver taking a shortcut he knows. Free routing services
+have **no live traffic data**, so the system cannot *see* a jam — only the driver can. The
+design therefore reacts to what the driver **does** instead of trying to detect traffic:
+
+1. **The driver drives his own way** → every GPS ping, the server checks whether he is still
+   on (within ~80 m of) the last computed guidance line. The moment he leaves it, the route
+   is **recalculated from his actual position** through the remaining *pending* stops and
+   drawn as a **blue live-guidance line**, while the original planned route fades into the
+   background. He is never "off the map".
+2. **The driver skips a congested stop** → tapping **Skip** on client A removes A from the
+   live route and guidance immediately redirects to the **nearest next pending client** (B).
+   A stays pending in the plan, so it naturally comes back later in the trip — skip A, do B,
+   return to A.
+
+Engineering points worth mentioning: the recalculation is **deviation-triggered, not
+per-ping** (the guidance line is cached per truck and only recomputed when the driver
+leaves it or the pending-stop set changes — kind to the free routing APIs), and the
+**planned route is never modified** — the contractor can still compare plan vs. actual.
+Code: `TruckController::liveRoute()` / `isNearPolyline()`, drawn by `drawLiveRoute()` in
+`driver/track.blade.php`.
+
 ---
 
 ## 6. GPS tracking — how the truck's dot moves
@@ -181,6 +204,39 @@ A **collection run** is one trip of one truck along one route. Its life:
 
 ---
 
+## 7b. ⚖️ Measuring the waste — the weighbridge method
+
+*"How much waste did we actually collect?"* Weighing every bag at every doorstep is
+impractical, and per-truck load cells are expensive hardware. GreenRoute uses the method
+real municipal systems use: **weigh the whole truck once per trip at the dumping site**.
+
+```
+ net waste for the trip = GROSS (weighbridge reading, truck + waste)
+                        − TARE  (the truck's registered empty weight)
+```
+
+How it flows through the system:
+
+1. **At registration**, every truck records its **tare (empty) weight** in kg —
+   a required field on the Register New Truck form (`trucks.tare_weight_kg`).
+2. **After the last stop**, the driver heads to the dumping site. His completion card shows
+   a **"Weighbridge reading"** box: he types the single gross number from the scale.
+3. The server computes **net = gross − tare**, stores it on the trip
+   (`collection_runs.gross/tare/net_weight_kg`, `weighed_at`), rejects readings lighter
+   than the empty truck, and blocks double entry for the same trip.
+4. The trip's net weight is **prorated across that run's collected clients** (equal share
+   per collected stop → `collection_run_stops.prorated_weight_kg`). Skipped/blocked stops
+   get nothing. This gives a **per-client waste estimate** for reports and future billing.
+5. The **contractor is alerted** ("T123 DEN disposed 480.5 kg on Masaki Loop") and the
+   Collection History drawer shows the trip's kg badge plus each client's ~kg share.
+
+Points to defend in the viva: **exact per-household weight is not needed** — a consistent,
+cheap, trip-accurate total (weighbridges already exist at disposal sites) beats expensive
+per-bin hardware; and proration can later be upgraded from equal shares to shares weighted
+by bin counts without changing the schema. Code: `TruckController::recordWeightByToken()`.
+
+---
+
 ## 8. Alerts without SMS costs (the "in-app notification" idea)
 
 Real SMS gateways (Twilio, Africa's Talking) cost money. Instead, GreenRoute delivers the same
@@ -211,6 +267,10 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
 | **Breadcrumb** | One saved GPS point in history; many form the playback trail. |
 | **Polling** | The page asking the server "anything new?" every few seconds. |
 | **Broadcast / real-time** | The server pushing an update out the moment it happens. |
+| **Live rerouting** | Recomputing guidance from the driver's *actual* position when he leaves the planned line. |
+| **Tare weight** | The truck's empty weight; subtracted from the weighbridge reading to get the waste weight. |
+| **Gross / Net weight** | Gross = truck + waste on the scale; Net = gross − tare = the waste itself. |
+| **Proration** | Splitting one trip's net waste weight across that trip's collected clients. |
 
 ---
 
@@ -222,6 +282,8 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
 | Route optimisation (nearest-neighbour) | `TruckController::optimizeOrder()` / `buildRouteWaypoints()` |
 | Road path + caching | `TruckController::roadGeometry()` |
 | Run completion + alert | `TruckController::finalizeRunIfComplete()` |
+| Live rerouting (deviation + skip) | `TruckController::liveRoute()` + `drawLiveRoute()` in driver page |
+| Weighbridge recording + proration | `TruckController::recordWeightByToken()` |
 | Contractor GPS map page | `resources/views/gps/index.blade.php` |
 | Driver phone terminal | `resources/views/driver/track.blade.php` |
 | Map helper (Leaflet) | `public/js/greenroute-map.js` |
@@ -247,9 +309,17 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
    Mention nearest-neighbour ordering and ETA (Layer 5).
 4. **Driver terminal:** tap **Start Location Sharing**, then **Collect / Skip / Block** each
    stop. Watch the contractor map markers turn into ✓ / ✗ / ! and the **progress bar** fill.
-5. On the **last stop**, show the **Route Completed** card + **Start Another Route**, and the
-   **contractor's notification bell** alert.
-6. **Contractor → Collection History** drawer: show the finished run with the per-client breakdown.
+   **Skip one stop** to show live rerouting: the blue guidance line jumps to the next client
+   while the planned route fades behind it (Layer 6).
+5. On the **last stop**, show the **Route Completed** card. Type a **weighbridge gross
+   reading** (e.g. `3980.5` for a 3500 kg truck → 480.5 kg net) and show the contractor's
+   bell alert with the kg, then **Start Another Route**.
+6. **Contractor → Collection History** drawer: show the finished run with the per-client
+   breakdown and the **kg badges** (trip total + ~kg per client).
+6b. **Contractor → Reports:** show **Field Operations & Waste Collected** (kg from the
+   weighbridge, success rate, waste by route, top clients) and the **Waste per Month**
+   chart — this is where both recording channels (weighbridge trips + schedule disposal
+   records) come together.
 7. **Client dashboard** (log in as Juma): show the **Live Alerts** feed / notification the
    client received.
 
@@ -270,5 +340,6 @@ http://localhost:8000/driver/track/jskCKLCGTmgRun8pRfvaAjXQh9FfMRFQ
    where contractors group clients into optimised routes and dispatch trucks.
 2. **The clever part is route determination** — matching clients by area, ordering stops with a
    nearest-neighbour heuristic, and drawing the real road path with a cached routing engine.
-3. **Accountability is built in** — live GPS, per-stop collected/skipped/blocked records,
-   automatic client alerts, and a completion report for every run.
+3. **Accountability is built in** — live GPS with rerouting from the driver's real position,
+   per-stop collected/skipped/blocked records, weighbridge-measured waste totals prorated to
+   each client, automatic alerts, and a completion report for every run.

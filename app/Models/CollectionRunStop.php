@@ -15,6 +15,7 @@ class CollectionRunStop extends Model
         'client_id',
         'client_name',
         'status',
+        'prorated_weight_kg',
         'actioned_at',
     ];
 

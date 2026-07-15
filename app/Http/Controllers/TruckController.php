@@ -64,7 +64,8 @@ class TruckController extends Controller
             'plate_number' => 'required|string|max:20',
             'driver_name' => 'required|string|max:100',
             'driver_phone' => 'required|string|max:20',
-            'truck_type' => 'required|string'
+            'truck_type' => 'required|string',
+            'tare_weight_kg' => 'required|numeric|min:100|max:50000'
         ]);
 
         $base = $this->contractorBase(Auth::user());
@@ -75,6 +76,7 @@ class TruckController extends Controller
             'driver_name' => $validated['driver_name'],
             'driver_phone' => $validated['driver_phone'],
             'truck_type' => $validated['truck_type'],
+            'tare_weight_kg' => $validated['tare_weight_kg'],
             'status' => 'active',
             'base_latitude' => $base['lat'],
             'base_longitude' => $base['lng'],
@@ -328,6 +330,133 @@ class TruckController extends Controller
     }
 
     /**
+     * Live navigation: the route from the driver's CURRENT position through the
+     * remaining pending stops (re-ordered nearest-neighbour from where he
+     * actually is), ending at the dumping site. This is what lets the map keep
+     * guiding the driver when he leaves the planned line — e.g. detouring
+     * around traffic — without touching the planned route itself.
+     *
+     * Recomputed only when the driver strays off the previously computed line
+     * or the pending stop set changes, so the free routing APIs are not hit on
+     * every 20-second GPS ping.
+     *
+     * Returns ['waypoints' => [...], 'geometry' => [[lat,lng],...]] or null.
+     */
+    private function liveRoute(Truck $truck, $latitude, $longitude): ?array
+    {
+        if (!$truck->assignedRoute || !is_numeric($latitude) || !is_numeric($longitude)) {
+            return null;
+        }
+
+        $lat = (float) $latitude;
+        $lng = (float) $longitude;
+
+        // Only stops still pending — collected/skipped/blocked drop off the live route.
+        $statuses = $truck->stop_statuses ?? [];
+        $pending = $this->routeStopClients($truck)
+            ->filter(fn ($c) => ($statuses[$c->id] ?? 'pending') === 'pending')
+            ->map(fn ($c) => [
+                'type' => 'client',
+                'id' => $c->id,
+                'name' => $c->name,
+                'lat' => (float) $c->latitude,
+                'lng' => (float) $c->longitude,
+            ])
+            ->values()
+            ->all();
+
+        $waypoints = [[
+            'type' => 'current',
+            'name' => 'Your position',
+            'lat' => $lat,
+            'lng' => $lng,
+        ]];
+
+        foreach ($this->optimizeOrder($pending, ['lat' => $lat, 'lng' => $lng]) as $stop) {
+            $waypoints[] = $stop;
+        }
+
+        // Dumping site last — and the sole target once every stop is actioned.
+        $route = $truck->assignedRoute;
+        if ($route->dumping_site) {
+            $site = collect(config('dumping_sites.sites', []))
+                ->firstWhere('name', $route->dumping_site);
+            if ($site) {
+                $waypoints[] = [
+                    'type' => 'dumping',
+                    'name' => $site['name'],
+                    'lat' => (float) $site['latitude'],
+                    'lng' => (float) $site['longitude'],
+                ];
+            }
+        }
+
+        if (count($waypoints) < 2) {
+            return null;
+        }
+
+        $stopSignature = md5(collect($waypoints)->slice(1)
+            ->map(fn ($w) => ($w['type'] ?? '') . ':' . ($w['id'] ?? ($w['name'] ?? '')))
+            ->implode('|'));
+
+        $cacheKey = 'live_route:truck:' . $truck->id;
+        $cached = Cache::get($cacheKey);
+
+        if ($cached && ($cached['signature'] ?? null) === $stopSignature) {
+            $geometry = $cached['payload']['geometry'] ?? null;
+            $origin = $cached['origin'] ?? null;
+
+            // Still on (within ~80 m of) the previously computed line → reuse it.
+            if ($this->isNearPolyline($lat, $lng, $geometry, 0.08)) {
+                return $cached['payload'];
+            }
+
+            // Routing engines were down last time (no geometry): don't retry
+            // them on every ping, only after meaningful movement (~250 m).
+            if (!$geometry && is_array($origin)
+                && $this->haversine($lat, $lng, $origin[0], $origin[1]) < 0.25) {
+                return $cached['payload'];
+            }
+        }
+
+        $payload = [
+            'waypoints' => $waypoints,
+            'geometry' => $this->roadGeometry($waypoints),
+        ];
+
+        Cache::put($cacheKey, [
+            'signature' => $stopSignature,
+            'origin' => [$lat, $lng],
+            'payload' => $payload,
+        ], now()->addMinutes(30));
+
+        return $payload;
+    }
+
+    /**
+     * Whether a point lies within $thresholdKm of any vertex of a polyline.
+     * Road geometries are dense enough that vertex distance is a good proxy
+     * for distance to the line itself.
+     */
+    private function isNearPolyline($lat, $lng, ?array $polyline, float $thresholdKm): bool
+    {
+        if (!is_array($polyline) || count($polyline) < 2) {
+            return false;
+        }
+
+        foreach ($polyline as $point) {
+            if (!isset($point[0], $point[1])) {
+                continue;
+            }
+            if ($this->haversine($lat, $lng, $point[0], $point[1]) <= $thresholdKm) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Build ordered waypoints: [base, ...nearest-neighbour clients, dumping site].
      */
     private function buildRouteWaypoints(Truck $truck): array
@@ -501,7 +630,12 @@ class TruckController extends Controller
             ->orderBy('route_name')
             ->get(['id', 'route_name', 'color']);
 
-        return view('driver.track', compact('truck', 'waypoints', 'etaList', 'availableRoutes', 'geometry'));
+        // Weighbridge state for the completion card: whether the latest run has
+        // already been weighed (so a page reload doesn't re-offer the form).
+        $latestRun = $truck->collectionRuns()->latest('id')->first();
+        $latestRunWeight = $latestRun?->net_weight_kg;
+
+        return view('driver.track', compact('truck', 'waypoints', 'etaList', 'availableRoutes', 'geometry', 'latestRunWeight'));
     }
 
     public function updateLocationByToken(Request $request, $token)
@@ -537,6 +671,10 @@ class TruckController extends Controller
         // Log history, calculate ETAs, send SMS alerts if nearby, and broadcast real-time update
         $etaList = $this->logLocationAndCalculateEtas($truck, $validated['latitude'], $validated['longitude']);
 
+        // Live navigation: route from where the driver actually is to the
+        // remaining pending stops (recomputed only when he leaves the line).
+        $liveRoute = $this->liveRoute($truck->fresh(), $validated['latitude'], $validated['longitude']);
+
         event(new TruckLocationUpdated(
             $truck,
             $validated['latitude'],
@@ -550,7 +688,8 @@ class TruckController extends Controller
         return response()->json([
             'success' => true,
             'stop_statuses' => $truck->stop_statuses ?? [],
-            'eta_list' => $etaList
+            'eta_list' => $etaList,
+            'live_route' => $liveRoute
         ]);
     }
 
@@ -614,8 +753,12 @@ class TruckController extends Controller
 
         // Calculate current ETAs after stop status change
         $etaList = [];
+        $liveRoute = null;
         if ($truck->current_latitude && $truck->current_longitude) {
             $etaList = $this->calculateEtas($truck, $truck->current_latitude, $truck->current_longitude);
+            // Re-target the live route: a skipped/collected stop drops out, so
+            // the map immediately guides the driver to the next pending client.
+            $liveRoute = $this->liveRoute($truck, $truck->current_latitude, $truck->current_longitude);
         }
 
         // Broadcast the update so the contractor map updates immediately
@@ -633,6 +776,7 @@ class TruckController extends Controller
             'success' => true,
             'stop_statuses' => $statuses,
             'eta_list' => $etaList,
+            'live_route' => $liveRoute,
             'route_complete' => (bool) $completedRun,
             'run_summary' => $completedRun ? [
                 'route_name' => $completedRun->route_name,
@@ -714,15 +858,105 @@ class TruckController extends Controller
                 'collected' => $run->collected_count,
                 'skipped' => $run->skipped_count,
                 'blocked' => $run->blocked_count,
+                'net_weight_kg' => $run->net_weight_kg !== null ? (float) $run->net_weight_kg : null,
+                'gross_weight_kg' => $run->gross_weight_kg !== null ? (float) $run->gross_weight_kg : null,
+                'weighed_at' => $run->weighed_at?->toIso8601String(),
                 'stops' => $run->stops->map(fn ($s) => [
                     'client_name' => $s->client_name,
                     'status' => $s->status,
+                    'prorated_weight_kg' => $s->prorated_weight_kg !== null ? (float) $s->prorated_weight_kg : null,
                     'actioned_at' => $s->actioned_at?->toIso8601String(),
                 ])->values(),
             ];
         });
 
         return response()->json(['success' => true, 'runs' => $payload]);
+    }
+
+    /**
+     * Public driver action: record the weighbridge reading taken at the dumping
+     * site for the truck's most recent finished run. Net waste = gross reading
+     * minus the truck's registered tare (empty) weight, and that net weight is
+     * prorated equally across the run's collected stops so every client gets a
+     * per-pickup estimate.
+     */
+    public function recordWeightByToken(Request $request, $token)
+    {
+        $truck = Truck::where('tracking_token', $token)->firstOrFail();
+
+        $validated = $request->validate([
+            'gross_weight_kg' => 'required|numeric|min:1|max:100000',
+        ]);
+
+        if (!$truck->tare_weight_kg) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This truck has no tare (empty) weight registered. Ask your contractor to set it.',
+            ], 422);
+        }
+
+        $run = $truck->collectionRuns()
+            ->whereIn('status', ['completed', 'in_progress'])
+            ->latest('id')
+            ->first();
+
+        if (!$run) {
+            return response()->json(['success' => false, 'message' => 'No collection run found for this truck.'], 404);
+        }
+
+        if ($run->net_weight_kg !== null) {
+            return response()->json(['success' => false, 'message' => 'A weighbridge reading was already recorded for this trip.'], 409);
+        }
+
+        $gross = (float) $validated['gross_weight_kg'];
+        $tare = (float) $truck->tare_weight_kg;
+        $net = round($gross - $tare, 1);
+
+        if ($net <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Gross reading ({$gross} kg) must be greater than the truck's empty weight ({$tare} kg).",
+            ], 422);
+        }
+
+        $run->update([
+            'gross_weight_kg' => $gross,
+            'tare_weight_kg' => $tare,
+            'net_weight_kg' => $net,
+            'weighed_at' => now(),
+        ]);
+
+        // Prorate the trip's net weight equally across its collected stops.
+        $collectedStops = $run->stops()->where('status', 'collected')->get();
+        $perStop = $collectedStops->count() > 0
+            ? round($net / $collectedStops->count(), 1)
+            : null;
+
+        if ($perStop !== null) {
+            foreach ($collectedStops as $stop) {
+                $stop->update(['prorated_weight_kg' => $perStop]);
+            }
+        }
+
+        // Alert the contractor's notification bell.
+        $contractor = $truck->contractor;
+        if ($contractor) {
+            $contractor->notify(new GenericNotification(
+                title: 'Trip weighed at dumping site',
+                message: "{$truck->plate_number} disposed " . number_format($net, 1) . " kg of waste on {$run->route_name} ({$collectedStops->count()} collections).",
+                url: route('trucks.index'),
+                icon: 'bi-clipboard-data',
+            ));
+        }
+
+        return response()->json([
+            'success' => true,
+            'gross_weight_kg' => $gross,
+            'tare_weight_kg' => $tare,
+            'net_weight_kg' => $net,
+            'collected_stops' => $collectedStops->count(),
+            'per_stop_kg' => $perStop,
+        ]);
     }
 
     public function getPlaybackHistory(Request $request, Truck $truck)

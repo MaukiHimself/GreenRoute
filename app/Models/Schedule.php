@@ -41,6 +41,8 @@ class Schedule extends Model
         'notes',
         'estimated_duration',
         'total_volume',
+        'weight_kg',
+        'waste_category',
         'disposal_site',
         'disposal_type',
         'disposal_notes'

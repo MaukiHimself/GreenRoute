@@ -247,6 +247,8 @@
         let geometry = @json($geometry ?? null);
         let etaList = @json($etaList);
         let stopStatuses = @json($truck->stop_statuses ?? []);
+        const truckTareKg = {{ $truck->tare_weight_kg ?? 'null' }};
+        let recordedNetKg = {{ $latestRunWeight ?? 'null' }};
         let isTracking = false;
         let watchId = null;
         let updateIntervalId = null;
@@ -255,6 +257,8 @@
         let mapCtx;
         let driverMarker;
         let routePolyline;
+        let liveRoutePolyline;
+        let lastLiveGeometryKey = null;
         const stopMarkers = [];
 
         GreenRouteMap.whenReady(function () {
@@ -282,6 +286,7 @@
             stopMarkers.forEach(m => mapCtx.map.removeLayer(m));
             stopMarkers.length = 0;
             if (routePolyline) mapCtx.map.removeLayer(routePolyline);
+            if (liveRoutePolyline) { mapCtx.map.removeLayer(liveRoutePolyline); liveRoutePolyline = null; lastLiveGeometryKey = null; }
             GreenRouteMap.clearPolylines(mapCtx);
 
             const points = [];
@@ -360,6 +365,37 @@
                 });
                 driverMarker = L.marker([lat, lng], { icon: driverIcon }).addTo(mapCtx.map);
             }
+        }
+
+        // Draw/refresh the live navigation line: current position -> remaining
+        // pending stops -> dumping site. The planned route stays visible but is
+        // faded underneath, so the driver always sees "the plan" vs "guidance
+        // from where I am now" (e.g. after detouring around traffic or skipping
+        // a congested stop).
+        function drawLiveRoute(liveRoute) {
+            if (!mapCtx || !liveRoute) return;
+
+            const line = (liveRoute.geometry && liveRoute.geometry.length > 1)
+                ? liveRoute.geometry
+                : (liveRoute.waypoints || []).map(w => [parseFloat(w.lat), parseFloat(w.lng)]);
+
+            if (!line || line.length < 2) return;
+
+            // Skip redrawing when the geometry hasn't changed (server reuses
+            // the cached line while the driver is still on it).
+            const key = line.length + ':' + line[0] + ':' + line[line.length - 1];
+            if (key === lastLiveGeometryKey && liveRoutePolyline) {
+                return;
+            }
+            lastLiveGeometryKey = key;
+
+            if (liveRoutePolyline) mapCtx.map.removeLayer(liveRoutePolyline);
+            liveRoutePolyline = L.polyline(line, {
+                color: '#2563eb', weight: 5, opacity: 0.9
+            }).addTo(mapCtx.map);
+
+            // Fade the planned route into the background.
+            if (routePolyline) routePolyline.setStyle({ opacity: 0.25, dashArray: '6, 10' });
         }
 
         function renderChecklist() {
@@ -495,6 +531,32 @@
                 ? others.map(r => `<option value="${r.id}">${r.route_name}</option>`).join('')
                 : '';
 
+            // Weighbridge entry: after finishing the route the driver drives to
+            // the dumping site, is weighed, and types the gross reading here.
+            // Net waste = gross - the truck's registered empty (tare) weight.
+            let weighHtml = '';
+            if (recordedNetKg !== null) {
+                weighHtml = `
+                    <div class="mt-3 p-3 rounded text-center" style="background:#e0f2fe;">
+                        <i class="bi bi-clipboard-check text-primary me-1"></i>
+                        <strong>${Number(recordedNetKg).toFixed(1)} kg</strong> of waste recorded for this trip.
+                    </div>`;
+            } else if (truckTareKg !== null) {
+                weighHtml = `
+                    <div class="mt-3 p-3 rounded" style="background:#f0f9ff;border:1px solid #bae6fd;">
+                        <label class="fw-semibold small mb-2 d-block"><i class="bi bi-clipboard-data me-1"></i>Weighbridge reading at dumping site</label>
+                        <div class="d-flex gap-2">
+                            <input type="number" id="grossWeightInput" class="form-control form-control-sm" min="1" step="0.1"
+                                   placeholder="Gross weight (kg), truck + waste">
+                            <button class="btn btn-primary btn-sm text-nowrap fw-bold" id="recordWeightBtn" onclick="recordWeight()">
+                                <i class="bi bi-check2"></i> Record
+                            </button>
+                        </div>
+                        <div class="small text-muted mt-2">Truck empty weight: ${Number(truckTareKg).toFixed(0)} kg — waste weight is calculated automatically.</div>
+                        <div class="small mt-1" id="weighFeedback"></div>
+                    </div>`;
+            }
+
             const selectorHtml = others.length ? `
                 <div class="mt-3">
                     <label class="fw-semibold small mb-2 d-block"><i class="bi bi-signpost-2 me-1"></i>Start another route</label>
@@ -541,9 +603,53 @@
                         </div>
                     </div>
                 </div>
+                ${weighHtml}
                 ${selectorHtml}
             `;
             container.appendChild(card);
+        }
+
+        async function recordWeight() {
+            const input = document.getElementById('grossWeightInput');
+            const btn = document.getElementById('recordWeightBtn');
+            const feedback = document.getElementById('weighFeedback');
+            if (!input || !input.value) return;
+
+            const gross = parseFloat(input.value);
+            if (isNaN(gross) || gross <= 0) {
+                feedback.className = 'small mt-1 text-danger';
+                feedback.textContent = 'Enter the gross weight shown on the weighbridge.';
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...'; }
+
+            try {
+                const response = await fetch(`/driver/record-weight/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ gross_weight_kg: gross })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    recordedNetKg = data.net_weight_kg;
+                    renderChecklist();
+                } else {
+                    feedback.className = 'small mt-1 text-danger';
+                    feedback.textContent = data.message || 'Failed to record the weight.';
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check2"></i> Record'; }
+                }
+            } catch (err) {
+                console.error(err);
+                feedback.className = 'small mt-1 text-danger';
+                feedback.textContent = 'Connection error occurred.';
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check2"></i> Record'; }
+            }
         }
 
         async function startRoute() {
@@ -573,6 +679,7 @@
                     stopStatuses = data.stop_statuses || {};
                     etaList = data.eta_list || [];
                     currentRouteId = parseInt(routeId);
+                    recordedNetKg = null; // fresh trip -> fresh weighbridge entry
 
                     drawRouteOnMap();
                     renderChecklist();
@@ -618,10 +725,16 @@
                     if (data.eta_list) {
                         etaList = data.eta_list;
                     }
-                    
+
                     // Rerender Map & Checklist
                     drawRouteOnMap();
                     renderChecklist();
+
+                    // Redirect guidance to the next pending client immediately
+                    // (e.g. after skipping a stop whose road is congested).
+                    if (data.live_route) {
+                        drawLiveRoute(data.live_route);
+                    }
                 } else {
                     alert('Failed to update stop status.');
                 }
@@ -711,6 +824,11 @@
                     // Update state variables
                     stopStatuses = data.stop_statuses;
                     etaList = data.eta_list;
+
+                    // Live guidance from the driver's actual position.
+                    if (data.live_route) {
+                        drawLiveRoute(data.live_route);
+                    }
 
                     // Rerender UI
                     renderChecklist();

@@ -254,7 +254,7 @@
                         <th>Route</th>
                         <th>Collection Date</th>
                         <th>Site Location</th>
-                        <th>Volume (m³)</th>
+                        <th>Weight (kg)</th>
                         <th>Disposal Site</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -272,8 +272,13 @@
                             <small class="text-muted">{{ $schedule->pickup_address }}</small>
                         </td>
                         <td>
-                            @if($schedule->total_volume)
-                                {{ number_format($schedule->total_volume, 2) }}
+                            @if($schedule->weight_kg)
+                                {{ number_format($schedule->weight_kg, 1) }} kg
+                                @if($schedule->waste_category)
+                                    <br><small class="text-muted">{{ ucfirst($schedule->waste_category) }}</small>
+                                @endif
+                            @elseif($schedule->total_volume)
+                                {{ number_format($schedule->total_volume, 2) }} m³
                             @else
                                 <span class="text-muted">Not recorded</span>
                             @endif
@@ -287,7 +292,7 @@
                             @endif
                         </td>
                         <td>
-                            @if($schedule->total_volume && $schedule->disposal_site)
+                            @if(($schedule->weight_kg || $schedule->total_volume) && $schedule->disposal_site)
                                 <span class="badge bg-success">Recorded</span>
                             @else
                                 <span class="badge bg-warning">Pending</span>

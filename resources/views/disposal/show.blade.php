@@ -99,14 +99,28 @@
             <div class="col-md-6">
                 <div class="info-card">
                     <h5 class="section-header primary-dark">Disposal Information</h5>
-                    @if($schedule->total_volume)
+                    @if($schedule->weight_kg || $schedule->total_volume)
                         <div class="row">
+                            @if($schedule->weight_kg)
+                                <div class="col-12 mb-2">
+                                    <strong class="primary-dark">Waste Weight:</strong>
+                                    <span class="ms-2">{{ number_format($schedule->weight_kg, 1) }} kg</span>
+                                </div>
+                            @endif
+                            @if($schedule->waste_category)
+                                <div class="col-12 mb-2">
+                                    <strong class="primary-dark">Waste Category:</strong>
+                                    <span class="ms-2">{{ ucfirst($schedule->waste_category) }}</span>
+                                </div>
+                            @endif
+                            @if($schedule->total_volume)
+                                <div class="col-12 mb-2">
+                                    <strong class="primary-dark">Volume:</strong>
+                                    <span class="ms-2">{{ number_format($schedule->total_volume, 2) }} m³</span>
+                                </div>
+                            @endif
                             <div class="col-12 mb-2">
-                                <strong class="primary-dark">Total Volume Collected:</strong> 
-                                <span class="ms-2">{{ number_format($schedule->total_volume, 2) }} m³</span>
-                            </div>
-                            <div class="col-12 mb-2">
-                                <strong class="primary-dark">Disposal Site:</strong> 
+                                <strong class="primary-dark">Disposal Site:</strong>
                                 <span class="ms-2">{{ $schedule->disposal_site }}</span>
                             </div>
                             <div class="col-12 mb-2">

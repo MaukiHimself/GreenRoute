@@ -14,6 +14,7 @@ class Truck extends Model
         'driver_name',
         'driver_phone',
         'truck_type',
+        'tare_weight_kg',
         'status',
         'base_latitude',
         'base_longitude',

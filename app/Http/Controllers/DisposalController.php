@@ -34,7 +34,9 @@ class DisposalController extends Controller
             abort(404);
         }
 
-        return view('disposal.edit', compact('schedule'));
+        $dumpingSites = collect(config('dumping_sites.sites', []))->pluck('name');
+
+        return view('disposal.edit', compact('schedule', 'dumpingSites'));
     }
 
     public function update(Request $request, Schedule $schedule)
@@ -44,16 +46,20 @@ class DisposalController extends Controller
         }
 
         $validated = $request->validate([
-            'total_volume' => 'required|numeric|min:0',
+            'weight_kg' => 'required|numeric|min:0.1|max:100000',
+            'waste_category' => 'required|in:general,organic,recyclable,mixed',
             'disposal_site' => 'required|string|max:255',
             'disposal_type' => 'required|in:sorting_facility,landfill',
+            'total_volume' => 'nullable|numeric|min:0',
             'disposal_notes' => 'nullable|string'
         ]);
 
         $schedule->update([
-            'total_volume' => $validated['total_volume'],
+            'weight_kg' => $validated['weight_kg'],
+            'waste_category' => $validated['waste_category'],
             'disposal_site' => $validated['disposal_site'],
             'disposal_type' => $validated['disposal_type'],
+            'total_volume' => $validated['total_volume'] ?? $schedule->total_volume,
             'disposal_notes' => $validated['disposal_notes']
         ]);
 

@@ -27,14 +27,195 @@
     </div>
 
     <div class="section">
-        <h3>Client Database Summary</h3>
+        <h3>Business Overview</h3>
         <div class="stats-grid">
             <div class="stat-box">
-                <div class="stat-value">{{ $data['clientStats']['total_clients'] }}</div>
-                <div>Total Clients</div>
+                <div class="stat-value">{{ $data['overview']['total_clients'] }}</div>
+                <div>Clients</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['overview']['total_routes'] }}</div>
+                <div>Routes</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['overview']['total_trucks'] }}</div>
+                <div>Trucks</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['overview']['runs_completed'] }}</div>
+                <div>Completed Runs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Field Operations & Waste Collected</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">{{ number_format($data['operationsStats']['total_waste_kg'], 1) }} kg</div>
+                <div>Waste Weighed (all trips)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ number_format($data['operationsStats']['month_waste_kg'], 1) }} kg</div>
+                <div>Weighed This Month</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['operationsStats']['trips_weighed'] }}</div>
+                <div>Trips Weighed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['operationsStats']['success_rate'] !== null ? $data['operationsStats']['success_rate'] . '%' : '—' }}</div>
+                <div>Collection Success Rate</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['operationsStats']['stops_collected'] }}</div>
+                <div>Stops Collected</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['operationsStats']['stops_skipped'] }} / {{ $data['operationsStats']['stops_blocked'] }}</div>
+                <div>Skipped / Blocked</div>
             </div>
         </div>
 
+        <h4>Waste by Route (weighbridge)</h4>
+        <table>
+            <thead>
+                <tr><th>Route</th><th>Trips</th><th>Waste (kg)</th></tr>
+            </thead>
+            <tbody>
+                @forelse($data['operationsStats']['waste_by_route'] as $row)
+                <tr>
+                    <td>{{ $row->route_name ?? 'Unnamed route' }}</td>
+                    <td>{{ $row->trips }}</td>
+                    <td>{{ number_format($row->total_kg, 1) }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="3">No weighed trips yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <h4>Top Clients by Waste (estimated share)</h4>
+        <table>
+            <thead>
+                <tr><th>Client</th><th>Pickups</th><th>Waste (kg)</th></tr>
+            </thead>
+            <tbody>
+                @forelse($data['operationsStats']['top_clients_by_waste'] as $row)
+                <tr>
+                    <td>{{ $row->client_name ?? 'Client' }}</td>
+                    <td>{{ $row->pickups }}</td>
+                    <td>~{{ number_format($row->total_kg, 1) }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="3">No per-client estimates yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Disposal Records</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">{{ number_format($data['disposalStats']['recorded_weight_kg'], 1) }} kg</div>
+                <div>Recorded on Schedules</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ number_format($data['disposalStats']['recycled_kg'], 1) }} kg</div>
+                <div>To Sorting Facility</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ number_format($data['disposalStats']['landfill_kg'], 1) }} kg</div>
+                <div>To Landfill</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['disposalStats']['pending_records'] }}</div>
+                <div>Awaiting Record</div>
+            </div>
+        </div>
+
+        <h4>Waste by Category</h4>
+        <table>
+            <thead>
+                <tr><th>Category</th><th>Waste (kg)</th></tr>
+            </thead>
+            <tbody>
+                @forelse($data['disposalStats']['by_category'] as $row)
+                <tr>
+                    <td>{{ ucfirst($row->waste_category ?? 'Uncategorised') }}</td>
+                    <td>{{ number_format($row->total_kg, 1) }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="2">No disposal records yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <h4>Waste by Disposal Site</h4>
+        <table>
+            <thead>
+                <tr><th>Site</th><th>Waste (kg)</th></tr>
+            </thead>
+            <tbody>
+                @forelse($data['disposalStats']['by_site'] as $row)
+                <tr>
+                    <td>{{ $row->disposal_site }}</td>
+                    <td>{{ number_format($row->total_kg, 1) }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="2">No disposal records yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Monthly Waste Trend (last 6 months)</h3>
+        <table>
+            <thead>
+                <tr><th>Month</th><th>Weighbridge trips (kg)</th><th>Schedule records (kg)</th></tr>
+            </thead>
+            <tbody>
+                @foreach($data['monthlyWaste']['labels'] as $i => $label)
+                <tr>
+                    <td>{{ $label }}</td>
+                    <td>{{ number_format($data['monthlyWaste']['trip_kg'][$i], 1) }}</td>
+                    <td>{{ number_format($data['monthlyWaste']['schedule_kg'][$i], 1) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Billing & Revenue Summary</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">TZS {{ number_format($data['billingStats']['paid_revenue'], 2) }}</div>
+                <div>Total Revenue Paid</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">TZS {{ number_format($data['billingStats']['pending_payments'], 2) }}</div>
+                <div>Pending Payments</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">TZS {{ number_format($data['billingStats']['monthly_revenue'], 2) }}</div>
+                <div>This Month's Revenue</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['billingStats']['paid_customers'] }}</div>
+                <div>Customers Paid</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ $data['billingStats']['overdue_customers'] }}</div>
+                <div>Overdue Customers</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Client Database Summary</h3>
         <h4>Clients by Category</h4>
         <table>
             <thead>
@@ -49,96 +230,21 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
 
-    <div class="section">
-        <h3>Billing & Revenue Summary</h3>
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-value">${{ number_format($data['billingStats']['paid_revenue'], 2) }}</div>
-                <div>Total Revenue Paid</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">${{ number_format($data['billingStats']['pending_payments'], 2) }}</div>
-                <div>Pending Payments</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">${{ number_format($data['billingStats']['weekly_revenue'], 2) }}</div>
-                <div>Weekly Revenue</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">${{ number_format($data['billingStats']['monthly_revenue'], 2) }}</div>
-                <div>Monthly Revenue</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">${{ number_format($data['billingStats']['yearly_revenue'], 2) }}</div>
-                <div>Yearly Revenue</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{{ $data['billingStats']['paid_customers'] }}</div>
-                <div>Customers Paid</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{{ $data['billingStats']['overdue_customers'] }}</div>
-                <div>Overdue Customers</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>Collection Summary</h3>
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-value">{{ $data['collectionStats']['total_routes'] }}</div>
-                <div>Total Routes</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{{ $data['collectionStats']['completed_collections'] }}</div>
-                <div>Completed Collections</div>
-            </div>
-        </div>
-
-        <h4>Volumes by Route</h4>
+        <h4>Clients by Route</h4>
         <table>
             <thead>
-                <tr><th>Route</th><th>Volume (m³)</th></tr>
+                <tr><th>Route</th><th>Clients</th></tr>
             </thead>
             <tbody>
-                @foreach($data['collectionStats']['volumes_by_route'] as $route)
+                @forelse($data['clientStats']['by_route'] as $route)
                 <tr>
-                    <td>{{ $route->pickup_location }}</td>
-                    <td>{{ number_format($route->total_volume, 2) }}</td>
+                    <td>{{ $route->route }}</td>
+                    <td>{{ $route->count }}</td>
                 </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>Disposal Summary</h3>
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-value">{{ number_format($data['disposalStats']['total_volume_collected'], 2) }} m³</div>
-                <div>Total Volume Collected</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{{ number_format($data['disposalStats']['recycled_volume'], 2) }} m³</div>
-                <div>Volume Recycled</div>
-            </div>
-        </div>
-
-        <h4>Volumes by Disposal Type</h4>
-        <table>
-            <thead>
-                <tr><th>Disposal Type</th><th>Volume (m³)</th></tr>
-            </thead>
-            <tbody>
-                @foreach($data['disposalStats']['volumes_by_disposal_type'] as $disposal)
-                <tr>
-                    <td>{{ ucfirst(str_replace('_', ' ', $disposal->disposal_type)) }}</td>
-                    <td>{{ number_format($disposal->total_volume, 2) }}</td>
-                </tr>
-                @endforeach
+                @empty
+                <tr><td colspan="2">No clients assigned to routes yet.</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

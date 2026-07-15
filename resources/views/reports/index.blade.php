@@ -250,40 +250,151 @@
         </div>
     </div>
 
-    <!-- Client Statistics -->
+    <!-- Business Overview -->
     <div class="content-section">
         <div class="section-header">
-            <h2 class="section-title">Client Database Summary</h2>
+            <h2 class="section-title">Business Overview</h2>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value primary">{{ $data['clientStats']['total_clients'] }}</div>
-                <div class="stat-label">Total Clients</div>
+                <div class="stat-value primary">{{ $data['overview']['total_clients'] }}</div>
+                <div class="stat-label">Clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value primary">{{ $data['overview']['total_routes'] }}</div>
+                <div class="stat-label">Routes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value primary">{{ $data['overview']['total_trucks'] }}</div>
+                <div class="stat-label">Trucks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ $data['overview']['runs_completed'] }}</div>
+                <div class="stat-label">Completed Collection Runs</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field Operations (from collection runs + weighbridge) -->
+    <div class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Field Operations & Waste Collected</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value success">{{ number_format($data['operationsStats']['total_waste_kg'], 1) }} kg</div>
+                <div class="stat-label">Waste Weighed at Dumping Site (all trips)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value info">{{ number_format($data['operationsStats']['month_waste_kg'], 1) }} kg</div>
+                <div class="stat-label">Weighed This Month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value primary">{{ $data['operationsStats']['trips_weighed'] }}</div>
+                <div class="stat-label">Trips Weighed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value {{ ($data['operationsStats']['success_rate'] ?? 0) >= 80 ? 'success' : 'warning' }}">
+                    {{ $data['operationsStats']['success_rate'] !== null ? $data['operationsStats']['success_rate'] . '%' : '—' }}
+                </div>
+                <div class="stat-label">Collection Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ $data['operationsStats']['stops_collected'] }}</div>
+                <div class="stat-label">Stops Collected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value warning">{{ $data['operationsStats']['stops_skipped'] }}</div>
+                <div class="stat-label">Stops Skipped</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value danger">{{ $data['operationsStats']['stops_blocked'] }}</div>
+                <div class="stat-label">Stops Blocked</div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <h5 class="mb-3" style="color: var(--primary-color);">Clients by Category</h5>
+                <h5 class="mb-3" style="color: var(--primary-color);">Waste by Route (weighbridge)</h5>
                 <div class="category-list">
-                    @foreach($data['clientStats']['by_category'] as $category)
+                    @forelse($data['operationsStats']['waste_by_route'] as $row)
                     <div class="category-item">
-                        <span class="category-name">{{ ucfirst($category->category ?? 'Unknown') }}</span>
-                        <span class="category-count">{{ $category->count }}</span>
+                        <span class="category-name">{{ $row->route_name ?? 'Unnamed route' }} <small class="text-muted">({{ $row->trips }} trip{{ $row->trips == 1 ? '' : 's' }})</small></span>
+                        <span class="category-count">{{ number_format($row->total_kg, 1) }} kg</span>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-muted small py-2">No weighed trips yet — record a weighbridge reading from the driver terminal after a route.</div>
+                    @endforelse
                 </div>
             </div>
             <div class="col-md-6">
-                <h5 class="mb-3" style="color: var(--primary-color);">Clients by Location</h5>
+                <h5 class="mb-3" style="color: var(--primary-color);">Top Clients by Waste (estimated share)</h5>
                 <div class="category-list">
-                    @foreach($data['clientStats']['by_location'] as $location)
+                    @forelse($data['operationsStats']['top_clients_by_waste'] as $row)
                     <div class="category-item">
-                        <span class="category-name">{{ $location->address }}</span>
-                        <span class="category-count">{{ $location->count }}</span>
+                        <span class="category-name">{{ $row->client_name ?? 'Client' }} <small class="text-muted">({{ $row->pickups }} pickup{{ $row->pickups == 1 ? '' : 's' }})</small></span>
+                        <span class="category-count">~{{ number_format($row->total_kg, 1) }} kg</span>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-muted small py-2">Per-client estimates appear once trips are weighed.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disposal Records (from completed schedules) -->
+    <div class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Disposal Records</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value primary">{{ number_format($data['disposalStats']['recorded_weight_kg'], 1) }} kg</div>
+                <div class="stat-label">Recorded on Schedules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ number_format($data['disposalStats']['recycled_kg'], 1) }} kg</div>
+                <div class="stat-label">To Sorting Facility (recycling)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value warning">{{ number_format($data['disposalStats']['landfill_kg'], 1) }} kg</div>
+                <div class="stat-label">To Landfill</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value danger">{{ $data['disposalStats']['pending_records'] }}</div>
+                <div class="stat-label">Completed Collections Awaiting Record</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3" style="color: var(--primary-color);">Waste by Category</h5>
+                <div class="category-list">
+                    @forelse($data['disposalStats']['by_category'] as $row)
+                    <div class="category-item">
+                        <span class="category-name">{{ ucfirst($row->waste_category ?? 'Uncategorised') }}</span>
+                        <span class="category-count">{{ number_format($row->total_kg, 1) }} kg</span>
+                    </div>
+                    @empty
+                    <div class="text-muted small py-2">No disposal records yet — use "Record Data" on a completed collection.</div>
+                    @endforelse
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3" style="color: var(--primary-color);">Waste by Disposal Site</h5>
+                <div class="category-list">
+                    @forelse($data['disposalStats']['by_site'] as $row)
+                    <div class="category-item">
+                        <span class="category-name">{{ $row->disposal_site }}</span>
+                        <span class="category-count">{{ number_format($row->total_kg, 1) }} kg</span>
+                    </div>
+                    @empty
+                    <div class="text-muted small py-2">No disposal records yet.</div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -305,16 +416,8 @@
                 <div class="stat-label">Pending Payments</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value info">TZS {{ number_format($data['billingStats']['weekly_revenue'], 2) }}</div>
-                <div class="stat-label">Weekly Revenue</div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-value info">TZS {{ number_format($data['billingStats']['monthly_revenue'], 2) }}</div>
-                <div class="stat-label">Monthly Revenue</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value info">TZS {{ number_format($data['billingStats']['yearly_revenue'], 2) }}</div>
-                <div class="stat-label">Yearly Revenue</div>
+                <div class="stat-label">This Month's Revenue</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value success">{{ $data['billingStats']['paid_customers'] }}</div>
@@ -327,66 +430,46 @@
         </div>
     </div>
 
-    <!-- Collection & Disposal Statistics -->
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="content-section h-100">
-                <div class="section-header">
-                    <h2 class="section-title">Collection Summary</h2>
-                </div>
+    <!-- Client Statistics -->
+    <div class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Client Database Summary</h2>
+        </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value primary">{{ $data['collectionStats']['total_routes'] }}</div>
-                        <div class="stat-label">Total Routes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value success">{{ $data['collectionStats']['completed_collections'] }}</div>
-                        <div class="stat-label">Completed Collections</div>
-                    </div>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value primary">{{ $data['clientStats']['total_clients'] }}</div>
+                <div class="stat-label">Total Clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ $data['clientStats']['new_this_month'] }}</div>
+                <div class="stat-label">New This Month</div>
+            </div>
+        </div>
 
-                <div class="section-divider"></div>
-
-                <h5 class="mb-3" style="color: var(--primary-color);">Volumes by Route</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3" style="color: var(--primary-color);">Clients by Category</h5>
                 <div class="category-list">
-                    @foreach($data['collectionStats']['volumes_by_route'] as $route)
+                    @foreach($data['clientStats']['by_category'] as $category)
                     <div class="category-item">
-                        <span class="category-name">{{ $route->pickup_location }}</span>
-                        <span class="category-count">{{ number_format($route->total_volume, 2) }} m³</span>
+                        <span class="category-name">{{ ucfirst($category->category ?? 'Unknown') }}</span>
+                        <span class="category-count">{{ $category->count }}</span>
                     </div>
                     @endforeach
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="content-section h-100">
-                <div class="section-header">
-                    <h2 class="section-title">Disposal Summary</h2>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value primary">{{ number_format($data['disposalStats']['total_volume_collected'], 2) }} m³</div>
-                        <div class="stat-label">Total Volume Collected</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value success">{{ number_format($data['disposalStats']['recycled_volume'], 2) }} m³</div>
-                        <div class="stat-label">Volume Recycled</div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <h5 class="mb-3" style="color: var(--primary-color);">Volumes by Disposal Type</h5>
+            <div class="col-md-6">
+                <h5 class="mb-3" style="color: var(--primary-color);">Clients by Route</h5>
                 <div class="category-list">
-                    @foreach($data['disposalStats']['volumes_by_disposal_type'] as $disposal)
+                    @forelse($data['clientStats']['by_route'] as $route)
                     <div class="category-item">
-                        <span class="category-name">{{ ucfirst(str_replace('_', ' ', $disposal->disposal_type)) }}</span>
-                        <span class="category-count">{{ number_format($disposal->total_volume, 2) }} m³</span>
+                        <span class="category-name">{{ $route->route }}</span>
+                        <span class="category-count">{{ $route->count }}</span>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-muted small py-2">No clients assigned to routes yet.</div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -394,6 +477,14 @@
 
     <!-- Charts Section -->
     <div class="row mt-4">
+        <div class="col-lg-12 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Waste Collected per Month (kg)</h3>
+                </div>
+                <canvas id="wasteChart" height="90"></canvas>
+            </div>
+        </div>
         <div class="col-lg-6">
             <div class="chart-container">
                 <div class="chart-header">
@@ -415,6 +506,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Monthly waste chart: weighbridge trips vs schedule disposal records
+    const wasteCtx = document.getElementById('wasteChart').getContext('2d');
+    new Chart(wasteCtx, {
+        type: 'bar',
+        data: {
+            labels: @json($data['monthlyWaste']['labels']),
+            datasets: [
+                {
+                    label: 'Weighbridge (trips, kg)',
+                    data: @json($data['monthlyWaste']['trip_kg']),
+                    backgroundColor: '#047857'
+                },
+                {
+                    label: 'Schedule records (kg)',
+                    data: @json($data['monthlyWaste']['schedule_kg']),
+                    backgroundColor: '#0a8989'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } },
+                x: { grid: { display: false } }
+            },
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
     // Revenue Chart
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
     new Chart(revenueCtx, {

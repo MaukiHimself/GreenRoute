@@ -98,14 +98,47 @@
                 @method('PUT')
                 
                 <h5 class="section-header">Disposal Information</h5>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <label for="total_volume" class="form-label">Total Volume Collected (m³) *</label>
-                        <input type="number" class="form-control @error('total_volume') is-invalid @enderror" 
-                               id="total_volume" name="total_volume" step="0.01" 
-                               value="{{ old('total_volume', $schedule->total_volume) }}" required>
-                        @error('total_volume')
+                        <label for="weight_kg" class="form-label">Waste Weight (kg) *</label>
+                        <input type="number" class="form-control @error('weight_kg') is-invalid @enderror"
+                               id="weight_kg" name="weight_kg" step="0.1" min="0.1"
+                               value="{{ old('weight_kg', $schedule->weight_kg) }}"
+                               placeholder="e.g. 120.5" required>
+                        <small class="text-muted">From the weighbridge/scale, or estimated (standard bag ≈ 5 kg, bin ≈ 20 kg).</small>
+                        @error('weight_kg')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label for="waste_category" class="form-label">Waste Category *</label>
+                        <select class="form-select @error('waste_category') is-invalid @enderror" id="waste_category" name="waste_category" required>
+                            <option value="">Select Category</option>
+                            <option value="general" {{ old('waste_category', $schedule->waste_category) == 'general' ? 'selected' : '' }}>General Waste</option>
+                            <option value="organic" {{ old('waste_category', $schedule->waste_category) == 'organic' ? 'selected' : '' }}>Organic Waste</option>
+                            <option value="recyclable" {{ old('waste_category', $schedule->waste_category) == 'recyclable' ? 'selected' : '' }}>Recyclable</option>
+                            <option value="mixed" {{ old('waste_category', $schedule->waste_category) == 'mixed' ? 'selected' : '' }}>Mixed</option>
+                        </select>
+                        @error('waste_category')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="disposal_site" class="form-label">Disposal Site *</label>
+                        <select class="form-select @error('disposal_site') is-invalid @enderror" id="disposal_site" name="disposal_site" required>
+                            <option value="">Select Disposal Site</option>
+                            @foreach($dumpingSites as $site)
+                                <option value="{{ $site }}" {{ old('disposal_site', $schedule->disposal_site) == $site ? 'selected' : '' }}>{{ $site }}</option>
+                            @endforeach
+                            @if($schedule->disposal_site && !$dumpingSites->contains($schedule->disposal_site))
+                                <option value="{{ $schedule->disposal_site }}" selected>{{ $schedule->disposal_site }}</option>
+                            @endif
+                        </select>
+                        @error('disposal_site')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -121,14 +154,14 @@
                         @enderror
                     </div>
                 </div>
-                
+
                 <div class="mb-4">
-                    <label for="disposal_site" class="form-label">Disposal Site Location *</label>
-                    <input type="text" class="form-control @error('disposal_site') is-invalid @enderror" 
-                           id="disposal_site" name="disposal_site" 
-                           value="{{ old('disposal_site', $schedule->disposal_site) }}" 
-                           placeholder="Enter the name/location of disposal site" required>
-                    @error('disposal_site')
+                    <label for="total_volume" class="form-label">Volume (m³) — optional</label>
+                    <input type="number" class="form-control @error('total_volume') is-invalid @enderror"
+                           id="total_volume" name="total_volume" step="0.01" min="0"
+                           value="{{ old('total_volume', $schedule->total_volume) }}"
+                           placeholder="Only if you also track volume">
+                    @error('total_volume')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

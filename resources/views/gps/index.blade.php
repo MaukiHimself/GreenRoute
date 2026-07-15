@@ -514,6 +514,11 @@
                             <option value="large">Large Truck</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Empty Truck Weight — Tare (kg)</label>
+                        <input type="number" class="form-control" name="tare_weight_kg" min="100" max="50000" step="0.1" placeholder="e.g. 3500" required>
+                        <small class="text-muted">Used at the weighbridge: net waste = gross reading − this weight.</small>
+                    </div>
                     <button type="submit" class="btn btn-primary">Register Truck</button>
                 </form>
             </div>
@@ -533,6 +538,9 @@
                                 <div class="truck-driver">{{ $truck->driver_name }}</div>
                                 <div class="truck-phone">{{ $truck->driver_phone }}</div>
                                 <span class="truck-badge">{{ ucfirst($truck->truck_type) }}</span>
+                                @if($truck->tare_weight_kg)
+                                    <span class="badge" style="background:#e0f2fe;color:#075985;"><i class="bi bi-box-seam me-1"></i>Tare {{ number_format($truck->tare_weight_kg) }} kg</span>
+                                @endif
                                 <span class="badge ms-1" id="route-badge-{{ $truck->id }}"
                                       style="{{ $truck->assignedRoute ? 'background:'.$truck->assignedRoute->color.';color:#fff;' : 'background:#f1f5f9;color:#64748b;' }}">
                                     <i class="bi bi-signpost-split me-1"></i>{{ $truck->assignedRoute ? $truck->assignedRoute->route_name : 'No route' }}
@@ -1384,7 +1392,10 @@
             const stopsHtml = (run.stops || []).map(s => `
                 <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
                     <span class="small">${escapeHtml(s.client_name || 'Client')}</span>
-                    ${statusBadge[s.status] || ''}
+                    <span class="d-flex align-items-center gap-2">
+                        ${s.prorated_weight_kg != null ? `<span class="small text-muted">~${Number(s.prorated_weight_kg).toFixed(1)} kg</span>` : ''}
+                        ${statusBadge[s.status] || ''}
+                    </span>
                 </div>`).join('') || '<div class="small text-muted py-2">No stop records.</div>';
 
             return `
@@ -1397,10 +1408,13 @@
                             </div>
                             <i class="bi bi-chevron-down text-muted"></i>
                         </div>
-                        <div class="d-flex gap-2 mt-2">
+                        <div class="d-flex gap-2 mt-2 flex-wrap">
                             <span class="badge" style="background:#dcfce7;color:#166534;">${run.collected} collected</span>
                             <span class="badge" style="background:#fef3c7;color:#92400e;">${run.skipped} skipped</span>
                             <span class="badge" style="background:#fee2e2;color:#991b1b;">${run.blocked} blocked</span>
+                            ${run.net_weight_kg != null
+                                ? `<span class="badge" style="background:#e0f2fe;color:#075985;"><i class="bi bi-clipboard-data me-1"></i>${Number(run.net_weight_kg).toFixed(1)} kg waste</span>`
+                                : '<span class="badge" style="background:#f1f5f9;color:#64748b;">Not weighed</span>'}
                         </div>
                     </div>
                     <div id="run-stops-${idx}" class="d-none px-3 pb-2">${stopsHtml}</div>

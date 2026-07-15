@@ -464,5 +464,6 @@ Route::get('/driver/track/{token}', [App\Http\Controllers\TruckController::class
 Route::post('/driver/location/{token}', [App\Http\Controllers\TruckController::class, 'updateLocationByToken'])->name('driver.location');
 Route::post('/driver/stop-status/{token}', [App\Http\Controllers\TruckController::class, 'updateStopStatus'])->name('driver.stop-status');
 Route::post('/driver/start-route/{token}', [App\Http\Controllers\TruckController::class, 'startRouteByToken'])->name('driver.start-route');
+Route::post('/driver/record-weight/{token}', [App\Http\Controllers\TruckController::class, 'recordWeightByToken'])->name('driver.record-weight');
 
 require __DIR__.'/auth.php';
