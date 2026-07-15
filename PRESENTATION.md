@@ -118,6 +118,79 @@ The final ordered list is called the **waypoints**:
 [ Base (yard) ] → [ nearest client ] → [ next nearest ] → … → [ Dumping site ]
 ```
 
+### Layer 3b — ⭐ The Route Optimizer screen: THREE algorithms compete
+
+On the **Route Optimization** page, the contractor selects clients and clicks
+**Optimize Route**. The system doesn't compute one answer — it computes **three
+candidate routes with three different algorithms**, fetches the **real road
+distance and driving time** for each from the routing engine (OSRM), and shows
+all three side by side. The contractor picks the best one and saves it. Start
+(base) and end (dumping site) are fixed in all three; only the client order
+changes. Code: `getNearestNeighborPath()`, `get2OptOptimizedPath()`,
+`getPolarSweepPath()` in `resources/views/routes/index.blade.php`.
+
+**Algorithm 1 — Nearest Neighbour ("the greedy one")**
+
+> From where you are, always drive to the **closest unvisited client**. Repeat
+> until every client is visited.
+
+- *Analogy:* a hungry person at a buffet always grabbing the nearest plate.
+- Very fast and intuitive; usually a decent route.
+- **Weakness:** it is *greedy* — great early choices can force a terrible final
+  leg (the last client left is often far across town, causing one long zig-zag
+  back). It never reconsiders a decision.
+
+**Algorithm 2 — 2-Opt ("the improver")**
+
+> Start with the Nearest Neighbour route, then repeatedly try to **un-cross**
+> it: pick two edges of the tour, and check if **reversing the segment between
+> them** makes the total distance shorter. Keep doing this until no swap helps
+> (capped at 500 rounds so the browser never freezes).
+
+- *Key picture to draw on the board:* a route that **crosses over itself** is
+  never optimal — 2-Opt finds each crossing and flips it out:
+
+```
+   A ──╲  ╱── C            A ────── B
+        ╳            ⟹
+   D ──╱  ╲── B            D ────── C     (segment B…D reversed, no more crossing)
+```
+
+- It's a classic **local search / iterative improvement** method: it doesn't
+  build a route, it **polishes** one.
+- Usually produces the **shortest** of the three — at the cost of more
+  computation (it compares every pair of edges, again and again).
+
+**Algorithm 3 — Polar Sweep ("the clock hand")**
+
+> Stand at the base, imagine a **clock hand (radar beam) sweeping in a circle**,
+> and visit the clients **in the order the beam hits them** (sorted by their
+> polar angle `atan2` around the base).
+
+- *Analogy:* a lighthouse beam rotating once — you serve clients in the order
+  the light touches them.
+- Produces a natural **loop around the base** with no back-tracking across the
+  middle; drivers find such routes intuitive to follow.
+- **Weakness:** it ignores *distance* completely (only direction matters), so a
+  near client and a far client at the same angle are visited consecutively even
+  if that's a long detour. Works best when clients form a ring around the base;
+  poor when they're in one narrow corridor.
+
+**Why compute all three instead of trusting one?** Because each algorithm wins
+on different client layouts — clustered, ring-shaped, or corridor-shaped — and
+straight-line maths can lie: two routes close in haversine distance can differ a
+lot in **real road km** (one-way streets, rivers, no through-roads). Comparing
+the three *by actual OSRM road distance and duration* and letting a human choose
+is cheap, transparent, and easy to defend. This "generate candidates → evaluate
+with real data → select" pattern is a legitimate engineering answer to a problem
+(TSP) that cannot be solved perfectly in reasonable time.
+
+| | Builds route by | Strength | Weakness |
+|---|---|---|---|
+| **Nearest Neighbour** | Greedy: closest next | Fast, intuitive | Bad final legs, never reconsiders |
+| **2-Opt** | Improving NN by un-crossing edges | Usually shortest | More computation |
+| **Polar Sweep** | Angle sweep around base | Natural loop, no criss-cross | Ignores distances |
+
 ### Layer 4 — Draw the real road path (not a straight line)
 Waypoints are just dots. To draw the **actual streets** the truck will follow, we send those
 dots to a **routing engine** (ORS, then OSRM as backup). It returns hundreds of coordinates
@@ -260,6 +333,9 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
 | **Haversine formula** | Maths to get the straight-line distance between two lat/lng points on a sphere. |
 | **Travelling Salesman Problem (TSP)** | "Visit all stops in the shortest total distance." Hard to solve exactly. |
 | **Nearest-Neighbour heuristic** | Quick TSP shortcut: always go to the closest unvisited stop next. |
+| **2-Opt** | Route improver: keep reversing segments to remove crossings until no swap shortens the tour. |
+| **Polar Sweep** | Order stops by the angle a rotating "clock hand" at the base hits them — a natural loop. |
+| **Local search** | Improving an existing solution step by step (what 2-Opt does), instead of building from scratch. |
 | **Routing engine (ORS / OSRM)** | A service that turns dots into a real road path. |
 | **Polyline** | The line drawn on the map made of many coordinates. |
 | **Geocoding** | Turning an address ("Masaki, Kinondoni") into lat/lng. |
@@ -280,6 +356,7 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
 |---|---|
 | Truck GPS, routes, runs, ETAs, routing | `app/Http/Controllers/TruckController.php` |
 | Route optimisation (nearest-neighbour) | `TruckController::optimizeOrder()` / `buildRouteWaypoints()` |
+| 3-algorithm optimizer UI (NN / 2-Opt / Polar Sweep) | `resources/views/routes/index.blade.php` |
 | Road path + caching | `TruckController::roadGeometry()` |
 | Run completion + alert | `TruckController::finalizeRunIfComplete()` |
 | Live rerouting (deviation + skip) | `TruckController::liveRoute()` + `drawLiveRoute()` in driver page |
@@ -303,6 +380,10 @@ Message types to know: `eta_alert` (truck nearby) and `collection_update` (colle
 
 **Suggested flow (5–7 minutes):**
 1. **Contractor → Route Management:** show the **5 routes** and explain Layer 1 (areas + dump site).
+1b. **Contractor → Route Optimization:** select a few clients and click **Optimize Route** —
+   three candidate routes appear (**Nearest Neighbour, 2-Opt, Polar Sweep**) with real road
+   km and duration from OSRM. Explain each in one line (greedy / un-crossing improver /
+   clock-hand sweep) and pick the shortest (Layer 3b).
 2. **Contractor → Clients:** show **20 clients** across Dar, grouped into the routes (Layer 2).
 3. **Contractor → GPS Tracker (`/trucks`):** point out truck **T123 DEN** on *Masaki–Oysterbay
    Loop*. The route **follows real roads** base → 4 clients → Pugu dumpsite (Layers 3–4).
