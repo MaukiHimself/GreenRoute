@@ -362,7 +362,7 @@ class ClientPortalController extends Controller
             'state' => $client->state ?? 'N/A',
             'zip_code' => $client->zip_code ?? '00000',
             'service_type' => $dbServiceType,
-            'status' => 'scheduled',
+            'status' => 'requested',
             'notes' => $notes,
             'includes_organic_waste' => $validated['waste_type'] === 'organic',
         ]);
@@ -371,13 +371,13 @@ class ClientPortalController extends Controller
         if ($contractor) {
             $contractor->notify(new GenericNotification(
                 title: 'New service request',
-                message: ($client->name ?? 'A client') . ' requested a ' . str_replace('_', ' ', $validated['service_type']),
-                url: route('dashboard.contractor'),
+                message: ($client->name ?? 'A client') . ' requested a ' . str_replace('_', ' ', $validated['service_type']) . ' — assign it to a route schedule',
+                url: route('schedules.index'),
                 icon: 'bi-truck',
             ));
         }
 
-        return redirect()->route('client.schedules')->with('success', 'Service request submitted successfully.');
+        return redirect()->route('client.schedules')->with('success', 'Service request submitted. Your contractor will confirm the pickup schedule shortly.');
     }
 
     public function equipment()

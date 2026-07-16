@@ -397,6 +397,7 @@ Route::middleware(['auth'])->prefix('contractor')->group(function () {
         Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('schedules.show');
         Route::get('/{schedule}/print', [ScheduleController::class, 'print'])->name('schedules.print');
         Route::post('/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.status');
+        Route::post('/{schedule}/assign-request', [ScheduleController::class, 'assignRequest'])->name('schedules.assign-request');
     });
 
     // Disposal routes

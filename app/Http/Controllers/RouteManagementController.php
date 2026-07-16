@@ -76,11 +76,6 @@ class RouteManagementController extends Controller
             'client_ids.*' => 'exists:clients,id',
         ];
 
-        // Only require site_location if columns exist
-        if ($hasLocationColumns) {
-            $validationRules['site_location'] = 'required|string';
-        }
-
         $validated = $request->validate($validationRules);
 
         $contractorId = Auth::id();

@@ -227,6 +227,70 @@
         </div>
     </div>
 
+        <!-- Pending Client Service Requests -->
+        @if($pendingRequests->isNotEmpty())
+        <div class="table-section" style="border-left: 5px solid #f59e0b;">
+            <div class="section-header">
+                <h2 class="section-title" style="color:#b45309;">
+                    <i class="bi bi-bell me-2"></i>Client Service Requests ({{ $pendingRequests->count() }})
+                </h2>
+                <span class="text-muted">Assign each request to one of your routes to confirm the pickup</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Service</th>
+                            <th>Requested Date</th>
+                            <th>Location</th>
+                            <th>Details</th>
+                            <th style="min-width: 320px;">Assign to Route</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($pendingRequests as $request)
+                        <tr>
+                            <td>
+                                <strong>{{ optional($request->client)->name ?? 'Unknown Client' }}</strong>
+                                @if(optional($request->client)->phone)
+                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ $request->client->phone }}</div>
+                                @endif
+                            </td>
+                            <td><span class="badge bg-info text-dark">{{ ucfirst($request->service_type) }}</span></td>
+                            <td>{{ $request->pickup_date ? $request->pickup_date->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $request->pickup_location }}</td>
+                            <td>
+                                @if($request->notes)
+                                    <small class="text-muted" style="white-space: pre-line;">{{ \Illuminate\Support\Str::limit($request->notes, 120) }}</small>
+                                @endif
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ route('schedules.assign-request', $request) }}" class="d-flex gap-2 align-items-center flex-wrap">
+                                    @csrf
+                                    <select name="route_name" class="form-select form-select-sm" style="max-width: 160px;" required>
+                                        <option value="">Route…</option>
+                                        @foreach($routes as $routeName)
+                                            <option value="{{ $routeName }}" {{ optional($request->client)->route === $routeName ? 'selected' : '' }}>{{ $routeName }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="date" name="pickup_date" class="form-control form-control-sm" style="max-width: 150px;"
+                                           min="{{ now()->toDateString() }}"
+                                           value="{{ now()->addDays(3)->toDateString() }}" required>
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check-lg"></i> Assign
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
         <!-- Schedules Table - No Cards -->
         <div class="table-section">
             <div class="section-header">

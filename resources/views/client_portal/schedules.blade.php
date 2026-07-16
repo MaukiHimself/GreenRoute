@@ -56,7 +56,7 @@
                                     </td>
                                     <td>
                                         @php $st=$schedule->status; @endphp
-                                        <span class="badge {{ $st==='scheduled' ? 'bg-warning' : ($st==='completed' ? 'bg-success' : 'bg-secondary') }}">{{ ucfirst(str_replace('_',' ',$st)) }}</span>
+                                        <span class="badge {{ $st==='requested' ? 'bg-info text-dark' : ($st==='scheduled' ? 'bg-warning' : ($st==='completed' ? 'bg-success' : 'bg-secondary')) }}">{{ $st==='requested' ? 'Awaiting confirmation' : ucfirst(str_replace('_',' ',$st)) }}</span>
                                     </td>
                                 </tr>
                             @empty

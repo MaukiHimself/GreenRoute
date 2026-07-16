@@ -40,7 +40,6 @@
 
                 <form id="locationForm" method="POST" action="{{ route('client.location.update') }}">
                     @csrf
-                    @method('PUT')
 
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Your Current Address</label>

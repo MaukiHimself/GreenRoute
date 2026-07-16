@@ -24,7 +24,63 @@ class ScheduleController extends Controller
             ->orderBy('pickup_date', 'desc')
             ->paginate(15);
 
-        return view('schedules.index', compact('schedules'));
+        // Client service requests waiting to be assigned to a route schedule.
+        $pendingRequests = Schedule::forContractor(Auth::id())
+            ->where('status', 'requested')
+            ->with(['client'])
+            ->orderBy('created_at')
+            ->get();
+
+        $routes = ContractorRoute::where('contractor_id', Auth::id())
+            ->where('is_active', true)
+            ->orderBy('route_name')
+            ->pluck('route_name');
+
+        return view('schedules.index', compact('schedules', 'pendingRequests', 'routes'));
+    }
+
+    /**
+     * Assign a client service request to a route and confirm its pickup
+     * date, turning it into a normal scheduled pickup. Notifies the client.
+     */
+    public function assignRequest(Request $request, Schedule $schedule)
+    {
+        if ($schedule->contractor_id !== Auth::id() || $schedule->status !== 'requested') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'route_name' => 'required|string|max:255',
+            'pickup_date' => 'required|date|after_or_equal:today',
+        ]);
+
+        $schedule->update([
+            'route' => $validated['route_name'],
+            'pickup_date' => $validated['pickup_date'],
+            'scheduled_date' => $validated['pickup_date'],
+            'status' => 'scheduled',
+        ]);
+
+        // Keep the client's route assignment in sync so future bulk
+        // schedules for this route include them.
+        $client = $schedule->client;
+        if ($client && !$client->route) {
+            $client->update(['route' => $validated['route_name']]);
+        }
+
+        if ($client && $client->user) {
+            $client->user->notify(new GenericNotification(
+                title: 'Pickup confirmed',
+                message: 'Your ' . $schedule->service_type . ' request has been scheduled for '
+                    . \Carbon\Carbon::parse($validated['pickup_date'])->format('M d, Y')
+                    . ' on route ' . $validated['route_name'] . '.',
+                url: route('client.schedules'),
+                icon: 'bi-calendar-check',
+            ));
+        }
+
+        return redirect()->route('schedules.index')
+            ->with('success', 'Request assigned to route "' . $validated['route_name'] . '" and the client has been notified.');
     }
 
     public function create()
